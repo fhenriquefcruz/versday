@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <meta name="description" content="Versículo diário com design sofisticado e carregamento rápido">
   <title>Versículo do Dia | Fábio Cruz</title>
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -125,32 +124,35 @@
       margin-left: 4px;
       vertical-align: top;
     }
+    .verse-reference-wrapper {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(4px);
+      padding: 0.2rem 1rem;
+      border-radius: 40px;
+      margin-top: 0.5rem;
+    }
     .verse-reference {
       font-size: 1.1rem;
       font-weight: 600;
       color: var(--accent-color);
-      background: rgba(0,0,0,0.3);
-      display: inline-block;
-      padding: 0.2rem 1rem;
-      border-radius: 40px;
-      backdrop-filter: blur(4px);
       letter-spacing: 0.5px;
-      margin-bottom: 0.8rem;
     }
-    .link-chapter {
-      display: inline-block;
-      margin-top: 0.5rem;
-      font-size: 0.8rem;
-      color: var(--accent-color);
+    .chapter-link {
+      display: inline-flex;
+      align-items: center;
       text-decoration: none;
-      background: rgba(0,0,0,0.2);
-      padding: 0.2rem 0.8rem;
-      border-radius: 20px;
-      transition: all 0.2s;
+      font-size: 1.1rem;
+      transition: transform 0.2s;
+      margin-left: 4px;
     }
-    .link-chapter:hover {
-      background: rgba(228, 179, 99, 0.2);
-      text-decoration: underline;
+    .chapter-link:hover {
+      transform: scale(1.1);
+    }
+    .chapter-link span {
+      font-size: 1.2rem;
     }
 
     /* loading skeleton */
@@ -246,6 +248,9 @@
       .verse-text::before, .verse-text::after { font-size: 1.6rem; }
       .btn { padding: 0.6rem 1.2rem; font-size: 0.8rem; }
       .verse-header h1 { font-size: 1.5rem; }
+      .verse-reference-wrapper { gap: 5px; }
+      .verse-reference { font-size: 0.9rem; }
+      .chapter-link span { font-size: 1rem; }
     }
     @media (max-width: 450px) {
       .buttons-group { flex-direction: column; align-items: stretch; }
@@ -258,7 +263,7 @@
 <div class="verse-container">
   <div class="verse-header">
     <h1>Versículo do Dia</h1>
-    <p></p> <!-- linha vazia para manter espaçamento -->
+    <p></p>
   </div>
 
   <div id="verseDynamicZone" class="verse-content"></div>
@@ -280,24 +285,22 @@
 
 <script>
   // ============================================================
-  // VERSÃO CORRIGIDA - SEM VERSÍCULOS REPETIDOS
+  // CÓDIGO OTIMIZADO COM ÍCONE AO LADO DA REFERÊNCIA
   // ============================================================
   
   const API_RANDOM_VERSE = 'https://www.abibliadigital.com.br/api/verses/nvi/random';
-  const CACHE_SIZE = 4;           // Quantos versículos manter em cache
-  const TIMEOUT_MS = 5000;        // Timeout da requisição (5 segundos)
+  const CACHE_SIZE = 4;
+  const TIMEOUT_MS = 5000;
 
-  // DOM elements
   const dynamicZone = document.getElementById('verseDynamicZone');
   const refreshBtn = document.getElementById('refreshBtn');
   const waContainer = document.getElementById('whatsappBtnContainer');
 
-  // Estado
-  let verseCache = [];            // Array de versículos em cache
-  let currentVerse = null;       // Versículo atual (objeto com text, reference, book, chapter)
-  let isLoading = false;          // Evita múltiplas requisições simultâneas
+  let verseCache = [];
+  let currentVerse = null;
+  let isLoading = false;
 
-  // Temas interativos (baseados em palavras-chave)
+  // Temas interativos
   const themes = [
     { name: 'paz', keywords: ['paz', 'calma', 'descanso', 'silêncio', 'tranquilidade', 'sossego', 'serenidade'], accent: '#6C91B2', bgImage: 'https://images.pexels.com/photos/457881/pexels-photo-457881.jpeg?auto=compress&cs=tinysrgb&w=1600' },
     { name: 'alegria', keywords: ['alegria', 'feliz', 'contentamento', 'regozijo', 'dança', 'cântico', 'júbilo', 'exultar'], accent: '#F4B942', bgImage: 'https://images.pexels.com/photos/931018/pexels-photo-931018.jpeg?auto=compress&cs=tinysrgb&w=1600' },
@@ -339,45 +342,33 @@
     });
   }
 
-  // Gera link para o capítulo completo (bibliaonline.com.br)
   function getChapterLink(bookName, chapter) {
-    // Normaliza o nome do livro para formato amigável na URL (minúsculo, sem acentos)
-    const bookSlug = bookName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    // mapeamento simples para livros com nomes compostos (ex: "1 Samuel" -> "1samuel")
+    let bookSlug = bookName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     const slugMap = {
-      "1samuel": "1samuel",
-      "2samuel": "2samuel",
-      "1reis": "1reis",
-      "2reis": "2reis",
-      "1cronicas": "1cronicas",
-      "2cronicas": "2cronicas",
-      "cantares": "cantares",
-      "eclesiastes": "eclesiastes",
-      "jeremias": "jeremias",
-      "isaias": "isaias",  // Isaías
-      "joao": "joao",
-      "lucas": "lucas",
-      "marcos": "marcos",
-      "mateus": "mateus",
-      "atos": "atos",
-      "apocalipse": "apocalipse"
+      "1samuel": "1samuel", "2samuel": "2samuel", "1reis": "1reis", "2reis": "2reis",
+      "1cronicas": "1cronicas", "2cronicas": "2cronicas", "cantares": "cantares",
+      "eclesiastes": "eclesiastes", "jeremias": "jeremias", "isaias": "isaias",
+      "joao": "joao", "lucas": "lucas", "marcos": "marcos", "mateus": "mateus",
+      "atos": "atos", "apocalipse": "apocalipse"
     };
-    let slug = bookSlug;
-    if (slugMap[slug]) slug = slugMap[slug];
-    // Remove espaços
+    let slug = slugMap[bookSlug] || bookSlug;
     slug = slug.replace(/\s/g, '');
     return `https://www.bibliaonline.com.br/nvi/${slug}/${chapter}`;
   }
 
-  // Exibe o versículo na tela, incluindo link para o capítulo
   function displayVerse(verseText, reference, bookName, chapter) {
     const chapterUrl = getChapterLink(bookName, chapter);
+    const refWithoutBook = reference.replace(bookName, '').trim();
+    const displayRef = reference; // mantém completo
+
     dynamicZone.innerHTML = `
       <div class="verse-text">${escapeHtml(verseText)}</div>
-      <div class="verse-reference">${escapeHtml(reference)}</div>
-      <a href="${chapterUrl}" target="_blank" rel="noopener noreferrer" class="link-chapter">
-        📖 Ler capítulo completo
-      </a>
+      <div class="verse-reference-wrapper">
+        <span class="verse-reference">${escapeHtml(displayRef)}</span>
+        <a href="${chapterUrl}" target="_blank" rel="noopener noreferrer" class="chapter-link" title="Ler capítulo completo">
+          <span>📖</span>
+        </a>
+      </div>
     `;
     const shareMsg = `${verseText} (${reference})`;
     const waUrl = `https://wa.me/?text=${encodeURIComponent(shareMsg)}`;
@@ -403,15 +394,11 @@
     waContainer.innerHTML = '';
   }
 
-  // Busca um versículo da API com timeout e retorna objeto completo
   async function fetchVerseFromAPI() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
     try {
-      const response = await fetch(API_RANDOM_VERSE, {
-        signal: controller.signal,
-        headers: { 'Accept': 'application/json' }
-      });
+      const response = await fetch(API_RANDOM_VERSE, { signal: controller.signal, headers: { 'Accept': 'application/json' } });
       clearTimeout(timeoutId);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
@@ -429,13 +416,11 @@
     }
   }
 
-  // Verifica se um versículo já está no cache (para evitar duplicatas)
   function isVerseInCache(verse) {
     if (!verse) return true;
     return verseCache.some(v => v.reference === verse.reference);
   }
 
-  // Adiciona um novo versículo ao cache (somente se for único e diferente do atual)
   async function addToCache() {
     if (isLoading) return;
     let newVerse = null;
@@ -456,35 +441,24 @@
     }
   }
 
-  // Pré-carrega o cache (chamado no início e quando o cache está baixo)
   async function preloadCache() {
     while (verseCache.length < CACHE_SIZE && !isLoading) {
       await addToCache();
-      // Pequena pausa para não sobrecarregar a API
       await new Promise(r => setTimeout(r, 400));
     }
   }
 
-  // Obtém o próximo versículo (prioriza cache, garantindo que seja diferente do atual)
   async function getNextVerse() {
-    // Se o cache tem pelo menos um e o primeiro é diferente do atual, usa ele
     if (verseCache.length > 0) {
-      // Encontra o primeiro versículo do cache que seja diferente do atual
       let index = 0;
-      while (index < verseCache.length && currentVerse && verseCache[index].reference === currentVerse.reference) {
-        index++;
-      }
+      while (index < verseCache.length && currentVerse && verseCache[index].reference === currentVerse.reference) index++;
       if (index < verseCache.length) {
         const next = verseCache[index];
-        // Remove esse item do cache
         verseCache.splice(index, 1);
-        // Dispara reposição em background
         addToCache();
         return next;
       }
     }
-    
-    // Se chegou aqui, cache não tem versículo adequado: busca da API
     showSkeleton();
     let newVerse = null;
     let attempts = 0;
@@ -498,8 +472,6 @@
       await new Promise(r => setTimeout(r, 300));
     }
     if (newVerse) return newVerse;
-    
-    // Fallback final: versículo estático (diferente do atual se possível)
     const fallbacks = [
       { text: "O Senhor é o meu pastor; nada me faltará.", reference: "Salmos 23:1", book: "Salmos", chapter: 23, verseNumber: 1 },
       { text: "Deus é amor; e aquele que permanece em amor permanece em Deus, e Deus nele.", reference: "1 João 4:16", book: "1 João", chapter: 4, verseNumber: 16 }
@@ -509,43 +481,35 @@
     return fallback;
   }
 
-  // Ação principal: carrega um novo versículo e exibe
   async function loadNewVerse() {
     if (isLoading) return;
     isLoading = true;
-    
     try {
       const verse = await getNextVerse();
       if (verse) {
         currentVerse = verse;
         displayVerse(verse.text, verse.reference, verse.book, verse.chapter);
       } else {
-        // Fallback de emergência
         const emergency = { text: "Buscai ao Senhor enquanto se pode achar.", reference: "Isaías 55:6", book: "Isaías", chapter: 55, verseNumber: 6 };
         currentVerse = emergency;
         displayVerse(emergency.text, emergency.reference, emergency.book, emergency.chapter);
       }
     } catch (err) {
-      console.error('Error loading verse:', err);
+      console.error(err);
       const emergency = { text: "Deus é o nosso refúgio e fortaleza.", reference: "Salmos 46:1", book: "Salmos", chapter: 46, verseNumber: 1 };
       displayVerse(emergency.text, emergency.reference, emergency.book, emergency.chapter);
     } finally {
       isLoading = false;
-      // Se cache estiver pequeno, reabastece em segundo plano (sem atrapalhar)
       if (verseCache.length < 2) preloadCache();
     }
   }
 
-  // Evento do botão Refresh
-  refreshBtn.addEventListener('click', () => {
-    loadNewVerse();
-  });
+  refreshBtn.addEventListener('click', loadNewVerse);
 
-  // ========== INICIALIZAÇÃO ==========
   (async function init() {
     showSkeleton();
-    await preloadCache();    // carrega cache inicial
-    await loadNewVerse();    // mostra o primeiro versículo
+    await preloadCache();
+    await loadNewVerse();
   })();
 </script>
 </body>
