@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <meta name="description" content="Versículo diário com cores e fundo interativos - inspire-se e compartilhe no WhatsApp">
-  <title>Versículo do Dia</title>
+  <meta name="description" content="Versículo diário com design sofisticado e carregamento rápido">
+  <title>Versículo do Dia | Fábio Cruz</title>
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
   <style>
@@ -14,12 +14,10 @@
       box-sizing: border-box;
     }
 
-    /* Variáveis CSS padrão (serão alteradas dinamicamente pelo JS) */
     :root {
-      --accent-color: #E4B363;      /* dourado principal */
+      --accent-color: #E4B363;
       --accent-glow: rgba(228, 179, 99, 0.3);
-      --bg-overlay-dark: rgba(0, 0, 0, 0.55);
-      --transition-speed: 0.4s;
+      --transition-speed: 0.3s;
     }
 
     body {
@@ -36,7 +34,6 @@
       transition: background-image var(--transition-speed) ease-in-out;
     }
 
-    /* Overlay escuro que melhora a legibilidade - também dinâmico (cor pode variar levemente) */
     body::after {
       content: "";
       position: fixed;
@@ -47,10 +44,8 @@
       background: radial-gradient(circle at 20% 40%, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.75) 100%);
       z-index: -1;
       pointer-events: none;
-      transition: background 0.3s;
     }
 
-    /* Container principal - glassmorphism refinado */
     .verse-container {
       max-width: 720px;
       width: 100%;
@@ -62,7 +57,7 @@
       box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent-glow) inset;
       padding: 2rem 1.8rem;
       transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
-      animation: fadeScaleUp 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      animation: fadeScaleUp 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
     }
 
     @keyframes fadeScaleUp {
@@ -76,7 +71,6 @@
       }
     }
 
-    /* Cabeçalho */
     .verse-header {
       text-align: center;
       margin-bottom: 2rem;
@@ -93,7 +87,6 @@
       display: inline-block;
       padding-bottom: 0.3rem;
       border-bottom: 2px solid var(--accent-color);
-      transition: background 0.3s, border-color 0.3s;
     }
     .verse-header p {
       color: #CBD5E1;
@@ -103,10 +96,10 @@
       letter-spacing: 1px;
     }
 
-    /* Área do versículo */
     .verse-content {
       text-align: center;
       margin: 2rem 0 1.5rem;
+      min-height: 180px;
     }
     .verse-text {
       font-family: 'Playfair Display', serif;
@@ -123,7 +116,6 @@
       color: var(--accent-color);
       font-family: serif;
       margin-right: 4px;
-      transition: color var(--transition-speed);
     }
     .verse-text::after {
       content: "”";
@@ -132,7 +124,6 @@
       font-family: serif;
       margin-left: 4px;
       vertical-align: top;
-      transition: color var(--transition-speed);
     }
     .verse-reference {
       font-size: 1.1rem;
@@ -144,35 +135,51 @@
       border-radius: 40px;
       backdrop-filter: blur(4px);
       letter-spacing: 0.5px;
-      transition: color var(--transition-speed);
+      margin-bottom: 0.8rem;
+    }
+    .link-chapter {
+      display: inline-block;
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--accent-color);
+      text-decoration: none;
+      background: rgba(0,0,0,0.2);
+      padding: 0.2rem 0.8rem;
+      border-radius: 20px;
+      transition: all 0.2s;
+    }
+    .link-chapter:hover {
+      background: rgba(228, 179, 99, 0.2);
+      text-decoration: underline;
     }
 
-    /* Loading */
-    .loading-state {
+    /* loading skeleton */
+    .loading-skeleton {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 1rem;
-      padding: 1.5rem 0;
+      padding: 1rem 0;
     }
-    .spinner {
-      width: 42px;
-      height: 42px;
-      border: 3px solid rgba(228, 179, 99, 0.2);
-      border-top-color: var(--accent-color);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      transition: border-top-color var(--transition-speed);
+    .skeleton-text {
+      width: 80%;
+      height: 24px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      animation: pulse 1.2s ease-in-out infinite;
     }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .skeleton-ref {
+      width: 120px;
+      height: 20px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 20px;
+      animation: pulse 1.2s ease-in-out infinite 0.3s;
     }
-    .loading-state span {
-      color: #CBD5E1;
-      font-weight: 300;
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
     }
 
-    /* Botões */
     .buttons-group {
       display: flex;
       flex-wrap: wrap;
@@ -190,7 +197,7 @@
       font-weight: 600;
       font-size: 0.9rem;
       cursor: pointer;
-      transition: all 0.25s ease;
+      transition: all 0.2s ease;
       border: none;
       background: transparent;
       font-family: 'Inter', sans-serif;
@@ -204,25 +211,22 @@
       border: 1px solid rgba(255,255,255,0.2);
     }
     .btn-wa:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 20px rgba(37, 211, 102, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(37, 211, 102, 0.35);
     }
     .btn-refresh {
       background: rgba(20, 25, 28, 0.8);
       border: 1px solid var(--accent-color);
       color: #F5E7D3;
-      transition: border-color var(--transition-speed), background 0.2s;
     }
     .btn-refresh:hover {
-      background: rgba(var(--accent-rgb, 228, 179, 99), 0.2);
-      border-color: var(--accent-color);
+      background: rgba(228, 179, 99, 0.2);
       transform: translateY(-2px);
     }
     .btn:active {
       transform: translateY(1px);
     }
 
-    /* Rodapé com crédito */
     .footer-credit {
       text-align: center;
       margin-top: 2rem;
@@ -232,58 +236,32 @@
       color: #A0B3B7;
       transition: border-color var(--transition-speed);
     }
-    .footer-credit a, .footer-credit strong {
+    .footer-credit strong {
       color: var(--accent-color);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .footer-credit a:hover {
-      text-decoration: underline;
-      filter: brightness(1.2);
     }
 
-    /* Responsividade */
     @media (max-width: 580px) {
-      .verse-container {
-        padding: 1.5rem;
-      }
-      .verse-text {
-        font-size: 1.3rem;
-      }
-      .verse-text::before,
-      .verse-text::after {
-        font-size: 1.6rem;
-      }
-      .btn {
-        padding: 0.6rem 1.2rem;
-        font-size: 0.8rem;
-      }
-      .verse-header h1 {
-        font-size: 1.5rem;
-      }
+      .verse-container { padding: 1.5rem; }
+      .verse-text { font-size: 1.3rem; }
+      .verse-text::before, .verse-text::after { font-size: 1.6rem; }
+      .btn { padding: 0.6rem 1.2rem; font-size: 0.8rem; }
+      .verse-header h1 { font-size: 1.5rem; }
     }
     @media (max-width: 450px) {
-      .buttons-group {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .btn {
-        justify-content: center;
-      }
+      .buttons-group { flex-direction: column; align-items: stretch; }
+      .btn { justify-content: center; }
     }
   </style>
 </head>
 <body>
 
-<div class="verse-container" id="app">
+<div class="verse-container">
   <div class="verse-header">
     <h1>Versículo do Dia</h1>
-    <p>Renove sua fé • Inspire-se</p>
+    <p></p> <!-- linha vazia para manter espaçamento -->
   </div>
 
-  <div id="verseDynamicZone" class="verse-content">
-    <!-- loading dinâmico -->
-  </div>
+  <div id="verseDynamicZone" class="verse-content"></div>
 
   <div class="buttons-group">
     <button class="btn btn-refresh" id="refreshBtn">
@@ -301,117 +279,55 @@
 </div>
 
 <script>
-  // ------------------------------
-  // 1. API para versículos (português)
-  // ------------------------------
+  // ============================================================
+  // VERSÃO CORRIGIDA - SEM VERSÍCULOS REPETIDOS
+  // ============================================================
+  
   const API_RANDOM_VERSE = 'https://www.abibliadigital.com.br/api/verses/nvi/random';
+  const CACHE_SIZE = 4;           // Quantos versículos manter em cache
+  const TIMEOUT_MS = 5000;        // Timeout da requisição (5 segundos)
 
-  // ------------------------------
-  // 2. Temas interativos (baseados em palavras-chave)
-  // ------------------------------
+  // DOM elements
+  const dynamicZone = document.getElementById('verseDynamicZone');
+  const refreshBtn = document.getElementById('refreshBtn');
+  const waContainer = document.getElementById('whatsappBtnContainer');
+
+  // Estado
+  let verseCache = [];            // Array de versículos em cache
+  let currentVerse = null;       // Versículo atual (objeto com text, reference, book, chapter)
+  let isLoading = false;          // Evita múltiplas requisições simultâneas
+
+  // Temas interativos (baseados em palavras-chave)
   const themes = [
-    {
-      name: 'paz',
-      keywords: ['paz', 'calma', 'descanso', 'silêncio', 'tranquilidade', 'sossego', 'serenidade'],
-      accent: '#6C91B2',   // azul suave
-      bgImage: 'https://images.pexels.com/photos/457881/pexels-photo-457881.jpeg?auto=compress&cs=tinysrgb&w=1600', // lago calmo
-    },
-    {
-      name: 'alegria',
-      keywords: ['alegria', 'feliz', 'contentamento', 'regozijo', 'dança', 'cântico', 'júbilo', 'exultar'],
-      accent: '#F4B942',   // amarelo dourado
-      bgImage: 'https://images.pexels.com/photos/931018/pexels-photo-931018.jpeg?auto=compress&cs=tinysrgb&w=1600', // campo de girassóis
-    },
-    {
-      name: 'amor',
-      keywords: ['amor', 'amado', 'caridade', 'afeto', 'bondade', 'misericórdia', 'ágape', 'querido'],
-      accent: '#D9738A',   // rosa suave
-      bgImage: 'https://images.pexels.com/photos/56866/garden-rose-red-pink-56866.jpeg?auto=compress&cs=tinysrgb&w=1600', // rosas
-    },
-    {
-      name: 'esperança',
-      keywords: ['esperança', 'confiança', 'esperar', 'aguardar', 'futuro', 'promessa', 'expectativa'],
-      accent: '#7CAF7C',   // verde esperança
-      bgImage: 'https://images.pexels.com/photos/1167355/pexels-photo-1167355.jpeg?auto=compress&cs=tinysrgb&w=1600', // nascer do sol
-    },
-    {
-      name: 'força',
-      keywords: ['força', 'coragem', 'valente', 'firmeza', 'poder', 'fortaleza', 'ânimo', 'robusto'],
-      accent: '#D97A3C',   // laranja terroso
-      bgImage: 'https://images.pexels.com/photos/618848/pexels-photo-618848.jpeg?auto=compress&cs=tinysrgb&w=1600', // montanhas rochosas
-    },
-    {
-      name: 'fé',
-      keywords: ['fé', 'crer', 'confiar', 'crente', 'acreditar', 'fidelidade', 'certeza'],
-      accent: '#A37CBB',   // roxo/lavanda
-      bgImage: 'https://images.pexels.com/photos/2387795/pexels-photo-2387795.jpeg?auto=compress&cs=tinysrgb&w=1600', // luz e mãos
-    },
-    {
-      name: 'luz',
-      keywords: ['luz', 'resplendor', 'brilho', 'iluminar', 'candeia', 'lâmpada', 'clarão'],
-      accent: '#F0D85C',   // amarelo claro
-      bgImage: 'https://images.pexels.com/photos/274062/pexels-photo-274062.jpeg?auto=compress&cs=tinysrgb&w=1600', // estrelas noturnas
-    },
-    {
-      name: 'gratidão',
-      keywords: ['graças', 'gratidão', 'agradecer', 'louvor', 'ação de graças', 'reconhecimento'],
-      accent: '#E4A951',   // âmbar
-      bgImage: 'https://images.pexels.com/photos/1146762/pexels-photo-1146762.jpeg?auto=compress&cs=tinysrgb&w=1600', // colheita
-    }
+    { name: 'paz', keywords: ['paz', 'calma', 'descanso', 'silêncio', 'tranquilidade', 'sossego', 'serenidade'], accent: '#6C91B2', bgImage: 'https://images.pexels.com/photos/457881/pexels-photo-457881.jpeg?auto=compress&cs=tinysrgb&w=1600' },
+    { name: 'alegria', keywords: ['alegria', 'feliz', 'contentamento', 'regozijo', 'dança', 'cântico', 'júbilo', 'exultar'], accent: '#F4B942', bgImage: 'https://images.pexels.com/photos/931018/pexels-photo-931018.jpeg?auto=compress&cs=tinysrgb&w=1600' },
+    { name: 'amor', keywords: ['amor', 'amado', 'caridade', 'afeto', 'bondade', 'misericórdia', 'ágape', 'querido'], accent: '#D9738A', bgImage: 'https://images.pexels.com/photos/56866/garden-rose-red-pink-56866.jpeg?auto=compress&cs=tinysrgb&w=1600' },
+    { name: 'esperança', keywords: ['esperança', 'confiança', 'esperar', 'aguardar', 'futuro', 'promessa', 'expectativa'], accent: '#7CAF7C', bgImage: 'https://images.pexels.com/photos/1167355/pexels-photo-1167355.jpeg?auto=compress&cs=tinysrgb&w=1600' },
+    { name: 'força', keywords: ['força', 'coragem', 'valente', 'firmeza', 'poder', 'fortaleza', 'ânimo', 'robusto'], accent: '#D97A3C', bgImage: 'https://images.pexels.com/photos/618848/pexels-photo-618848.jpeg?auto=compress&cs=tinysrgb&w=1600' },
+    { name: 'fé', keywords: ['fé', 'crer', 'confiar', 'crente', 'acreditar', 'fidelidade', 'certeza'], accent: '#A37CBB', bgImage: 'https://images.pexels.com/photos/2387795/pexels-photo-2387795.jpeg?auto=compress&cs=tinysrgb&w=1600' },
+    { name: 'luz', keywords: ['luz', 'resplendor', 'brilho', 'iluminar', 'candeia', 'lâmpada', 'clarão'], accent: '#F0D85C', bgImage: 'https://images.pexels.com/photos/274062/pexels-photo-274062.jpeg?auto=compress&cs=tinysrgb&w=1600' },
+    { name: 'gratidão', keywords: ['graças', 'gratidão', 'agradecer', 'louvor', 'ação de graças', 'reconhecimento'], accent: '#E4A951', bgImage: 'https://images.pexels.com/photos/1146762/pexels-photo-1146762.jpeg?auto=compress&cs=tinysrgb&w=1600' }
   ];
+  const defaultTheme = { accent: '#E4B363', bgImage: 'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1600' };
 
-  // Tema padrão (caso nenhuma keyword seja encontrada)
-  const defaultTheme = {
-    accent: '#E4B363',
-    bgImage: 'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1600'
-  };
-
-  // ------------------------------
-  // 3. Função para aplicar tema baseado no texto do versículo
-  // ------------------------------
   function applyTheme(verseText) {
     const lowerText = verseText.toLowerCase();
     let selectedTheme = defaultTheme;
-
-    // Procura o primeiro tema cujas keywords estejam presentes no texto
     for (const theme of themes) {
       if (theme.keywords.some(keyword => lowerText.includes(keyword))) {
         selectedTheme = { accent: theme.accent, bgImage: theme.bgImage };
         break;
       }
     }
-
-    // Aplica a cor de destaque (variável CSS)
     document.documentElement.style.setProperty('--accent-color', selectedTheme.accent);
-    // Para efeitos de hover com rgba, podemos definir também --accent-rgb (opcional)
     const r = parseInt(selectedTheme.accent.slice(1,3), 16);
     const g = parseInt(selectedTheme.accent.slice(3,5), 16);
     const b = parseInt(selectedTheme.accent.slice(5,7), 16);
-    document.documentElement.style.setProperty('--accent-rgb', `${r}, ${g}, ${b}`);
     document.documentElement.style.setProperty('--accent-glow', `rgba(${r}, ${g}, ${b}, 0.3)`);
-
-    // Aplica a imagem de fundo no body
     document.body.style.backgroundImage = `url('${selectedTheme.bgImage}')`;
     document.body.style.backgroundSize = 'cover';
     document.body.style.backgroundPosition = 'center 30%';
     document.body.style.backgroundAttachment = 'fixed';
-  }
-
-  // ------------------------------
-  // 4. Manipulação do DOM e API
-  // ------------------------------
-  const dynamicZone = document.getElementById('verseDynamicZone');
-  const refreshBtn = document.getElementById('refreshBtn');
-  const waContainer = document.getElementById('whatsappBtnContainer');
-
-  function showLoading() {
-    dynamicZone.innerHTML = `
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <span>Buscando palavra que transforma...</span>
-      </div>
-    `;
-    waContainer.innerHTML = '';
   }
 
   function escapeHtml(str) {
@@ -423,60 +339,214 @@
     });
   }
 
-  function displayVerse(verseText, reference) {
-    // Exibe o versículo na tela
+  // Gera link para o capítulo completo (bibliaonline.com.br)
+  function getChapterLink(bookName, chapter) {
+    // Normaliza o nome do livro para formato amigável na URL (minúsculo, sem acentos)
+    const bookSlug = bookName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    // mapeamento simples para livros com nomes compostos (ex: "1 Samuel" -> "1samuel")
+    const slugMap = {
+      "1samuel": "1samuel",
+      "2samuel": "2samuel",
+      "1reis": "1reis",
+      "2reis": "2reis",
+      "1cronicas": "1cronicas",
+      "2cronicas": "2cronicas",
+      "cantares": "cantares",
+      "eclesiastes": "eclesiastes",
+      "jeremias": "jeremias",
+      "isaias": "isaias",  // Isaías
+      "joao": "joao",
+      "lucas": "lucas",
+      "marcos": "marcos",
+      "mateus": "mateus",
+      "atos": "atos",
+      "apocalipse": "apocalipse"
+    };
+    let slug = bookSlug;
+    if (slugMap[slug]) slug = slugMap[slug];
+    // Remove espaços
+    slug = slug.replace(/\s/g, '');
+    return `https://www.bibliaonline.com.br/nvi/${slug}/${chapter}`;
+  }
+
+  // Exibe o versículo na tela, incluindo link para o capítulo
+  function displayVerse(verseText, reference, bookName, chapter) {
+    const chapterUrl = getChapterLink(bookName, chapter);
     dynamicZone.innerHTML = `
       <div class="verse-text">${escapeHtml(verseText)}</div>
       <div class="verse-reference">${escapeHtml(reference)}</div>
+      <a href="${chapterUrl}" target="_blank" rel="noopener noreferrer" class="link-chapter">
+        📖 Ler capítulo completo
+      </a>
     `;
-
-    // Gera botão do WhatsApp
     const shareMsg = `${verseText} (${reference})`;
     const waUrl = `https://wa.me/?text=${encodeURIComponent(shareMsg)}`;
     waContainer.innerHTML = `
       <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-wa">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
           <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-5.45-4.45-9.9-9.91-9.9zm0 18.23c-1.5 0-2.97-.39-4.26-1.12l-.3-.18-3.12.82.84-3.04-.2-.31c-.79-1.35-1.21-2.9-1.21-4.48 0-4.56 3.71-8.27 8.27-8.27 4.56 0 8.27 3.71 8.27 8.27-.02 4.55-3.72 8.26-8.29 8.26zM16.5 13.5c-.26-.13-1.55-.77-1.79-.86-.23-.09-.42-.13-.6.13-.18.26-.69.86-.85 1.04-.16.18-.31.2-.58.07-.26-.13-1.12-.41-2.13-1.32-.79-.71-1.32-1.59-1.47-1.86-.16-.26-.02-.4.11-.53.11-.12.26-.31.39-.47.13-.16.17-.26.26-.43.09-.17.04-.32-.02-.45s-.6-1.44-.82-1.97c-.21-.52-.43-.45-.6-.46-.16-.01-.34-.01-.52-.01-.18 0-.47.07-.71.32-.25.25-.94.92-.94 2.24 0 1.32.96 2.6 1.09 2.78.14.18 1.89 2.88 4.57 4.03 2.68 1.15 2.68.77 3.16.72.48-.05 1.55-.63 1.77-1.24.22-.61.22-1.13.15-1.24-.06-.1-.23-.16-.49-.29z" fill="white"/>
         </svg>
         Compartilhar no WhatsApp
       </a>
     `;
-
-    // Aplica o tema DINÂMICO baseado no texto do versículo
     applyTheme(verseText);
   }
 
-  async function fetchRandomVerse() {
-    showLoading();
+  function showSkeleton() {
+    dynamicZone.innerHTML = `
+      <div class="loading-skeleton">
+        <div class="skeleton-text"></div>
+        <div class="skeleton-text" style="width: 70%"></div>
+        <div class="skeleton-ref"></div>
+      </div>
+    `;
+    waContainer.innerHTML = '';
+  }
+
+  // Busca um versículo da API com timeout e retorna objeto completo
+  async function fetchVerseFromAPI() {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
     try {
-      const response = await fetch(API_RANDOM_VERSE);
+      const response = await fetch(API_RANDOM_VERSE, {
+        signal: controller.signal,
+        headers: { 'Accept': 'application/json' }
+      });
+      clearTimeout(timeoutId);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
-      const verseText = data.text;
-      const bookName = data.book.name;
-      const chapter = data.chapter;
-      const verseNum = data.number;
-      const reference = `${bookName} ${chapter}:${verseNum}`;
-      displayVerse(verseText, reference);
+      return {
+        text: data.text,
+        reference: `${data.book.name} ${data.chapter}:${data.number}`,
+        book: data.book.name,
+        chapter: data.chapter,
+        verseNumber: data.number
+      };
     } catch (error) {
-      console.error('Erro na API:', error);
-      // Fallback elegante
-      const fallbackText = "O Senhor é o meu pastor; nada me faltará.";
-      const fallbackRef = "Salmos 23:1";
-      displayVerse(fallbackText, fallbackRef);
-      // Aviso sutil
-      const note = document.createElement('div');
-      note.style.fontSize = '0.7rem';
-      note.style.marginTop = '1rem';
-      note.style.color = 'var(--accent-color)';
-      note.innerText = '🔌 Modo offline: versículo inspirador';
-      dynamicZone.appendChild(note);
-      setTimeout(() => note.remove(), 4000);
+      clearTimeout(timeoutId);
+      console.warn('API fetch error:', error);
+      return null;
     }
   }
 
-  refreshBtn.addEventListener('click', fetchRandomVerse);
-  fetchRandomVerse();
+  // Verifica se um versículo já está no cache (para evitar duplicatas)
+  function isVerseInCache(verse) {
+    if (!verse) return true;
+    return verseCache.some(v => v.reference === verse.reference);
+  }
+
+  // Adiciona um novo versículo ao cache (somente se for único e diferente do atual)
+  async function addToCache() {
+    if (isLoading) return;
+    let newVerse = null;
+    let attempts = 0;
+    const maxAttempts = 5;
+    while (!newVerse && attempts < maxAttempts) {
+      const fetched = await fetchVerseFromAPI();
+      if (fetched && !isVerseInCache(fetched) && (!currentVerse || fetched.reference !== currentVerse.reference)) {
+        newVerse = fetched;
+        break;
+      }
+      attempts++;
+      await new Promise(r => setTimeout(r, 200));
+    }
+    if (newVerse) {
+      verseCache.push(newVerse);
+      if (verseCache.length > CACHE_SIZE) verseCache.shift();
+    }
+  }
+
+  // Pré-carrega o cache (chamado no início e quando o cache está baixo)
+  async function preloadCache() {
+    while (verseCache.length < CACHE_SIZE && !isLoading) {
+      await addToCache();
+      // Pequena pausa para não sobrecarregar a API
+      await new Promise(r => setTimeout(r, 400));
+    }
+  }
+
+  // Obtém o próximo versículo (prioriza cache, garantindo que seja diferente do atual)
+  async function getNextVerse() {
+    // Se o cache tem pelo menos um e o primeiro é diferente do atual, usa ele
+    if (verseCache.length > 0) {
+      // Encontra o primeiro versículo do cache que seja diferente do atual
+      let index = 0;
+      while (index < verseCache.length && currentVerse && verseCache[index].reference === currentVerse.reference) {
+        index++;
+      }
+      if (index < verseCache.length) {
+        const next = verseCache[index];
+        // Remove esse item do cache
+        verseCache.splice(index, 1);
+        // Dispara reposição em background
+        addToCache();
+        return next;
+      }
+    }
+    
+    // Se chegou aqui, cache não tem versículo adequado: busca da API
+    showSkeleton();
+    let newVerse = null;
+    let attempts = 0;
+    while (!newVerse && attempts < 3) {
+      const fetched = await fetchVerseFromAPI();
+      if (fetched && (!currentVerse || fetched.reference !== currentVerse.reference)) {
+        newVerse = fetched;
+        break;
+      }
+      attempts++;
+      await new Promise(r => setTimeout(r, 300));
+    }
+    if (newVerse) return newVerse;
+    
+    // Fallback final: versículo estático (diferente do atual se possível)
+    const fallbacks = [
+      { text: "O Senhor é o meu pastor; nada me faltará.", reference: "Salmos 23:1", book: "Salmos", chapter: 23, verseNumber: 1 },
+      { text: "Deus é amor; e aquele que permanece em amor permanece em Deus, e Deus nele.", reference: "1 João 4:16", book: "1 João", chapter: 4, verseNumber: 16 }
+    ];
+    let fallback = fallbacks[0];
+    if (currentVerse && currentVerse.reference === fallback.reference) fallback = fallbacks[1];
+    return fallback;
+  }
+
+  // Ação principal: carrega um novo versículo e exibe
+  async function loadNewVerse() {
+    if (isLoading) return;
+    isLoading = true;
+    
+    try {
+      const verse = await getNextVerse();
+      if (verse) {
+        currentVerse = verse;
+        displayVerse(verse.text, verse.reference, verse.book, verse.chapter);
+      } else {
+        // Fallback de emergência
+        const emergency = { text: "Buscai ao Senhor enquanto se pode achar.", reference: "Isaías 55:6", book: "Isaías", chapter: 55, verseNumber: 6 };
+        currentVerse = emergency;
+        displayVerse(emergency.text, emergency.reference, emergency.book, emergency.chapter);
+      }
+    } catch (err) {
+      console.error('Error loading verse:', err);
+      const emergency = { text: "Deus é o nosso refúgio e fortaleza.", reference: "Salmos 46:1", book: "Salmos", chapter: 46, verseNumber: 1 };
+      displayVerse(emergency.text, emergency.reference, emergency.book, emergency.chapter);
+    } finally {
+      isLoading = false;
+      // Se cache estiver pequeno, reabastece em segundo plano (sem atrapalhar)
+      if (verseCache.length < 2) preloadCache();
+    }
+  }
+
+  // Evento do botão Refresh
+  refreshBtn.addEventListener('click', () => {
+    loadNewVerse();
+  });
+
+  // ========== INICIALIZAÇÃO ==========
+  (async function init() {
+    showSkeleton();
+    await preloadCache();    // carrega cache inicial
+    await loadNewVerse();    // mostra o primeiro versículo
+  })();
 </script>
 </body>
 </html>
