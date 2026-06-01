@@ -87,18 +87,11 @@
       padding-bottom: 0.3rem;
       border-bottom: 2px solid var(--accent-color);
     }
-    .verse-header p {
-      color: #CBD5E1;
-      font-size: 0.8rem;
-      margin-top: 0.5rem;
-      font-weight: 300;
-      letter-spacing: 1px;
-    }
 
     .verse-content {
       text-align: center;
       margin: 2rem 0 1.5rem;
-      min-height: 180px;
+      min-height: 220px;
     }
     .verse-text {
       font-family: 'Playfair Display', serif;
@@ -155,30 +148,50 @@
       font-size: 1.2rem;
     }
 
-    .loading-skeleton {
+    /* LOADING COM TEMPORIZADOR */
+    .loading-timer {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 1rem;
       padding: 1rem 0;
     }
-    .skeleton-text {
-      width: 80%;
-      height: 24px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 12px;
-      animation: pulse 1.2s ease-in-out infinite;
+    .timer-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--accent-color);
+      font-family: monospace;
+      border: 2px solid var(--accent-color);
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
     }
-    .skeleton-ref {
-      width: 120px;
-      height: 20px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 20px;
-      animation: pulse 1.2s ease-in-out infinite 0.3s;
+    .loading-message {
+      font-size: 1rem;
+      color: #CBD5E1;
+      font-weight: 400;
+      background: rgba(0,0,0,0.4);
+      padding: 0.3rem 1rem;
+      border-radius: 50px;
+      backdrop-filter: blur(4px);
+    }
+    .delay-message {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: #E4B363;
+      background: rgba(0,0,0,0.5);
+      padding: 0.4rem 1rem;
+      border-radius: 30px;
+      animation: pulse 1.5s infinite;
     }
     @keyframes pulse {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 0.8; }
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
     }
 
     .buttons-group {
@@ -250,6 +263,7 @@
       .verse-reference-wrapper { gap: 5px; }
       .verse-reference { font-size: 0.9rem; }
       .chapter-link span { font-size: 1rem; }
+      .timer-circle { width: 65px; height: 65px; font-size: 1.8rem; }
     }
     @media (max-width: 450px) {
       .buttons-group { flex-direction: column; align-items: stretch; }
@@ -262,7 +276,6 @@
 <div class="verse-container">
   <div class="verse-header">
     <h1>Versículo do Dia</h1>
-    <p>Almeida Revista e Atualizada</p>
   </div>
 
   <div id="verseDynamicZone" class="verse-content"></div>
@@ -284,12 +297,12 @@
 
 <script>
   // ============================================================
-  // VERSÃO ARA (ALMEIDA REVISTA E ATUALIZADA) - bible-api.com
+  // VERSÃO ARA COM TEMPORIZADOR E MENSAGEM DE DEMORA
   // ============================================================
   
   const API_RANDOM_VERSE = 'https://bible-api.com/data/ara/random';
   const CACHE_SIZE = 4;
-  const TIMEOUT_MS = 5000;
+  const TIMEOUT_MS = 12000;        // limite de 12 segundos para a requisição
 
   const dynamicZone = document.getElementById('verseDynamicZone');
   const refreshBtn = document.getElementById('refreshBtn');
@@ -298,6 +311,8 @@
   let verseCache = [];
   let currentVerse = null;
   let isLoading = false;
+  let timerInterval = null;
+  let startTime = null;
 
   // Temas interativos
   const themes = [
@@ -312,7 +327,6 @@
   ];
   const defaultTheme = { accent: '#E4B363', bgImage: 'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1600' };
 
-  // Mapeamento de abreviações para nomes completos (exibição e link)
   const bookNameMap = {
     "gn": "Gênesis", "ex": "Êxodo", "lv": "Levítico", "nm": "Números", "dt": "Deuteronômio",
     "js": "Josué", "jz": "Juízes", "rt": "Rute", "1sm": "1 Samuel", "2sm": "2 Samuel",
@@ -344,7 +358,6 @@
     const b = parseInt(selectedTheme.accent.slice(5,7), 16);
     document.documentElement.style.setProperty('--accent-glow', `rgba(${r}, ${g}, ${b}, 0.3)`);
     document.body.style.backgroundImage = `url('${selectedTheme.bgImage}')`;
-    document.body.style.backgroundSize = 'cover';
     document.body.style.backgroundPosition = 'center 30%';
     document.body.style.backgroundAttachment = 'fixed';
   }
@@ -358,7 +371,6 @@
     });
   }
 
-  // Função para gerar link do capítulo (bibliaonline.com.br - NVI, mas compatível)
   function getChapterLink(bookAbbrev, chapter) {
     let bookSlug = bookAbbrev.toLowerCase();
     const specialSlugs = {
@@ -375,6 +387,9 @@
   }
 
   function displayVerse(verseText, reference, bookAbbrev, chapter, verseNumber) {
+    // Para o timer, se estiver rodando
+    stopTimer();
+
     const chapterUrl = getChapterLink(bookAbbrev, chapter);
     const fullBookName = bookNameMap[bookAbbrev.toLowerCase()] || bookAbbrev;
     const displayReference = `${fullBookName} ${chapter}:${verseNumber}`;
@@ -401,12 +416,55 @@
     applyTheme(verseText);
   }
 
-  function showSkeleton() {
+  // Mostra o loading com temporizador (contagem crescente)
+  function showLoadingWithTimer() {
+    // Para qualquer timer anterior
+    stopTimer();
+    
+    // Limpa a área e mostra o timer
     dynamicZone.innerHTML = `
-      <div class="loading-skeleton">
-        <div class="skeleton-text"></div>
-        <div class="skeleton-text" style="width: 70%"></div>
-        <div class="skeleton-ref"></div>
+      <div class="loading-timer" id="timerContainer">
+        <div class="timer-circle" id="timerSeconds">0</div>
+        <div class="loading-message">Buscando versículo...</div>
+        <div id="delayMessage" style="min-height: 50px;"></div>
+      </div>
+    `;
+    waContainer.innerHTML = '';
+    
+    startTime = Date.now();
+    let seconds = 0;
+    const timerEl = document.getElementById('timerSeconds');
+    const delayMsgDiv = document.getElementById('delayMessage');
+    
+    timerInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      if (timerEl) timerEl.textContent = elapsed;
+      
+      // Se ultrapassar 10 segundos, mostra mensagem de desculpa
+      if (elapsed >= 10 && delayMsgDiv && !delayMsgDiv.innerHTML) {
+        delayMsgDiv.innerHTML = `
+          <div class="delay-message">
+            🙏 Estamos buscando o versículo, desculpe a demora.<br>
+            Muitas requisições ao mesmo tempo. Em breve aparecerá.
+          </div>
+        `;
+      }
+    }, 1000);
+  }
+
+  function stopTimer() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
+  // Loading sem timer (para cache rápido, mas vamos usar o timer mesmo assim)
+  function showLoadingFallback() {
+    stopTimer();
+    dynamicZone.innerHTML = `
+      <div class="loading-timer">
+        <div class="loading-message">Aguarde, carregando versículo...</div>
       </div>
     `;
     waContainer.innerHTML = '';
@@ -423,7 +481,6 @@
       clearTimeout(timeoutId);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
-      
       return {
         text: data.text,
         reference: data.reference,
@@ -477,11 +534,12 @@
       if (index < verseCache.length) {
         const next = verseCache[index];
         verseCache.splice(index, 1);
-        addToCache();
+        addToCache(); // reposição assíncrona
         return next;
       }
     }
-    showSkeleton();
+    
+    // Se cache não tem disponível, busca da API com timer ativo
     let newVerse = null;
     let attempts = 0;
     while (!newVerse && attempts < 3) {
@@ -495,7 +553,7 @@
     }
     if (newVerse) return newVerse;
     
-    // Fallback final (versículo em ARA)
+    // Fallback
     return {
       text: "O Senhor é o meu pastor; nada me faltará.",
       reference: "sl 23:1",
@@ -508,6 +566,10 @@
   async function loadNewVerse() {
     if (isLoading) return;
     isLoading = true;
+    
+    // Inicia o timer visual
+    showLoadingWithTimer();
+    
     try {
       const verse = await getNextVerse();
       if (verse) {
@@ -528,10 +590,14 @@
     }
   }
 
-  refreshBtn.addEventListener('click', loadNewVerse);
+  refreshBtn.addEventListener('click', () => {
+    if (isLoading) return;
+    loadNewVerse();
+  });
 
+  // Inicialização
   (async function init() {
-    showSkeleton();
+    showLoadingWithTimer();
     await preloadCache();
     await loadNewVerse();
   })();
