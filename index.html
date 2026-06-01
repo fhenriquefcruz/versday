@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <meta name="description" content="Versículo diário com design sofisticado e carregamento rápido">
+  <meta name="description" content="Versículo diário - Almeida Revista e Atualizada">
   <title>Versículo do Dia | Fábio Cruz</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
   <style>
@@ -155,7 +155,6 @@
       font-size: 1.2rem;
     }
 
-    /* loading skeleton */
     .loading-skeleton {
       display: flex;
       flex-direction: column;
@@ -263,7 +262,7 @@
 <div class="verse-container">
   <div class="verse-header">
     <h1>Versículo do Dia</h1>
-    <p></p>
+    <p>Almeida Revista e Atualizada</p>
   </div>
 
   <div id="verseDynamicZone" class="verse-content"></div>
@@ -285,10 +284,10 @@
 
 <script>
   // ============================================================
-  // CÓDIGO OTIMIZADO COM ÍCONE AO LADO DA REFERÊNCIA
+  // VERSÃO ARA (ALMEIDA REVISTA E ATUALIZADA) - bible-api.com
   // ============================================================
   
-  const API_RANDOM_VERSE = 'https://www.abibliadigital.com.br/api/verses/nvi/random';
+  const API_RANDOM_VERSE = 'https://bible-api.com/data/ara/random';
   const CACHE_SIZE = 4;
   const TIMEOUT_MS = 5000;
 
@@ -312,6 +311,23 @@
     { name: 'gratidão', keywords: ['graças', 'gratidão', 'agradecer', 'louvor', 'ação de graças', 'reconhecimento'], accent: '#E4A951', bgImage: 'https://images.pexels.com/photos/1146762/pexels-photo-1146762.jpeg?auto=compress&cs=tinysrgb&w=1600' }
   ];
   const defaultTheme = { accent: '#E4B363', bgImage: 'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1600' };
+
+  // Mapeamento de abreviações para nomes completos (exibição e link)
+  const bookNameMap = {
+    "gn": "Gênesis", "ex": "Êxodo", "lv": "Levítico", "nm": "Números", "dt": "Deuteronômio",
+    "js": "Josué", "jz": "Juízes", "rt": "Rute", "1sm": "1 Samuel", "2sm": "2 Samuel",
+    "1rs": "1 Reis", "2rs": "2 Reis", "1cr": "1 Crônicas", "2cr": "2 Crônicas", "ed": "Esdras",
+    "ne": "Neemias", "et": "Ester", "jó": "Jó", "sl": "Salmos", "pv": "Provérbios",
+    "ec": "Eclesiastes", "ct": "Cantares", "is": "Isaías", "jr": "Jeremias", "lm": "Lamentações",
+    "ez": "Ezequiel", "dn": "Daniel", "os": "Oséias", "jl": "Joel", "am": "Amós", "ob": "Obadias",
+    "jn": "Jonas", "mq": "Miquéias", "na": "Naum", "hc": "Habacuque", "sf": "Sofonias", "ag": "Ageu",
+    "zc": "Zacarias", "ml": "Malaquias", "mt": "Mateus", "mc": "Marcos", "lc": "Lucas", "jo": "João",
+    "atos": "Atos", "rm": "Romanos", "1co": "1 Coríntios", "2co": "2 Coríntios", "gl": "Gálatas",
+    "ef": "Efésios", "fp": "Filipenses", "cl": "Colossenses", "1ts": "1 Tessalonicenses", "2ts": "2 Tessalonicenses",
+    "1tm": "1 Timóteo", "2tm": "2 Timóteo", "tt": "Tito", "fm": "Filemom", "hb": "Hebreus",
+    "tg": "Tiago", "1pe": "1 Pedro", "2pe": "2 Pedro", "1jo": "1 João", "2jo": "2 João",
+    "3jo": "3 João", "jd": "Judas", "ap": "Apocalipse"
+  };
 
   function applyTheme(verseText) {
     const lowerText = verseText.toLowerCase();
@@ -342,35 +358,37 @@
     });
   }
 
-  function getChapterLink(bookName, chapter) {
-    let bookSlug = bookName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    const slugMap = {
-      "1samuel": "1samuel", "2samuel": "2samuel", "1reis": "1reis", "2reis": "2reis",
-      "1cronicas": "1cronicas", "2cronicas": "2cronicas", "cantares": "cantares",
-      "eclesiastes": "eclesiastes", "jeremias": "jeremias", "isaias": "isaias",
-      "joao": "joao", "lucas": "lucas", "marcos": "marcos", "mateus": "mateus",
-      "atos": "atos", "apocalipse": "apocalipse"
+  // Função para gerar link do capítulo (bibliaonline.com.br - NVI, mas compatível)
+  function getChapterLink(bookAbbrev, chapter) {
+    let bookSlug = bookAbbrev.toLowerCase();
+    const specialSlugs = {
+      "1sm": "1samuel", "2sm": "2samuel", "1rs": "1reis", "2rs": "2reis",
+      "1cr": "1cronicas", "2cr": "2cronicas", "ct": "cantares", "ec": "eclesiastes",
+      "jr": "jeremias", "is": "isaias", "jo": "joao", "lc": "lucas", "mc": "marcos",
+      "mt": "mateus", "atos": "atos", "ap": "apocalipse", "1co": "1corintios", "2co": "2corintios",
+      "1ts": "1tessalonicenses", "2ts": "2tessalonicenses", "1tm": "1timoteo", "2tm": "2timoteo",
+      "1pe": "1pedro", "2pe": "2pedro", "1jo": "1joao", "2jo": "2joao", "3jo": "3joao"
     };
-    let slug = slugMap[bookSlug] || bookSlug;
+    let slug = specialSlugs[bookSlug] || bookSlug;
     slug = slug.replace(/\s/g, '');
     return `https://www.bibliaonline.com.br/nvi/${slug}/${chapter}`;
   }
 
-  function displayVerse(verseText, reference, bookName, chapter) {
-    const chapterUrl = getChapterLink(bookName, chapter);
-    const refWithoutBook = reference.replace(bookName, '').trim();
-    const displayRef = reference; // mantém completo
-
+  function displayVerse(verseText, reference, bookAbbrev, chapter, verseNumber) {
+    const chapterUrl = getChapterLink(bookAbbrev, chapter);
+    const fullBookName = bookNameMap[bookAbbrev.toLowerCase()] || bookAbbrev;
+    const displayReference = `${fullBookName} ${chapter}:${verseNumber}`;
+    
     dynamicZone.innerHTML = `
       <div class="verse-text">${escapeHtml(verseText)}</div>
       <div class="verse-reference-wrapper">
-        <span class="verse-reference">${escapeHtml(displayRef)}</span>
-        <a href="${chapterUrl}" target="_blank" rel="noopener noreferrer" class="chapter-link" title="Ler capítulo completo">
+        <span class="verse-reference">${escapeHtml(displayReference)}</span>
+        <a href="${chapterUrl}" target="_blank" rel="noopener noreferrer" class="chapter-link" title="Ler capítulo completo (NVI)">
           <span>📖</span>
         </a>
       </div>
     `;
-    const shareMsg = `${verseText} (${reference})`;
+    const shareMsg = `${verseText} (${displayReference} - ARA)`;
     const waUrl = `https://wa.me/?text=${encodeURIComponent(shareMsg)}`;
     waContainer.innerHTML = `
       <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-wa">
@@ -398,16 +416,20 @@
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
     try {
-      const response = await fetch(API_RANDOM_VERSE, { signal: controller.signal, headers: { 'Accept': 'application/json' } });
+      const response = await fetch(API_RANDOM_VERSE, { 
+        signal: controller.signal,
+        headers: { 'Accept': 'application/json' }
+      });
       clearTimeout(timeoutId);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
+      
       return {
         text: data.text,
-        reference: `${data.book.name} ${data.chapter}:${data.number}`,
-        book: data.book.name,
+        reference: data.reference,
+        book: data.book_id,
         chapter: data.chapter,
-        verseNumber: data.number
+        verseNumber: data.verse
       };
     } catch (error) {
       clearTimeout(timeoutId);
@@ -472,13 +494,15 @@
       await new Promise(r => setTimeout(r, 300));
     }
     if (newVerse) return newVerse;
-    const fallbacks = [
-      { text: "O Senhor é o meu pastor; nada me faltará.", reference: "Salmos 23:1", book: "Salmos", chapter: 23, verseNumber: 1 },
-      { text: "Deus é amor; e aquele que permanece em amor permanece em Deus, e Deus nele.", reference: "1 João 4:16", book: "1 João", chapter: 4, verseNumber: 16 }
-    ];
-    let fallback = fallbacks[0];
-    if (currentVerse && currentVerse.reference === fallback.reference) fallback = fallbacks[1];
-    return fallback;
+    
+    // Fallback final (versículo em ARA)
+    return {
+      text: "O Senhor é o meu pastor; nada me faltará.",
+      reference: "sl 23:1",
+      book: "sl",
+      chapter: 23,
+      verseNumber: 1
+    };
   }
 
   async function loadNewVerse() {
@@ -488,16 +512,16 @@
       const verse = await getNextVerse();
       if (verse) {
         currentVerse = verse;
-        displayVerse(verse.text, verse.reference, verse.book, verse.chapter);
+        displayVerse(verse.text, verse.reference, verse.book, verse.chapter, verse.verseNumber);
       } else {
-        const emergency = { text: "Buscai ao Senhor enquanto se pode achar.", reference: "Isaías 55:6", book: "Isaías", chapter: 55, verseNumber: 6 };
+        const emergency = { text: "Buscai ao Senhor enquanto se pode achar.", reference: "is 55:6", book: "is", chapter: 55, verseNumber: 6 };
         currentVerse = emergency;
-        displayVerse(emergency.text, emergency.reference, emergency.book, emergency.chapter);
+        displayVerse(emergency.text, emergency.reference, emergency.book, emergency.chapter, emergency.verseNumber);
       }
     } catch (err) {
       console.error(err);
-      const emergency = { text: "Deus é o nosso refúgio e fortaleza.", reference: "Salmos 46:1", book: "Salmos", chapter: 46, verseNumber: 1 };
-      displayVerse(emergency.text, emergency.reference, emergency.book, emergency.chapter);
+      const emergency = { text: "Deus é o nosso refúgio e fortaleza.", reference: "sl 46:1", book: "sl", chapter: 46, verseNumber: 1 };
+      displayVerse(emergency.text, emergency.reference, emergency.book, emergency.chapter, emergency.verseNumber);
     } finally {
       isLoading = false;
       if (verseCache.length < 2) preloadCache();
