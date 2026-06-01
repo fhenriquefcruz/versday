@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <meta name="description" content="Versículo diário - Almeida Revista e Atualizada">
-  <title>Versículo do Dia</title>
+  <title>📖 Vers Day</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
   <style>
     * {
@@ -148,7 +147,6 @@
       font-size: 1.2rem;
     }
 
-    /* LOADING COM TEMPORIZADOR */
     .loading-timer {
       display: flex;
       flex-direction: column;
@@ -296,72 +294,111 @@
 </div>
 
 <script>
-  // ============================================================
-  // VERSÃO ARA COM TEMPORIZADOR E MENSAGEM DE DEMORA
-  // ============================================================
+  // ==============================================
+  // VERSÃO CORRIGIDA - SEM BUG DO SALMO 23:1
+  // ==============================================
   
-  const API_RANDOM_VERSE = 'https://bible-api.com/data/ara/random';
-  const CACHE_SIZE = 4;
-  const TIMEOUT_MS = 12000;        // limite de 12 segundos para a requisição
-
+  const API_URL = 'https://bible-api.com/data/ara/random';
+  const TIMEOUT_MS = 4000;       // tempo máximo aguardando a API
+  
+  // Lista de versículos locais em ARA (fallback variado)
+  const LOCAL_VERSE_LIST = [
+    { text: "O Senhor é o meu pastor; nada me faltará.", reference: "sl 23:1", book: "sl", chapter: 23, verse: 1 },
+    { text: "Deus é amor; e aquele que permanece em amor permanece em Deus, e Deus nele.", reference: "1jo 4:16", book: "1jo", chapter: 4, verse: 16 },
+    { text: "Tudo posso naquele que me fortalece.", reference: "fp 4:13", book: "fp", chapter: 4, verse: 13 },
+    { text: "Buscai ao Senhor enquanto se pode achar, invocai-o enquanto está perto.", reference: "is 55:6", book: "is", chapter: 55, verse: 6 },
+    { text: "Deus é o nosso refúgio e fortaleza, socorro bem presente nas tribulações.", reference: "sl 46:1", book: "sl", chapter: 46, verse: 1 },
+    { text: "A alegria do Senhor é a vossa força.", reference: "ne 8:10", book: "ne", chapter: 8, verse: 10 },
+    { text: "E conhecereis a verdade, e a verdade vos libertará.", reference: "jo 8:32", book: "jo", chapter: 8, verse: 32 },
+    { text: "Respondeu Jesus: Eu sou o caminho, e a verdade, e a vida.", reference: "jo 14:6", book: "jo", chapter: 14, verse: 6 }
+  ];
+  
+  let lastVerseRef = null;        // para evitar repetição consecutiva
+  let currentVerseObj = null;
+  let isLoading = false;
+  let timerInterval = null;
+  
   const dynamicZone = document.getElementById('verseDynamicZone');
   const refreshBtn = document.getElementById('refreshBtn');
   const waContainer = document.getElementById('whatsappBtnContainer');
-
-  let verseCache = [];
-  let currentVerse = null;
-  let isLoading = false;
-  let timerInterval = null;
-  let startTime = null;
-
-  // Temas interativos
-  const themes = [
-    { name: 'paz', keywords: ['paz', 'calma', 'descanso', 'silêncio', 'tranquilidade', 'sossego', 'serenidade'], accent: '#6C91B2', bgImage: 'https://images.pexels.com/photos/457881/pexels-photo-457881.jpeg?auto=compress&cs=tinysrgb&w=1600' },
-    { name: 'alegria', keywords: ['alegria', 'feliz', 'contentamento', 'regozijo', 'dança', 'cântico', 'júbilo', 'exultar'], accent: '#F4B942', bgImage: 'https://images.pexels.com/photos/931018/pexels-photo-931018.jpeg?auto=compress&cs=tinysrgb&w=1600' },
-    { name: 'amor', keywords: ['amor', 'amado', 'caridade', 'afeto', 'bondade', 'misericórdia', 'ágape', 'querido'], accent: '#D9738A', bgImage: 'https://images.pexels.com/photos/56866/garden-rose-red-pink-56866.jpeg?auto=compress&cs=tinysrgb&w=1600' },
-    { name: 'esperança', keywords: ['esperança', 'confiança', 'esperar', 'aguardar', 'futuro', 'promessa', 'expectativa'], accent: '#7CAF7C', bgImage: 'https://images.pexels.com/photos/1167355/pexels-photo-1167355.jpeg?auto=compress&cs=tinysrgb&w=1600' },
-    { name: 'força', keywords: ['força', 'coragem', 'valente', 'firmeza', 'poder', 'fortaleza', 'ânimo', 'robusto'], accent: '#D97A3C', bgImage: 'https://images.pexels.com/photos/618848/pexels-photo-618848.jpeg?auto=compress&cs=tinysrgb&w=1600' },
-    { name: 'fé', keywords: ['fé', 'crer', 'confiar', 'crente', 'acreditar', 'fidelidade', 'certeza'], accent: '#A37CBB', bgImage: 'https://images.pexels.com/photos/2387795/pexels-photo-2387795.jpeg?auto=compress&cs=tinysrgb&w=1600' },
-    { name: 'luz', keywords: ['luz', 'resplendor', 'brilho', 'iluminar', 'candeia', 'lâmpada', 'clarão'], accent: '#F0D85C', bgImage: 'https://images.pexels.com/photos/274062/pexels-photo-274062.jpeg?auto=compress&cs=tinysrgb&w=1600' },
-    { name: 'gratidão', keywords: ['graças', 'gratidão', 'agradecer', 'louvor', 'ação de graças', 'reconhecimento'], accent: '#E4A951', bgImage: 'https://images.pexels.com/photos/1146762/pexels-photo-1146762.jpeg?auto=compress&cs=tinysrgb&w=1600' }
-  ];
-  const defaultTheme = { accent: '#E4B363', bgImage: 'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1600' };
-
+  
+  // Mapeamento de abreviações para nome completo
   const bookNameMap = {
+    "sl": "Salmos", "1jo": "1 João", "fp": "Filipenses", "is": "Isaías", "ne": "Neemias", "jo": "João",
     "gn": "Gênesis", "ex": "Êxodo", "lv": "Levítico", "nm": "Números", "dt": "Deuteronômio",
     "js": "Josué", "jz": "Juízes", "rt": "Rute", "1sm": "1 Samuel", "2sm": "2 Samuel",
     "1rs": "1 Reis", "2rs": "2 Reis", "1cr": "1 Crônicas", "2cr": "2 Crônicas", "ed": "Esdras",
-    "ne": "Neemias", "et": "Ester", "jó": "Jó", "sl": "Salmos", "pv": "Provérbios",
-    "ec": "Eclesiastes", "ct": "Cantares", "is": "Isaías", "jr": "Jeremias", "lm": "Lamentações",
-    "ez": "Ezequiel", "dn": "Daniel", "os": "Oséias", "jl": "Joel", "am": "Amós", "ob": "Obadias",
-    "jn": "Jonas", "mq": "Miquéias", "na": "Naum", "hc": "Habacuque", "sf": "Sofonias", "ag": "Ageu",
-    "zc": "Zacarias", "ml": "Malaquias", "mt": "Mateus", "mc": "Marcos", "lc": "Lucas", "jo": "João",
-    "atos": "Atos", "rm": "Romanos", "1co": "1 Coríntios", "2co": "2 Coríntios", "gl": "Gálatas",
-    "ef": "Efésios", "fp": "Filipenses", "cl": "Colossenses", "1ts": "1 Tessalonicenses", "2ts": "2 Tessalonicenses",
+    "et": "Ester", "jó": "Jó", "pv": "Provérbios", "ec": "Eclesiastes", "ct": "Cantares",
+    "jr": "Jeremias", "lm": "Lamentações", "ez": "Ezequiel", "dn": "Daniel", "os": "Oséias",
+    "jl": "Joel", "am": "Amós", "ob": "Obadias", "jn": "Jonas", "mq": "Miquéias", "na": "Naum",
+    "hc": "Habacuque", "sf": "Sofonias", "ag": "Ageu", "zc": "Zacarias", "ml": "Malaquias",
+    "mt": "Mateus", "mc": "Marcos", "lc": "Lucas", "atos": "Atos", "rm": "Romanos",
+    "1co": "1 Coríntios", "2co": "2 Coríntios", "gl": "Gálatas", "ef": "Efésios",
+    "cl": "Colossenses", "1ts": "1 Tessalonicenses", "2ts": "2 Tessalonicenses",
     "1tm": "1 Timóteo", "2tm": "2 Timóteo", "tt": "Tito", "fm": "Filemom", "hb": "Hebreus",
-    "tg": "Tiago", "1pe": "1 Pedro", "2pe": "2 Pedro", "1jo": "1 João", "2jo": "2 João",
-    "3jo": "3 João", "jd": "Judas", "ap": "Apocalipse"
+    "tg": "Tiago", "1pe": "1 Pedro", "2pe": "2 Pedro", "2jo": "2 João", "3jo": "3 João",
+    "jd": "Judas", "ap": "Apocalipse"
   };
-
-  function applyTheme(verseText) {
-    const lowerText = verseText.toLowerCase();
-    let selectedTheme = defaultTheme;
-    for (const theme of themes) {
-      if (theme.keywords.some(keyword => lowerText.includes(keyword))) {
-        selectedTheme = { accent: theme.accent, bgImage: theme.bgImage };
+  
+  // Temas visuais
+  const themes = [
+    { keywords: ['paz', 'calma', 'descanso', 'silêncio'], accent: '#6C91B2', bgImage: 'https://images.pexels.com/photos/457881/pexels-photo-457881.jpeg?auto=compress&cs=tinysrgb&w=1600' },
+    { keywords: ['alegria', 'feliz', 'contentamento', 'regozijo'], accent: '#F4B942', bgImage: 'https://images.pexels.com/photos/931018/pexels-photo-931018.jpeg?auto=compress&cs=tinysrgb&w=1600' },
+    { keywords: ['amor', 'amado', 'caridade', 'bondade'], accent: '#D9738A', bgImage: 'https://images.pexels.com/photos/56866/garden-rose-red-pink-56866.jpeg?auto=compress&cs=tinysrgb&w=1600' },
+    { keywords: ['esperança', 'confiança', 'aguardar'], accent: '#7CAF7C', bgImage: 'https://images.pexels.com/photos/1167355/pexels-photo-1167355.jpeg?auto=compress&cs=tinysrgb&w=1600' },
+    { keywords: ['força', 'coragem', 'fortaleza'], accent: '#D97A3C', bgImage: 'https://images.pexels.com/photos/618848/pexels-photo-618848.jpeg?auto=compress&cs=tinysrgb&w=1600' },
+    { keywords: ['fé', 'crer', 'confiar'], accent: '#A37CBB', bgImage: 'https://images.pexels.com/photos/2387795/pexels-photo-2387795.jpeg?auto=compress&cs=tinysrgb&w=1600' }
+  ];
+  const defaultTheme = { accent: '#E4B363', bgImage: 'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1600' };
+  
+  function applyThemeByText(text) {
+    const lower = text.toLowerCase();
+    let theme = defaultTheme;
+    for (let t of themes) {
+      if (t.keywords.some(k => lower.includes(k))) {
+        theme = t;
         break;
       }
     }
-    document.documentElement.style.setProperty('--accent-color', selectedTheme.accent);
-    const r = parseInt(selectedTheme.accent.slice(1,3), 16);
-    const g = parseInt(selectedTheme.accent.slice(3,5), 16);
-    const b = parseInt(selectedTheme.accent.slice(5,7), 16);
-    document.documentElement.style.setProperty('--accent-glow', `rgba(${r}, ${g}, ${b}, 0.3)`);
-    document.body.style.backgroundImage = `url('${selectedTheme.bgImage}')`;
+    document.documentElement.style.setProperty('--accent-color', theme.accent);
+    document.body.style.backgroundImage = `url('${theme.bgImage}')`;
+    document.body.style.backgroundSize = 'cover';
     document.body.style.backgroundPosition = 'center 30%';
-    document.body.style.backgroundAttachment = 'fixed';
   }
-
+  
+  function getChapterLink(bookAbbrev, chapter) {
+    let slug = bookAbbrev.toLowerCase();
+    const special = { "1sm":"1samuel", "2sm":"2samuel", "1rs":"1reis", "2rs":"2reis", "1cr":"1cronicas", "2cr":"2cronicas", "ct":"cantares", "ec":"eclesiastes", "jr":"jeremias", "is":"isaias", "jo":"joao", "lc":"lucas", "mc":"marcos", "mt":"mateus", "atos":"atos", "ap":"apocalipse", "1co":"1corintios", "2co":"2corintios", "1ts":"1tessalonicenses", "2ts":"2tessalonicenses", "1tm":"1timoteo", "2tm":"2timoteo", "1pe":"1pedro", "2pe":"2pedro", "1jo":"1joao", "2jo":"2joao", "3jo":"3joao" };
+    slug = special[slug] || slug;
+    slug = slug.replace(/\s/g, '');
+    return `https://www.bibliaonline.com.br/ara/${slug}/${chapter}`;
+  }
+  
+  function displayVerse(verse) {
+    if (timerInterval) clearInterval(timerInterval);
+    const fullBook = bookNameMap[verse.book.toLowerCase()] || verse.book;
+    const displayRef = `${fullBook} ${verse.chapter}:${verse.verse}`;
+    const chapterUrl = getChapterLink(verse.book, verse.chapter);
+    dynamicZone.innerHTML = `
+      <div class="verse-text">${escapeHtml(verse.text)}</div>
+      <div class="verse-reference-wrapper">
+        <span class="verse-reference">${escapeHtml(displayRef)}</span>
+        <a href="${chapterUrl}" target="_blank" rel="noopener noreferrer" class="chapter-link" title="Ler capítulo completo (ARA)">
+          <span>📖</span>
+        </a>
+      </div>
+    `;
+    const shareMsg = `${verse.text} (${displayRef} - ARA)`;
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(shareMsg)}`;
+    waContainer.innerHTML = `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-wa">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-5.45-4.45-9.9-9.91-9.9zm0 18.23c-1.5 0-2.97-.39-4.26-1.12l-.3-.18-3.12.82.84-3.04-.2-.31c-.79-1.35-1.21-2.9-1.21-4.48 0-4.56 3.71-8.27 8.27-8.27 4.56 0 8.27 3.71 8.27 8.27-.02 4.55-3.72 8.26-8.29 8.26zM16.5 13.5c-.26-.13-1.55-.77-1.79-.86-.23-.09-.42-.13-.6.13-.18.26-.69.86-.85 1.04-.16.18-.31.2-.58.07-.26-.13-1.12-.41-2.13-1.32-.79-.71-1.32-1.59-1.47-1.86-.16-.26-.02-.4.11-.53.11-.12.26-.31.39-.47.13-.16.17-.26.26-.43.09-.17.04-.32-.02-.45s-.6-1.44-.82-1.97c-.21-.52-.43-.45-.6-.46-.16-.01-.34-.01-.52-.01-.18 0-.47.07-.71.32-.25.25-.94.92-.94 2.24 0 1.32.96 2.6 1.09 2.78.14.18 1.89 2.88 4.57 4.03 2.68 1.15 2.68.77 3.16.72.48-.05 1.55-.63 1.77-1.24.22-.61.22-1.13.15-1.24-.06-.1-.23-.16-.49-.29z" fill="white"/></svg>
+      Compartilhar no WhatsApp
+    </a>`;
+    applyThemeByText(verse.text);
+    currentVerseObj = verse;
+    lastVerseRef = verse.reference;
+  }
+  
   function escapeHtml(str) {
     return str.replace(/[&<>]/g, function(m) {
       if (m === '&') return '&amp;';
@@ -370,237 +407,88 @@
       return m;
     });
   }
-
-  function getChapterLink(bookAbbrev, chapter) {
-    let bookSlug = bookAbbrev.toLowerCase();
-    const specialSlugs = {
-      "1sm": "1samuel", "2sm": "2samuel", "1rs": "1reis", "2rs": "2reis",
-      "1cr": "1cronicas", "2cr": "2cronicas", "ct": "cantares", "ec": "eclesiastes",
-      "jr": "jeremias", "is": "isaias", "jo": "joao", "lc": "lucas", "mc": "marcos",
-      "mt": "mateus", "atos": "atos", "ap": "apocalipse", "1co": "1corintios", "2co": "2corintios",
-      "1ts": "1tessalonicenses", "2ts": "2tessalonicenses", "1tm": "1timoteo", "2tm": "2timoteo",
-      "1pe": "1pedro", "2pe": "2pedro", "1jo": "1joao", "2jo": "2joao", "3jo": "3joao"
-    };
-    let slug = specialSlugs[bookSlug] || bookSlug;
-    slug = slug.replace(/\s/g, '');
-    return `https://www.bibliaonline.com.br/nvi/${slug}/${chapter}`;
-  }
-
-  function displayVerse(verseText, reference, bookAbbrev, chapter, verseNumber) {
-    // Para o timer, se estiver rodando
-    stopTimer();
-
-    const chapterUrl = getChapterLink(bookAbbrev, chapter);
-    const fullBookName = bookNameMap[bookAbbrev.toLowerCase()] || bookAbbrev;
-    const displayReference = `${fullBookName} ${chapter}:${verseNumber}`;
-    
-    dynamicZone.innerHTML = `
-      <div class="verse-text">${escapeHtml(verseText)}</div>
-      <div class="verse-reference-wrapper">
-        <span class="verse-reference">${escapeHtml(displayReference)}</span>
-        <a href="${chapterUrl}" target="_blank" rel="noopener noreferrer" class="chapter-link" title="Ler capítulo completo (NVI)">
-          <span>📖</span>
-        </a>
-      </div>
-    `;
-    const shareMsg = `${verseText} (${displayReference} - ARA)`;
-    const waUrl = `https://wa.me/?text=${encodeURIComponent(shareMsg)}`;
-    waContainer.innerHTML = `
-      <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-wa">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-5.45-4.45-9.9-9.91-9.9zm0 18.23c-1.5 0-2.97-.39-4.26-1.12l-.3-.18-3.12.82.84-3.04-.2-.31c-.79-1.35-1.21-2.9-1.21-4.48 0-4.56 3.71-8.27 8.27-8.27 4.56 0 8.27 3.71 8.27 8.27-.02 4.55-3.72 8.26-8.29 8.26zM16.5 13.5c-.26-.13-1.55-.77-1.79-.86-.23-.09-.42-.13-.6.13-.18.26-.69.86-.85 1.04-.16.18-.31.2-.58.07-.26-.13-1.12-.41-2.13-1.32-.79-.71-1.32-1.59-1.47-1.86-.16-.26-.02-.4.11-.53.11-.12.26-.31.39-.47.13-.16.17-.26.26-.43.09-.17.04-.32-.02-.45s-.6-1.44-.82-1.97c-.21-.52-.43-.45-.6-.46-.16-.01-.34-.01-.52-.01-.18 0-.47.07-.71.32-.25.25-.94.92-.94 2.24 0 1.32.96 2.6 1.09 2.78.14.18 1.89 2.88 4.57 4.03 2.68 1.15 2.68.77 3.16.72.48-.05 1.55-.63 1.77-1.24.22-.61.22-1.13.15-1.24-.06-.1-.23-.16-.49-.29z" fill="white"/>
-        </svg>
-        Compartilhar no WhatsApp
-      </a>
-    `;
-    applyTheme(verseText);
-  }
-
-  // Mostra o loading com temporizador (contagem crescente)
+  
   function showLoadingWithTimer() {
-    // Para qualquer timer anterior
-    stopTimer();
-    
-    // Limpa a área e mostra o timer
+    if (timerInterval) clearInterval(timerInterval);
     dynamicZone.innerHTML = `
-      <div class="loading-timer" id="timerContainer">
+      <div class="loading-timer">
         <div class="timer-circle" id="timerSeconds">0</div>
         <div class="loading-message">Buscando versículo...</div>
         <div id="delayMessage" style="min-height: 50px;"></div>
       </div>
     `;
     waContainer.innerHTML = '';
-    
-    startTime = Date.now();
     let seconds = 0;
+    const start = Date.now();
     const timerEl = document.getElementById('timerSeconds');
-    const delayMsgDiv = document.getElementById('delayMessage');
-    
+    const delayDiv = document.getElementById('delayMessage');
     timerInterval = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const elapsed = Math.floor((Date.now() - start) / 1000);
       if (timerEl) timerEl.textContent = elapsed;
-      
-      // Se ultrapassar 10 segundos, mostra mensagem de desculpa
-      if (elapsed >= 10 && delayMsgDiv && !delayMsgDiv.innerHTML) {
-        delayMsgDiv.innerHTML = `
-          <div class="delay-message">
-            🙏 Estamos buscando o versículo, desculpe a demora.<br>
-            Muitas requisições ao mesmo tempo. Em breve aparecerá.
-          </div>
-        `;
+      if (elapsed >= 10 && delayDiv && !delayDiv.innerHTML) {
+        delayDiv.innerHTML = `<div class="delay-message">🙏 Estamos buscando o versículo, desculpe a demora.<br>Muitas requisições ao mesmo tempo. Em breve aparecerá.</div>`;
       }
     }, 1000);
   }
-
-  function stopTimer() {
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-    }
-  }
-
-  // Loading sem timer (para cache rápido, mas vamos usar o timer mesmo assim)
-  function showLoadingFallback() {
-    stopTimer();
-    dynamicZone.innerHTML = `
-      <div class="loading-timer">
-        <div class="loading-message">Aguarde, carregando versículo...</div>
-      </div>
-    `;
-    waContainer.innerHTML = '';
-  }
-
+  
   async function fetchVerseFromAPI() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
     try {
-      const response = await fetch(API_RANDOM_VERSE, { 
-        signal: controller.signal,
-        headers: { 'Accept': 'application/json' }
-      });
+      const res = await fetch(API_URL, { signal: controller.signal });
       clearTimeout(timeoutId);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
       return {
         text: data.text,
         reference: data.reference,
         book: data.book_id,
         chapter: data.chapter,
-        verseNumber: data.verse
+        verse: data.verse
       };
-    } catch (error) {
+    } catch (e) {
       clearTimeout(timeoutId);
-      console.warn('API fetch error:', error);
       return null;
     }
   }
-
-  function isVerseInCache(verse) {
-    if (!verse) return true;
-    return verseCache.some(v => v.reference === verse.reference);
+  
+  // Retorna um versículo diferente do último (se possível)
+  async function getRandomVerse() {
+    // Tenta API primeiro
+    const apiVerse = await fetchVerseFromAPI();
+    if (apiVerse && apiVerse.reference !== lastVerseRef) {
+      return apiVerse;
+    }
+    // Fallback local: escolhe um diferente do último
+    let available = LOCAL_VERSE_LIST.filter(v => v.reference !== lastVerseRef);
+    if (available.length === 0) available = LOCAL_VERSE_LIST;
+    const randomIndex = Math.floor(Math.random() * available.length);
+    return { ...available[randomIndex] };
   }
-
-  async function addToCache() {
-    if (isLoading) return;
-    let newVerse = null;
-    let attempts = 0;
-    const maxAttempts = 5;
-    while (!newVerse && attempts < maxAttempts) {
-      const fetched = await fetchVerseFromAPI();
-      if (fetched && !isVerseInCache(fetched) && (!currentVerse || fetched.reference !== currentVerse.reference)) {
-        newVerse = fetched;
-        break;
-      }
-      attempts++;
-      await new Promise(r => setTimeout(r, 200));
-    }
-    if (newVerse) {
-      verseCache.push(newVerse);
-      if (verseCache.length > CACHE_SIZE) verseCache.shift();
-    }
-  }
-
-  async function preloadCache() {
-    while (verseCache.length < CACHE_SIZE && !isLoading) {
-      await addToCache();
-      await new Promise(r => setTimeout(r, 400));
-    }
-  }
-
-  async function getNextVerse() {
-    if (verseCache.length > 0) {
-      let index = 0;
-      while (index < verseCache.length && currentVerse && verseCache[index].reference === currentVerse.reference) index++;
-      if (index < verseCache.length) {
-        const next = verseCache[index];
-        verseCache.splice(index, 1);
-        addToCache(); // reposição assíncrona
-        return next;
-      }
-    }
-    
-    // Se cache não tem disponível, busca da API com timer ativo
-    let newVerse = null;
-    let attempts = 0;
-    while (!newVerse && attempts < 3) {
-      const fetched = await fetchVerseFromAPI();
-      if (fetched && (!currentVerse || fetched.reference !== currentVerse.reference)) {
-        newVerse = fetched;
-        break;
-      }
-      attempts++;
-      await new Promise(r => setTimeout(r, 300));
-    }
-    if (newVerse) return newVerse;
-    
-    // Fallback
-    return {
-      text: "O Senhor é o meu pastor; nada me faltará.",
-      reference: "sl 23:1",
-      book: "sl",
-      chapter: 23,
-      verseNumber: 1
-    };
-  }
-
+  
   async function loadNewVerse() {
     if (isLoading) return;
     isLoading = true;
-    
-    // Inicia o timer visual
     showLoadingWithTimer();
-    
     try {
-      const verse = await getNextVerse();
-      if (verse) {
-        currentVerse = verse;
-        displayVerse(verse.text, verse.reference, verse.book, verse.chapter, verse.verseNumber);
-      } else {
-        const emergency = { text: "Buscai ao Senhor enquanto se pode achar.", reference: "is 55:6", book: "is", chapter: 55, verseNumber: 6 };
-        currentVerse = emergency;
-        displayVerse(emergency.text, emergency.reference, emergency.book, emergency.chapter, emergency.verseNumber);
-      }
+      const verse = await getRandomVerse();
+      displayVerse(verse);
     } catch (err) {
       console.error(err);
-      const emergency = { text: "Deus é o nosso refúgio e fortaleza.", reference: "sl 46:1", book: "sl", chapter: 46, verseNumber: 1 };
-      displayVerse(emergency.text, emergency.reference, emergency.book, emergency.chapter, emergency.verseNumber);
+      // último fallback de emergência
+      displayVerse(LOCAL_VERSE_LIST[0]);
     } finally {
       isLoading = false;
-      if (verseCache.length < 2) preloadCache();
+      if (timerInterval) clearInterval(timerInterval);
     }
   }
-
+  
   refreshBtn.addEventListener('click', () => {
-    if (isLoading) return;
-    loadNewVerse();
+    if (!isLoading) loadNewVerse();
   });
-
-  // Inicialização
-  (async function init() {
-    showLoadingWithTimer();
-    await preloadCache();
-    await loadNewVerse();
-  })();
+  
+  // Inicialização: já carrega o primeiro versículo
+  loadNewVerse();
 </script>
 </body>
 </html>
