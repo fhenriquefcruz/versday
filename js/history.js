@@ -13,7 +13,3 @@ export function addToHistory(verse) {
   if (history.length > MAX_HISTORY) history.pop();
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
 }
-
-export function clearHistory() {
-  localStorage.removeItem(HISTORY_KEY);
-}
