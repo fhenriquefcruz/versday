@@ -1,12 +1,12 @@
-// Temas semânticos e imagens contemplativas – NENHUMA imagem de bitcoin/tecnologia
+// Temas semânticos – APENAS PAISAGENS (sem pessoas)
 export const semanticThemes = [
   {
     name: 'alegria',
     keywords: ['alegria', 'alegre', 'júbilo', 'feliz', 'contentamento', 'regozijo', 'coração alegre', 'sorriso', 'riso', 'dança'],
     images: [
-      'https://images.pexels.com/photos/931018/pexels-photo-931018.jpeg?auto=compress&cs=tinysrgb&w=1600',
+      'https://images.pexels.com/photos/1167355/pexels-photo-1167355.jpeg?auto=compress&cs=tinysrgb&w=1600',
       'https://images.pexels.com/photos/1146762/pexels-photo-1146762.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      'https://images.pexels.com/photos/1167355/pexels-photo-1167355.jpeg?auto=compress&cs=tinysrgb&w=1600'
+      'https://images.pexels.com/photos/931018/pexels-photo-931018.jpeg?auto=compress&cs=tinysrgb&w=1600'
     ]
   },
   {
@@ -112,7 +112,7 @@ export const semanticThemes = [
   }
 ];
 
-// Imagens de fallback – apenas paisagens naturais (sem bitcoin/tecnologia)
+// Fallback – apenas paisagens
 export const contemplativeImages = [
   'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1600',
   'https://images.pexels.com/photos/235985/pexels-photo-235985.jpeg?auto=compress&cs=tinysrgb&w=1600',
