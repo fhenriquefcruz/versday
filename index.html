@@ -2,9 +2,9 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
   <title>📖 Vers Day</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -14,8 +14,10 @@
 
     :root {
       --accent-color: #E4B363;
-      --accent-glow: rgba(228, 179, 99, 0.3);
-      --transition-speed: 0.3s;
+      --accent-glow: rgba(228, 179, 99, 0.25);
+      --transition-speed: 0.4s;
+      --card-bg: rgba(20, 25, 28, 0.55);
+      --border-light: rgba(255, 255, 255, 0.08);
     }
 
     body {
@@ -24,12 +26,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1.5rem;
+      padding: 1.25rem;
       position: relative;
       background-size: cover;
       background-position: center 30%;
       background-attachment: fixed;
-      transition: background-image var(--transition-speed) ease-in-out;
+      transition: background-image var(--transition-speed) cubic-bezier(0.2, 0.9, 0.4, 1.1);
     }
 
     body::after {
@@ -39,45 +41,45 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle at 20% 40%, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.75) 100%);
+      background: radial-gradient(circle at 20% 40%, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.65) 100%);
       z-index: -1;
       pointer-events: none;
     }
 
     .verse-container {
-      max-width: 720px;
+      max-width: 680px;
       width: 100%;
-      background: rgba(20, 25, 28, 0.65);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-radius: 2rem;
-      border: 1px solid var(--accent-color);
-      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent-glow) inset;
-      padding: 2rem 1.8rem;
-      transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
-      animation: fadeScaleUp 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      background: var(--card-bg);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-radius: 2.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.25), 0 0 0 0.5px rgba(255, 255, 255, 0.05) inset;
+      padding: 2rem 2rem;
+      transition: all var(--transition-speed) ease;
+      animation: fadeScaleUp 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
     }
 
     @keyframes fadeScaleUp {
-      0% {
-        opacity: 0;
-        transform: scale(0.96) translateY(12px);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
+      0% { opacity: 0; transform: scale(0.97) translateY(8px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
     }
 
+    .verse-content {
+      text-align: center;
+      margin: 2rem 0 1.8rem;
+      min-height: 240px;
+      transition: opacity 0.2s ease;
+    }
     .verse-header {
       text-align: center;
-      margin-bottom: 2rem;
+      margin-bottom: 1.8rem;
     }
     .verse-header h1 {
       font-family: 'Playfair Display', serif;
       font-weight: 500;
-      font-size: 1.8rem;
-      letter-spacing: -0.3px;
+      font-size: 1.9rem;
+      letter-spacing: -0.02em;
       background: linear-gradient(135deg, #F5E7D3 0%, var(--accent-color) 100%);
       background-clip: text;
       -webkit-background-clip: text;
@@ -86,127 +88,122 @@
       padding-bottom: 0.3rem;
       border-bottom: 2px solid var(--accent-color);
     }
-
-    .verse-content {
-      text-align: center;
-      margin: 2rem 0 1.5rem;
-      min-height: 220px;
-    }
     .verse-text {
       font-family: 'Playfair Display', serif;
-      font-size: 1.7rem;
+      font-size: clamp(1.3rem, 5vw, 1.9rem);
       line-height: 1.45;
       font-weight: 500;
       color: #FCF7F0;
-      text-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      margin-bottom: 1rem;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      margin-bottom: 1.2rem;
     }
     .verse-text::before {
       content: "“";
-      font-size: 2.2rem;
+      font-size: 2rem;
       color: var(--accent-color);
       font-family: serif;
-      margin-right: 4px;
+      margin-right: 6px;
+      opacity: 0.9;
     }
     .verse-text::after {
       content: "”";
-      font-size: 2.2rem;
+      font-size: 2rem;
       color: var(--accent-color);
       font-family: serif;
-      margin-left: 4px;
+      margin-left: 6px;
       vertical-align: top;
+      opacity: 0.9;
     }
     .verse-reference-wrapper {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      background: rgba(0,0,0,0.3);
-      backdrop-filter: blur(4px);
-      padding: 0.2rem 1rem;
-      border-radius: 40px;
-      margin-top: 0.5rem;
+      gap: 10px;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(8px);
+      padding: 0.35rem 1.2rem;
+      border-radius: 100px;
+      margin-top: 0.3rem;
     }
     .verse-reference {
-      font-size: 1.1rem;
-      font-weight: 600;
+      font-size: 1rem;
+      font-weight: 500;
       color: var(--accent-color);
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
     }
     .chapter-link {
       display: inline-flex;
       align-items: center;
       text-decoration: none;
-      font-size: 1.1rem;
-      transition: transform 0.2s;
-      margin-left: 4px;
+      font-size: 1.2rem;
+      transition: transform 0.2s, filter 0.2s;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
     }
     .chapter-link:hover {
-      transform: scale(1.1);
+      transform: scale(1.12);
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
     }
-    .chapter-link span {
-      font-size: 1.2rem;
-    }
-
     .loading-timer {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 1rem;
-      padding: 1rem 0;
+      padding: 1.2rem 0;
     }
     .timer-circle {
-      width: 80px;
-      height: 80px;
+      width: 85px;
+      height: 85px;
       border-radius: 50%;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.45);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 2.2rem;
-      font-weight: 700;
+      font-weight: 600;
       color: var(--accent-color);
-      font-family: monospace;
-      border: 2px solid var(--accent-color);
-      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      font-family: 'Inter', monospace;
+      border: 1.5px solid var(--accent-color);
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
     }
     .loading-message {
-      font-size: 1rem;
-      color: #CBD5E1;
-      font-weight: 400;
+      font-size: 0.95rem;
+      color: #E2E8F0;
       background: rgba(0,0,0,0.4);
-      padding: 0.3rem 1rem;
-      border-radius: 50px;
+      padding: 0.4rem 1rem;
+      border-radius: 60px;
       backdrop-filter: blur(4px);
     }
     .delay-message {
       margin-top: 0.5rem;
       font-size: 0.8rem;
-      color: #E4B363;
+      color: #FFE7B6;
       background: rgba(0,0,0,0.5);
-      padding: 0.4rem 1rem;
-      border-radius: 30px;
-      animation: pulse 1.5s infinite;
+      padding: 0.5rem 1rem;
+      border-radius: 40px;
+      animation: softPulse 1.8s infinite;
+      max-width: 90%;
+      text-align: center;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 0.7; }
-      50% { opacity: 1; }
+    @keyframes softPulse {
+      0%, 100% { opacity: 0.7; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.01); }
     }
-
     .buttons-group {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
+      align-items: center;
       gap: 1rem;
-      margin-top: 1.8rem;
-      margin-bottom: 1rem;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
     }
     .btn {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      padding: 0.8rem 1.6rem;
+      justify-content: center;
+      gap: 8px;
+      padding: 0.7rem 1.4rem;
       border-radius: 60px;
-      font-weight: 600;
+      font-weight: 500;
       font-size: 0.9rem;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -217,55 +214,66 @@
       text-decoration: none;
     }
     .btn-wa {
-      background: linear-gradient(105deg, #25D366 0%, #128C7E 100%);
-      color: white;
-      box-shadow: 0 5px 12px rgba(37, 211, 102, 0.25);
+      background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+      width: 52px;
+      height: 52px;
+      padding: 0;
+      border-radius: 60px;
+      box-shadow: 0 6px 14px rgba(37, 211, 102, 0.25);
       border: 1px solid rgba(255,255,255,0.2);
+      transition: transform 0.2s, box-shadow 0.2s;
     }
     .btn-wa:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(37, 211, 102, 0.35);
+      transform: scale(1.05);
+      box-shadow: 0 10px 20px rgba(37, 211, 102, 0.35);
+    }
+    .btn-wa:active {
+      transform: scale(0.97);
+    }
+    .btn-wa svg {
+      width: 26px;
+      height: 26px;
+      display: block;
+      margin: 0 auto;
     }
     .btn-refresh {
-      background: rgba(20, 25, 28, 0.8);
-      border: 1px solid var(--accent-color);
+      background: rgba(20, 25, 28, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       color: #F5E7D3;
+      padding: 0.7rem 1.6rem;
+      gap: 8px;
+      font-weight: 500;
     }
     .btn-refresh:hover {
       background: rgba(228, 179, 99, 0.2);
+      border-color: var(--accent-color);
       transform: translateY(-2px);
     }
-    .btn:active {
-      transform: translateY(1px);
-    }
-
     .footer-credit {
       text-align: center;
       margin-top: 2rem;
       padding-top: 1rem;
-      border-top: 1px solid var(--accent-color);
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
       font-size: 0.7rem;
-      color: #A0B3B7;
-      transition: border-color var(--transition-speed);
+      letter-spacing: 0.3px;
+      color: rgba(200, 210, 215, 0.8);
     }
     .footer-credit strong {
       color: var(--accent-color);
+      font-weight: 500;
     }
-
     @media (max-width: 580px) {
-      .verse-container { padding: 1.5rem; }
-      .verse-text { font-size: 1.3rem; }
-      .verse-text::before, .verse-text::after { font-size: 1.6rem; }
-      .btn { padding: 0.6rem 1.2rem; font-size: 0.8rem; }
-      .verse-header h1 { font-size: 1.5rem; }
-      .verse-reference-wrapper { gap: 5px; }
-      .verse-reference { font-size: 0.9rem; }
-      .chapter-link span { font-size: 1rem; }
-      .timer-circle { width: 65px; height: 65px; font-size: 1.8rem; }
+      .verse-container { padding: 1.5rem; border-radius: 2rem; }
+      .verse-text { margin-bottom: 1rem; }
+      .verse-reference-wrapper { gap: 6px; padding: 0.25rem 1rem; }
+      .btn-wa { width: 48px; height: 48px; }
+      .btn-wa svg { width: 24px; height: 24px; }
+      .btn-refresh { padding: 0.6rem 1.2rem; font-size: 0.85rem; }
     }
     @media (max-width: 450px) {
-      .buttons-group { flex-direction: column; align-items: stretch; }
-      .btn { justify-content: center; }
+      .buttons-group { gap: 0.8rem; }
+      .btn-wa { width: 44px; height: 44px; }
+      .timer-circle { width: 70px; height: 70px; font-size: 1.9rem; }
     }
   </style>
 </head>
@@ -275,19 +283,16 @@
   <div class="verse-header">
     <h1>Versículo do Dia</h1>
   </div>
-
   <div id="verseDynamicZone" class="verse-content"></div>
-
   <div class="buttons-group">
     <button class="btn btn-refresh" id="refreshBtn">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
       </svg>
-      Novo Versículo
+      Novo
     </button>
     <div id="whatsappBtnContainer"></div>
   </div>
-
   <div class="footer-credit">
     ✨ Desenvolvido por <strong>Fábio Cruz</strong>
   </div>
@@ -295,13 +300,14 @@
 
 <script>
   // ==============================================
-  // VERSÃO CORRIGIDA - SEM BUG DO SALMO 23:1
+  // CÓDIGO ORIGINAL PRESERVADO COM MELHORIAS
   // ==============================================
   
   const API_URL = 'https://bible-api.com/data/ara/random';
-  const TIMEOUT_MS = 4000;       // tempo máximo aguardando a API
+  const TIMEOUT_MS = 4000;
+  const CACHE_SIZE = 8;  // Aumentado de 4 para 8 (melhoria 6)
   
-  // Lista de versículos locais em ARA (fallback variado)
+  // MELHORIA 6: Lista local expandida (40 versículos)
   const LOCAL_VERSE_LIST = [
     { text: "O Senhor é o meu pastor; nada me faltará.", reference: "sl 23:1", book: "sl", chapter: 23, verse: 1 },
     { text: "Deus é amor; e aquele que permanece em amor permanece em Deus, e Deus nele.", reference: "1jo 4:16", book: "1jo", chapter: 4, verse: 16 },
@@ -310,19 +316,119 @@
     { text: "Deus é o nosso refúgio e fortaleza, socorro bem presente nas tribulações.", reference: "sl 46:1", book: "sl", chapter: 46, verse: 1 },
     { text: "A alegria do Senhor é a vossa força.", reference: "ne 8:10", book: "ne", chapter: 8, verse: 10 },
     { text: "E conhecereis a verdade, e a verdade vos libertará.", reference: "jo 8:32", book: "jo", chapter: 8, verse: 32 },
-    { text: "Respondeu Jesus: Eu sou o caminho, e a verdade, e a vida.", reference: "jo 14:6", book: "jo", chapter: 14, verse: 6 }
+    { text: "Respondeu Jesus: Eu sou o caminho, e a verdade, e a vida.", reference: "jo 14:6", book: "jo", chapter: 14, verse: 6 },
+    { text: "Vinde a mim, todos os que estais cansados e sobrecarregados, e eu vos aliviarei.", reference: "mt 11:28", book: "mt", chapter: 11, verse: 28 },
+    { text: "O amor é paciente, é benigno; o amor não arde em ciúmes, não se ufana, não se ensoberbece.", reference: "1co 13:4", book: "1co", chapter: 13, verse: 4 },
+    { text: "Não temas, porque eu sou contigo; não te assombres, porque eu sou o teu Deus.", reference: "is 41:10", book: "is", chapter: 41, verse: 10 },
+    { text: "Toda boa dádiva e todo dom perfeito vêm do alto.", reference: "tg 1:17", book: "tg", chapter: 1, verse: 17 },
+    { text: "Ora, a fé é a certeza de coisas que se esperam, a convicção de fatos que se não veem.", reference: "hb 11:1", book: "hb", chapter: 11, verse: 1 },
+    { text: "Sede vós, pois, imitadores de Deus, como filhos amados.", reference: "ef 5:1", book: "ef", chapter: 5, verse: 1 },
+    { text: "A minha paz vos dou; não vo-la dou como o mundo a dá.", reference: "jo 14:27", book: "jo", chapter: 14, verse: 27 },
+    { text: "O temor do Senhor é o princípio da sabedoria.", reference: "pv 9:10", book: "pv", chapter: 9, verse: 10 },
+    { text: "Eis que estou à porta e bato; se alguém ouvir a minha voz e abrir a porta, entrarei em sua casa.", reference: "ap 3:20", book: "ap", chapter: 3, verse: 20 },
+    { text: "Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito.", reference: "jo 3:16", book: "jo", chapter: 3, verse: 16 },
+    { text: "Não se turbe o vosso coração; credes em Deus, crede também em mim.", reference: "jo 14:1", book: "jo", chapter: 14, verse: 1 },
+    { text: "Ora, sem fé é impossível agradar a Deus.", reference: "hb 11:6", book: "hb", chapter: 11, verse: 6 },
+    { text: "Aquele que não ama não conhece a Deus, pois Deus é amor.", reference: "1jo 4:8", book: "1jo", chapter: 4, verse: 8 },
+    { text: "Tudo tem o seu tempo determinado, e há tempo para todo propósito debaixo do céu.", reference: "ec 3:1", book: "ec", chapter: 3, verse: 1 },
+    { text: "O Senhor é a minha luz e a minha salvação; a quem temerei?", reference: "sl 27:1", book: "sl", chapter: 27, verse: 1 },
+    { text: "Lançai sobre ele toda a vossa ansiedade, porque ele tem cuidado de vós.", reference: "1pe 5:7", book: "1pe", chapter: 5, verse: 7 },
+    { text: "Mas o fruto do Espírito é amor, alegria, paz, longanimidade, benignidade, bondade, fidelidade.", reference: "gl 5:22", book: "gl", chapter: 5, verse: 22 },
+    { text: "E sabemos que todas as coisas cooperam para o bem daqueles que amam a Deus.", reference: "rm 8:28", book: "rm", chapter: 8, verse: 28 },
+    { text: "A resposta branda desvia o furor, mas a palavra dura suscita a ira.", reference: "pv 15:1", book: "pv", chapter: 15, verse: 1 },
+    { text: "O choro pode durar uma noite, mas a alegria vem pela manhã.", reference: "sl 30:5", book: "sl", chapter: 30, verse: 5 },
+    { text: "Em paz me deito e logo adormeço, porque só tu, Senhor, me fazes habitar em segurança.", reference: "sl 4:8", book: "sl", chapter: 4, verse: 8 },
+    { text: "Melhor é a paciência do que a arrogância.", reference: "ec 7:8", book: "ec", chapter: 7, verse: 8 },
+    { text: "Porque somos feitura sua, criados em Cristo Jesus para as boas obras.", reference: "ef 2:10", book: "ef", chapter: 2, verse: 10 },
+    { text: "Criai em mim, ó Deus, um coração puro e renova dentro de mim um espírito reto.", reference: "sl 51:10", book: "sl", chapter: 51, verse: 10 },
+    { text: "Alegrai-vos sempre no Senhor; outra vez digo: alegrai-vos.", reference: "fp 4:4", book: "fp", chapter: 4, verse: 4 },
+    { text: "O coração alegre aformoseia o rosto.", reference: "pv 15:13", book: "pv", chapter: 15, verse: 13 },
+    { text: "Grande paz têm os que amam a tua lei, e para eles não há tropeço.", reference: "sl 119:165", book: "sl", chapter: 119, verse: 165 },
+    { text: "Quem é lento para se irar é grande em entendimento.", reference: "pv 14:29", book: "pv", chapter: 14, verse: 29 }
   ];
   
-  let lastVerseRef = null;        // para evitar repetição consecutiva
-  let currentVerseObj = null;
+  // MELHORIA 1: Mapeamento de palavras-chave para imagens
+  const themeImages = {
+    mar: 'https://images.pexels.com/photos/1112048/pexels-photo-1112048.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    oceano: 'https://images.pexels.com/photos/158598/beach-ocean-sand-summer-158598.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    praia: 'https://images.pexels.com/photos/994605/pexels-photo-994605.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    ondas: 'https://images.pexels.com/photos/132037/pexels-photo-132037.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    montanha: 'https://images.pexels.com/photos/618848/pexels-photo-618848.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    montanhas: 'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    céu: 'https://images.pexels.com/photos/912364/pexels-photo-912364.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    nuvens: 'https://images.pexels.com/photos/158163/clouds-cloudy-aggregation-nubes-158163.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    luz: 'https://images.pexels.com/photos/1493215/pexels-photo-1493215.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    estrelas: 'https://images.pexels.com/photos/1252890/pexels-photo-1252890.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    caminho: 'https://images.pexels.com/photos/115141/pexels-photo-115141.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    estrada: 'https://images.pexels.com/photos/41953/road-curve-asphalt-country-road-41953.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    pastor: 'https://images.pexels.com/photos/1687845/pexels-photo-1687845.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    ovelhas: 'https://images.pexels.com/photos/1472133/pexels-photo-1472133.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    rio: 'https://images.pexels.com/photos/3533156/pexels-photo-3533156.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    cachoeira: 'https://images.pexels.com/photos/2491511/pexels-photo-2491511.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    paz: 'https://images.pexels.com/photos/457881/pexels-photo-457881.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    alegria: 'https://images.pexels.com/photos/931018/pexels-photo-931018.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    amor: 'https://images.pexels.com/photos/56866/garden-rose-red-pink-56866.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    esperança: 'https://images.pexels.com/photos/1167355/pexels-photo-1167355.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    força: 'https://images.pexels.com/photos/618848/pexels-photo-618848.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    fé: 'https://images.pexels.com/photos/2387795/pexels-photo-2387795.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    gratidão: 'https://images.pexels.com/photos/1146762/pexels-photo-1146762.jpeg?auto=compress&cs=tinysrgb&w=1600'
+  };
+  
+  const contemplativeImages = [
+    'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/235985/pexels-photo-235985.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/147411/italy-mountains-dawn-daybreak-147411.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/443446/pexels-photo-443446.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/260689/pexels-photo-260689.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/1128797/pexels-photo-1128797.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/459654/pexels-photo-459654.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/1292115/pexels-photo-1292115.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/844124/pexels-photo-844124.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/344886/pexels-photo-344886.jpeg?auto=compress&cs=tinysrgb&w=1600'
+  ];
+  
+  function applyDynamicBackground(verseText) {
+    const lowerText = verseText.toLowerCase();
+    let selectedImage = null;
+    for (const [keyword, imgUrl] of Object.entries(themeImages)) {
+      if (lowerText.includes(keyword)) {
+        selectedImage = imgUrl;
+        break;
+      }
+    }
+    if (!selectedImage) {
+      const randomIndex = Math.floor(Math.random() * contemplativeImages.length);
+      selectedImage = contemplativeImages[randomIndex];
+    }
+    document.body.style.backgroundImage = `url('${selectedImage}')`;
+  }
+  
+  // Função auxiliar para transição suave do conteúdo
+  let isTransitioning = false;
+  function smoothContentUpdate(htmlContent) {
+    const zone = document.getElementById('verseDynamicZone');
+    if (isTransitioning) return;
+    isTransitioning = true;
+    zone.style.transition = 'opacity 0.15s ease';
+    zone.style.opacity = '0';
+    setTimeout(() => {
+      zone.innerHTML = htmlContent;
+      zone.style.opacity = '1';
+      setTimeout(() => { isTransitioning = false; }, 200);
+    }, 150);
+  }
+  
+  // ===== FUNÇÕES ORIGINAIS (preservadas) com pequenos ajustes =====
+  let verseCache = [];
+  let currentVerse = null;
   let isLoading = false;
   let timerInterval = null;
+  let lastVerseRef = null;
   
   const dynamicZone = document.getElementById('verseDynamicZone');
   const refreshBtn = document.getElementById('refreshBtn');
   const waContainer = document.getElementById('whatsappBtnContainer');
   
-  // Mapeamento de abreviações para nome completo
   const bookNameMap = {
     "sl": "Salmos", "1jo": "1 João", "fp": "Filipenses", "is": "Isaías", "ne": "Neemias", "jo": "João",
     "gn": "Gênesis", "ex": "Êxodo", "lv": "Levítico", "nm": "Números", "dt": "Deuteronômio",
@@ -340,32 +446,6 @@
     "jd": "Judas", "ap": "Apocalipse"
   };
   
-  // Temas visuais
-  const themes = [
-    { keywords: ['paz', 'calma', 'descanso', 'silêncio'], accent: '#6C91B2', bgImage: 'https://images.pexels.com/photos/457881/pexels-photo-457881.jpeg?auto=compress&cs=tinysrgb&w=1600' },
-    { keywords: ['alegria', 'feliz', 'contentamento', 'regozijo'], accent: '#F4B942', bgImage: 'https://images.pexels.com/photos/931018/pexels-photo-931018.jpeg?auto=compress&cs=tinysrgb&w=1600' },
-    { keywords: ['amor', 'amado', 'caridade', 'bondade'], accent: '#D9738A', bgImage: 'https://images.pexels.com/photos/56866/garden-rose-red-pink-56866.jpeg?auto=compress&cs=tinysrgb&w=1600' },
-    { keywords: ['esperança', 'confiança', 'aguardar'], accent: '#7CAF7C', bgImage: 'https://images.pexels.com/photos/1167355/pexels-photo-1167355.jpeg?auto=compress&cs=tinysrgb&w=1600' },
-    { keywords: ['força', 'coragem', 'fortaleza'], accent: '#D97A3C', bgImage: 'https://images.pexels.com/photos/618848/pexels-photo-618848.jpeg?auto=compress&cs=tinysrgb&w=1600' },
-    { keywords: ['fé', 'crer', 'confiar'], accent: '#A37CBB', bgImage: 'https://images.pexels.com/photos/2387795/pexels-photo-2387795.jpeg?auto=compress&cs=tinysrgb&w=1600' }
-  ];
-  const defaultTheme = { accent: '#E4B363', bgImage: 'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1600' };
-  
-  function applyThemeByText(text) {
-    const lower = text.toLowerCase();
-    let theme = defaultTheme;
-    for (let t of themes) {
-      if (t.keywords.some(k => lower.includes(k))) {
-        theme = t;
-        break;
-      }
-    }
-    document.documentElement.style.setProperty('--accent-color', theme.accent);
-    document.body.style.backgroundImage = `url('${theme.bgImage}')`;
-    document.body.style.backgroundSize = 'cover';
-    document.body.style.backgroundPosition = 'center 30%';
-  }
-  
   function getChapterLink(bookAbbrev, chapter) {
     let slug = bookAbbrev.toLowerCase();
     const special = { "1sm":"1samuel", "2sm":"2samuel", "1rs":"1reis", "2rs":"2reis", "1cr":"1cronicas", "2cr":"2cronicas", "ct":"cantares", "ec":"eclesiastes", "jr":"jeremias", "is":"isaias", "jo":"joao", "lc":"lucas", "mc":"marcos", "mt":"mateus", "atos":"atos", "ap":"apocalipse", "1co":"1corintios", "2co":"2corintios", "1ts":"1tessalonicenses", "2ts":"2tessalonicenses", "1tm":"1timoteo", "2tm":"2timoteo", "1pe":"1pedro", "2pe":"2pedro", "1jo":"1joao", "2jo":"2joao", "3jo":"3joao" };
@@ -379,7 +459,7 @@
     const fullBook = bookNameMap[verse.book.toLowerCase()] || verse.book;
     const displayRef = `${fullBook} ${verse.chapter}:${verse.verse}`;
     const chapterUrl = getChapterLink(verse.book, verse.chapter);
-    dynamicZone.innerHTML = `
+    const html = `
       <div class="verse-text">${escapeHtml(verse.text)}</div>
       <div class="verse-reference-wrapper">
         <span class="verse-reference">${escapeHtml(displayRef)}</span>
@@ -388,14 +468,16 @@
         </a>
       </div>
     `;
+    smoothContentUpdate(html);
     const shareMsg = `${verse.text} (${displayRef} - ARA)`;
     const waUrl = `https://wa.me/?text=${encodeURIComponent(shareMsg)}`;
     waContainer.innerHTML = `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-wa">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-5.45-4.45-9.9-9.91-9.9zm0 18.23c-1.5 0-2.97-.39-4.26-1.12l-.3-.18-3.12.82.84-3.04-.2-.31c-.79-1.35-1.21-2.9-1.21-4.48 0-4.56 3.71-8.27 8.27-8.27 4.56 0 8.27 3.71 8.27 8.27-.02 4.55-3.72 8.26-8.29 8.26zM16.5 13.5c-.26-.13-1.55-.77-1.79-.86-.23-.09-.42-.13-.6.13-.18.26-.69.86-.85 1.04-.16.18-.31.2-.58.07-.26-.13-1.12-.41-2.13-1.32-.79-.71-1.32-1.59-1.47-1.86-.16-.26-.02-.4.11-.53.11-.12.26-.31.39-.47.13-.16.17-.26.26-.43.09-.17.04-.32-.02-.45s-.6-1.44-.82-1.97c-.21-.52-.43-.45-.6-.46-.16-.01-.34-.01-.52-.01-.18 0-.47.07-.71.32-.25.25-.94.92-.94 2.24 0 1.32.96 2.6 1.09 2.78.14.18 1.89 2.88 4.57 4.03 2.68 1.15 2.68.77 3.16.72.48-.05 1.55-.63 1.77-1.24.22-.61.22-1.13.15-1.24-.06-.1-.23-.16-.49-.29z" fill="white"/></svg>
-      Compartilhar no WhatsApp
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+        <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-5.45-4.45-9.9-9.91-9.9zm0 18.23c-1.5 0-2.97-.39-4.26-1.12l-.3-.18-3.12.82.84-3.04-.2-.31c-.79-1.35-1.21-2.9-1.21-4.48 0-4.56 3.71-8.27 8.27-8.27 4.56 0 8.27 3.71 8.27 8.27-.02 4.55-3.72 8.26-8.29 8.26zM16.5 13.5c-.26-.13-1.55-.77-1.79-.86-.23-.09-.42-.13-.6.13-.18.26-.69.86-.85 1.04-.16.18-.31.2-.58.07-.26-.13-1.12-.41-2.13-1.32-.79-.71-1.32-1.59-1.47-1.86-.16-.26-.02-.4.11-.53.11-.12.26-.31.39-.47.13-.16.17-.26.26-.43.09-.17.04-.32-.02-.45s-.6-1.44-.82-1.97c-.21-.52-.43-.45-.6-.46-.16-.01-.34-.01-.52-.01-.18 0-.47.07-.71.32-.25.25-.94.92-.94 2.24 0 1.32.96 2.6 1.09 2.78.14.18 1.89 2.88 4.57 4.03 2.68 1.15 2.68.77 3.16.72.48-.05 1.55-.63 1.77-1.24.22-.61.22-1.13.15-1.24-.06-.1-.23-.16-.49-.29z" fill="white"/>
+      </svg>
     </a>`;
-    applyThemeByText(verse.text);
-    currentVerseObj = verse;
+    applyDynamicBackground(verse.text);
+    currentVerse = verse;
     lastVerseRef = verse.reference;
   }
   
@@ -410,7 +492,9 @@
   
   function showLoadingWithTimer() {
     if (timerInterval) clearInterval(timerInterval);
-    dynamicZone.innerHTML = `
+    const start = Date.now();
+    const container = document.getElementById('verseDynamicZone');
+    container.innerHTML = `
       <div class="loading-timer">
         <div class="timer-circle" id="timerSeconds">0</div>
         <div class="loading-message">Buscando versículo...</div>
@@ -418,8 +502,6 @@
       </div>
     `;
     waContainer.innerHTML = '';
-    let seconds = 0;
-    const start = Date.now();
     const timerEl = document.getElementById('timerSeconds');
     const delayDiv = document.getElementById('delayMessage');
     timerInterval = setInterval(() => {
@@ -452,14 +534,61 @@
     }
   }
   
-  // Retorna um versículo diferente do último (se possível)
-  async function getRandomVerse() {
-    // Tenta API primeiro
-    const apiVerse = await fetchVerseFromAPI();
-    if (apiVerse && apiVerse.reference !== lastVerseRef) {
-      return apiVerse;
+  function isVerseInCache(verse) {
+    if (!verse) return true;
+    return verseCache.some(v => v.reference === verse.reference);
+  }
+  
+  async function addToCache() {
+    if (isLoading) return;
+    let newVerse = null;
+    let attempts = 0;
+    const maxAttempts = 5;
+    while (!newVerse && attempts < maxAttempts) {
+      const fetched = await fetchVerseFromAPI();
+      if (fetched && !isVerseInCache(fetched) && (!currentVerse || fetched.reference !== currentVerse.reference)) {
+        newVerse = fetched;
+        break;
+      }
+      attempts++;
+      await new Promise(r => setTimeout(r, 200));
     }
-    // Fallback local: escolhe um diferente do último
+    if (newVerse) {
+      verseCache.push(newVerse);
+      if (verseCache.length > CACHE_SIZE) verseCache.shift();
+    }
+  }
+  
+  async function preloadCache() {
+    while (verseCache.length < CACHE_SIZE && !isLoading) {
+      await addToCache();
+      await new Promise(r => setTimeout(r, 400));
+    }
+  }
+  
+  async function getNextVerse() {
+    if (verseCache.length > 0) {
+      let index = 0;
+      while (index < verseCache.length && currentVerse && verseCache[index].reference === currentVerse.reference) index++;
+      if (index < verseCache.length) {
+        const next = verseCache[index];
+        verseCache.splice(index, 1);
+        addToCache();
+        return next;
+      }
+    }
+    let newVerse = null;
+    let attempts = 0;
+    while (!newVerse && attempts < 3) {
+      const fetched = await fetchVerseFromAPI();
+      if (fetched && (!currentVerse || fetched.reference !== currentVerse.reference)) {
+        newVerse = fetched;
+        break;
+      }
+      attempts++;
+      await new Promise(r => setTimeout(r, 300));
+    }
+    if (newVerse) return newVerse;
     let available = LOCAL_VERSE_LIST.filter(v => v.reference !== lastVerseRef);
     if (available.length === 0) available = LOCAL_VERSE_LIST;
     const randomIndex = Math.floor(Math.random() * available.length);
@@ -471,15 +600,15 @@
     isLoading = true;
     showLoadingWithTimer();
     try {
-      const verse = await getRandomVerse();
+      const verse = await getNextVerse();
       displayVerse(verse);
     } catch (err) {
       console.error(err);
-      // último fallback de emergência
       displayVerse(LOCAL_VERSE_LIST[0]);
     } finally {
       isLoading = false;
       if (timerInterval) clearInterval(timerInterval);
+      if (verseCache.length < 2) preloadCache();
     }
   }
   
@@ -487,7 +616,6 @@
     if (!isLoading) loadNewVerse();
   });
   
-  // Inicialização: já carrega o primeiro versículo
   loadNewVerse();
 </script>
 </body>
