@@ -20,10 +20,9 @@ const histModal = document.getElementById('historyModal');
 const favListDiv = document.getElementById('favoritesList');
 const histListDiv = document.getElementById('historyList');
 
-// Estado local
+// Estado local (histórico de referências para evitar repetição)
 let verseHistoryRefs = [];
 let lastVerseRef = null;
-let verseCache = [];
 
 function isRecentlyUsed(ref) { return verseHistoryRefs.includes(ref); }
 function addToHistoryRef(ref) {
@@ -109,20 +108,26 @@ function displayVerse(verse) {
   setBackgroundImage(verse.text);
 }
 
-// Lógica principal de carregamento
+// Lógica principal de carregamento (USANDO O CACHE CENTRALIZADO)
 async function loadNewVerse() {
   if (appState.isLoading) return;
   appState.isLoading = true;
   showLoading(true);
   try {
     let verse = null;
-    // 1) Cache
-    if (verseCache.length > 0) {
+    // 1) Cache centralizado
+    let cache = getCache();   // obtém o array do módulo cache.js
+    if (cache.length > 0) {
       let idx = 0;
-      while (idx < verseCache.length && (verseCache[idx].reference === lastVerseRef || isRecentlyUsed(verseCache[idx].reference))) idx++;
-      if (idx < verseCache.length) {
-        verse = verseCache[idx];
-        verseCache.splice(idx, 1);
+      while (idx < cache.length && (cache[idx].reference === lastVerseRef || isRecentlyUsed(cache[idx].reference))) {
+        idx++;
+      }
+      if (idx < cache.length) {
+        verse = cache[idx];
+        // Remove do cache
+        cache.splice(idx, 1);
+        setCache(cache);      // atualiza o cache no módulo
+        // Repõe um novo versículo em segundo plano
         addToCache(lastVerseRef, isRecentlyUsed);
       }
     }
@@ -148,8 +153,8 @@ async function loadNewVerse() {
   } finally {
     appState.isLoading = false;
     showLoading(false);
-    // Reabastece cache em segundo plano
-    if (verseCache.length < 8) addToCache(lastVerseRef, isRecentlyUsed);
+    // Reabastece cache se estiver baixo (usando o cache centralizado)
+    if (getCache().length < 8) addToCache(lastVerseRef, isRecentlyUsed);
   }
 }
 
