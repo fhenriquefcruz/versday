@@ -22,7 +22,7 @@ const favListDiv = document.getElementById('favoritesList');
 const histListDiv = document.getElementById('historyList');
 
 // ========== Estado local ==========
-let verseHistoryRefs = [];   // armazena referências para evitar repetição
+let verseHistoryRefs = [];
 let lastVerseRef = null;
 
 function isRecentlyUsed(ref) {
