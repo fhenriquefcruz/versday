@@ -24,17 +24,17 @@
     </div>
     <div id="verseDynamicZone" class="verse-content" aria-live="polite"></div>
     
-    <!-- NOVA ÁREA DE PESQUISA E CHAT -->
+    <!-- ÁREA DE PESQUISA E CHAT (abaixo do versículo) -->
     <div class="research-area">
       <div class="question-prompt">
-        <input type="text" id="initialQuestion" placeholder="🔍 Faça sua pergunta bíblica..." aria-label="Pergunta sobre a Bíblia">
-        <button id="askInitialBtn" class="btn">Perguntar</button>
+        <input type="text" id="initialQuestion" placeholder="🔍 Pesquise na Bíblia. Ex: O que é a fé?" aria-label="Pergunta bíblica">
+        <button id="askInitialBtn" class="btn btn-primary">Perguntar</button>
       </div>
       <div id="chatContainer" style="display: none;">
-        <div id="chatMessages" class="chat-messages">
+        <div class="chat-messages" id="chatMessages">
           <div class="chat-message system">
             <strong>Assistente Teológico:</strong><br>
-            👋 Bem-vindo! Pergunte sobre qualquer passagem ou tema bíblico.
+            👋 Bem-vindo! Você pode continuar perguntando.
           </div>
         </div>
         <div class="chat-input-area">
