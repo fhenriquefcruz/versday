@@ -1,19 +1,21 @@
 export function initTheme() {
-  const savedTheme = localStorage.getItem('versday_theme') || 'system';
+  const saved = localStorage.getItem('versday_theme');
   const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  if (savedTheme === 'dark' || (savedTheme === 'system' && systemDark)) {
-    document.body.classList.add('light'); // atenção: no CSS, .light é o modo claro? Vamos inverter
-  } else {
-    document.body.classList.remove('light');
-  }
+  let isLight = false;
+  if (saved === 'light') isLight = true;
+  else if (saved === 'dark') isLight = false;
+  else isLight = !systemDark; // se sistema escuro, queremos dark (body sem classe)
+  if (isLight) document.body.classList.add('light');
+  else document.body.classList.remove('light');
+
   const btn = document.getElementById('themeToggleBtn');
   if (btn) {
-    btn.textContent = document.body.classList.contains('light') ? '🌙' : '☀️';
+    btn.textContent = isLight ? '☀️' : '🌙';
     btn.onclick = () => {
       document.body.classList.toggle('light');
-      const newTheme = document.body.classList.contains('light') ? 'dark' : 'light';
-      localStorage.setItem('versday_theme', newTheme);
-      btn.textContent = document.body.classList.contains('light') ? '🌙' : '☀️';
+      const nowLight = document.body.classList.contains('light');
+      localStorage.setItem('versday_theme', nowLight ? 'light' : 'dark');
+      btn.textContent = nowLight ? '☀️' : '🌙';
     };
   }
 }
