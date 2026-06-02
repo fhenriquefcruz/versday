@@ -1,6 +1,29 @@
 import { appState } from './state.js';
-import { getFavorites, addFavorite, removeFavorite } from './favorites.js';
-import { addToHistory } from './history.js';
+
+// Mapeamento completo de abreviações para nomes de livros (66 livros)
+const bookNameMap = {
+  // Velho Testamento
+  "gn": "Gênesis", "ex": "Êxodo", "lv": "Levítico", "nm": "Números", "dt": "Deuteronômio",
+  "js": "Josué", "jz": "Juízes", "rt": "Rute", "1sm": "1 Samuel", "2sm": "2 Samuel",
+  "1rs": "1 Reis", "2rs": "2 Reis", "1cr": "1 Crônicas", "2cr": "2 Crônicas", "ed": "Esdras",
+  "ne": "Neemias", "et": "Ester", "jó": "Jó", "sl": "Salmos", "pv": "Provérbios",
+  "ec": "Eclesiastes", "ct": "Cantares", "is": "Isaías", "jr": "Jeremias", "lm": "Lamentações",
+  "ez": "Ezequiel", "dn": "Daniel", "os": "Oséias", "jl": "Joel", "am": "Amós",
+  "ob": "Obadias", "jn": "Jonas", "mq": "Miquéias", "na": "Naum", "hc": "Habacuque",
+  "sf": "Sofonias", "ag": "Ageu", "zc": "Zacarias", "ml": "Malaquias",
+  // Novo Testamento
+  "mt": "Mateus", "mc": "Marcos", "lc": "Lucas", "jo": "João",
+  "atos": "Atos", "rm": "Romanos", "1co": "1 Coríntios", "2co": "2 Coríntios",
+  "gl": "Gálatas", "ef": "Efésios", "fp": "Filipenses", "cl": "Colossenses",
+  "1ts": "1 Tessalonicenses", "2ts": "2 Tessalonicenses", "1tm": "1 Timóteo", "2tm": "2 Timóteo",
+  "tt": "Tito", "fm": "Filemom", "hb": "Hebreus", "tg": "Tiago",
+  "1pe": "1 Pedro", "2pe": "2 Pedro", "1jo": "1 João", "2jo": "2 João",
+  "3jo": "3 João", "jd": "Judas", "ap": "Apocalipse"
+};
+
+function getFullBookName(abbrev) {
+  return bookNameMap[abbrev] || abbrev;
+}
 
 export async function generateShareImage() {
   if (!appState.currentVerse) return null;
@@ -14,7 +37,8 @@ export async function generateShareImage() {
 
   let bgUrl = appState.currentBackgroundImageUrl;
   if (!bgUrl) bgUrl = 'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg';
-  const bgImg = new Image(); bgImg.crossOrigin = 'Anonymous';
+  const bgImg = new Image();
+  bgImg.crossOrigin = 'Anonymous';
   await new Promise((resolve) => {
     bgImg.onload = resolve;
     bgImg.onerror = resolve;
@@ -72,8 +96,9 @@ async function shareWithFile(dataUrl, filename) {
   const blob = await (await fetch(dataUrl)).blob();
   const file = new File([blob], filename, { type: 'image/png' });
   if (navigator.share) {
-    try { await navigator.share({ files: [file], title: 'Versículo do Dia' }); }
-    catch(e) { download(dataUrl, filename); }
+    try {
+      await navigator.share({ files: [file], title: 'Versículo do Dia' });
+    } catch(e) { download(dataUrl, filename); }
   } else { download(dataUrl, filename); }
 }
 function download(url, name) {
@@ -89,17 +114,14 @@ export async function shareInstagram() {
   const dataUrl = await generateShareImage();
   if (dataUrl) {
     download(dataUrl, 'versiculo_instagram.png');
-    alert('Imagem salva! Abra o Instagram e escolha a imagem para Feed, Story ou Reels.');
+    alert('✅ Imagem salva! Abra o Instagram e escolha a imagem para Feed, Story ou Reels.');
   }
-}
-function getFullBookName(abbrev) {
-  const map = { sl:'Salmos', fp:'Filipenses', is:'Isaías', jo:'João', 1jo:'1 João', gl:'Gálatas', ef:'Efésios', pv:'Provérbios', ec:'Eclesiastes', mt:'Mateus', mc:'Marcos', lc:'Lucas', atos:'Atos', ap:'Apocalipse' };
-  return map[abbrev] || abbrev;
 }
 export function copyVerseText() {
   if (appState.currentVerse) {
-    const full = `${appState.currentVerse.text} (${getFullBookName(appState.currentVerse.book)} ${appState.currentVerse.chapter}:${appState.currentVerse.verse} - ARA)`;
-    navigator.clipboard.writeText(full);
-    alert('Versículo copiado!');
+    const fullBook = getFullBookName(appState.currentVerse.book);
+    const text = `${appState.currentVerse.text} (${fullBook} ${appState.currentVerse.chapter}:${appState.currentVerse.verse} - ARA)`;
+    navigator.clipboard.writeText(text);
+    alert('📋 Versículo copiado!');
   }
 }
