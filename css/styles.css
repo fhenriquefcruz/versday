@@ -5,6 +5,7 @@
   --text-primary: #FCF7F0;
   --text-secondary: #CBD5E1;
   --overlay: rgba(0,0,0,0.6);
+  --btn-bg: rgba(20,25,28,0.7);
 }
 body.light {
   --card-bg: rgba(245,245,245,0.85);
@@ -12,6 +13,7 @@ body.light {
   --text-primary: #1a2a2a;
   --text-secondary: #2c3e3e;
   --overlay: rgba(255,255,255,0.7);
+  --btn-bg: rgba(230,230,230,0.85);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -79,7 +81,7 @@ body::after {
   color: transparent;
 }
 .header-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-.icon-btn {
+.icon-btn, .btn-text-only {
   background: none;
   border: none;
   font-size: 1.4rem;
@@ -95,14 +97,14 @@ body::after {
   justify-content: center;
   gap: 6px;
 }
-.icon-btn:hover, .icon-btn:focus { background: rgba(228,179,99,0.2); outline: none; }
-#favoritesBtn {
+.btn-text-only {
   font-size: 0.9rem;
   font-weight: 500;
   border-radius: 48px;
   padding: 8px 16px;
   background: rgba(0,0,0,0.3);
 }
+.icon-btn:hover, .icon-btn:focus, .btn-text-only:hover { background: rgba(228,179,99,0.2); outline: none; }
 .verse-content {
   text-align: center;
   margin: 24px 0;
@@ -160,9 +162,9 @@ body::after {
   cursor: pointer;
   transition: all 0.2s;
   border: none;
-  background: rgba(20,25,28,0.7);
+  background: var(--btn-bg);
   backdrop-filter: blur(8px);
-  color: #F5E7D3;
+  color: var(--text-primary);
   font-size: 0.9rem;
   min-width: 48px;
   min-height: 48px;
@@ -176,7 +178,7 @@ body::after {
   padding-top: 12px;
   border-top: 1px solid rgba(255,255,255,0.1);
   font-size: 0.7rem;
-  color: rgba(200,210,215,0.7);
+  color: var(--text-secondary);
 }
 .modal {
   display: none;
@@ -231,5 +233,5 @@ body::after {
   .btn-icon { width: 48px; height: 48px; }
   .btn { padding: 8px 16px; }
   .icon-btn { font-size: 1.2rem; }
-  #favoritesBtn { font-size: 0.8rem; padding: 6px 12px; }
+  .btn-text-only { font-size: 0.8rem; padding: 6px 12px; }
 }
