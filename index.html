@@ -16,9 +16,10 @@
     <div class="verse-header">
       <h1>Versículo do Dia</h1>
       <div class="header-actions">
-        <button id="themeToggleBtn" aria-label="Alternar tema" class="icon-btn">🌙</button>
-        <button id="favoritesBtn" aria-label="Meus favoritos" class="icon-btn">❤️</button>
-        <button id="historyBtn" aria-label="Histórico" class="icon-btn">📜</button>
+        <button id="favoriteCurrentBtn" class="icon-btn" aria-label="Favoritar versículo">🤍</button>
+        <button id="themeToggleBtn" class="icon-btn" aria-label="Alternar tema">🌙</button>
+        <button id="favoritesBtn" class="icon-btn" aria-label="Meus favoritos">❤️</button>
+        <button id="historyBtn" class="icon-btn" aria-label="Histórico">📜</button>
       </div>
     </div>
     <div id="verseDynamicZone" class="verse-content" aria-live="polite"></div>
@@ -41,13 +42,10 @@
 
   <script type="module" src="js/main.js"></script>
   <script>
-    // Registro do Service Worker (PWA)
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/service-worker.js').then(reg => {
-        console.log('Service Worker registrado com sucesso!', reg);
-      }).catch(err => {
-        console.error('Falha ao registrar Service Worker:', err);
-      });
+        console.log('Service Worker registrado', reg);
+      }).catch(err => console.error('SW falhou', err));
     }
   </script>
 </body>
