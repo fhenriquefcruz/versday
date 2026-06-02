@@ -5,21 +5,17 @@ export function getFavorites() {
   return stored ? JSON.parse(stored) : [];
 }
 
-export function saveFavorites(favorites) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
-}
-
 export function addFavorite(verse) {
   const favs = getFavorites();
   if (!favs.some(f => f.reference === verse.reference)) {
     favs.unshift({ ...verse, createdAt: new Date().toISOString() });
-    saveFavorites(favs);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(favs));
   }
 }
 
 export function removeFavorite(reference) {
   const favs = getFavorites().filter(f => f.reference !== reference);
-  saveFavorites(favs);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(favs));
 }
 
 export function isFavorite(reference) {
