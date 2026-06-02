@@ -7,6 +7,7 @@ import { getFavorites, addFavorite, removeFavorite, isFavorite } from './favorit
 import { initTheme } from './theme.js';
 import { initBackgroundLayers, setBackgroundImage } from './background.js';
 import { shareWhatsApp, shareInstagram, copyVerseText } from './share.js';
+import { initChat } from './chat.js';  // <-- NOVO
 
 // ========== DOM Elements ==========
 const dynamicZone = document.getElementById('verseDynamicZone');
@@ -114,7 +115,7 @@ function displayVerse(verse) {
     </div>
   `;
   smoothUpdate(html);
-  setBackgroundImage(); // CHAMADA SEM PARÂMETRO (usa Unsplash)
+  setBackgroundImage();
   updateFavoriteButton();
 }
 
@@ -125,7 +126,6 @@ async function loadNewVerse() {
   showLoading(true);
   try {
     let verse = null;
-    // 1) Tentar cache
     let cache = getCache();
     if (cache.length > 0) {
       let idx = 0;
@@ -139,12 +139,10 @@ async function loadNewVerse() {
         addToCache(lastVerseRef, isRecentlyUsed);
       }
     }
-    // 2) Tentar API
     if (!verse) {
       const apiVerse = await fetchVerseFromAPI();
       if (apiVerse && !isRecentlyUsed(apiVerse.reference)) verse = apiVerse;
     }
-    // 3) Fallback local
     if (!verse) {
       let fallback = getRandomFallbackVerse();
       let attempts = 0;
@@ -165,7 +163,7 @@ async function loadNewVerse() {
   }
 }
 
-// ========== Favoritos (estrela) ==========
+// ========== Favoritos ==========
 const favoriteCurrentBtn = document.getElementById('favoriteCurrentBtn');
 
 function updateFavoriteButton() {
@@ -261,7 +259,7 @@ function renderHistory() {
   });
 }
 
-// ========== Eventos dos botões principais ==========
+// ========== Eventos ==========
 refreshBtn.onclick = () => loadNewVerse();
 shareWABtn.onclick = () => shareWhatsApp();
 shareIGBtn.onclick = () => shareInstagram();
@@ -269,7 +267,6 @@ copyBtn.onclick = () => copyVerseText();
 favoritesBtn.onclick = () => { renderFavorites(); favModal.style.display = 'flex'; };
 historyBtn.onclick = () => { renderHistory(); histModal.style.display = 'flex'; };
 
-// Fechar modais
 document.querySelectorAll('.modal .close').forEach(btn => {
   btn.onclick = () => btn.closest('.modal').style.display = 'none';
 });
@@ -282,3 +279,4 @@ window.onclick = (e) => {
 initTheme();
 initBackgroundLayers();
 loadNewVerse();
+initChat();  // <-- NOVO
