@@ -40,5 +40,15 @@
   <div id="historyModal" class="modal"><div class="modal-content"><span class="close">&times;</span><h2>📜 Histórico (últimos 50)</h2><div id="historyList"></div></div></div>
 
   <script type="module" src="js/main.js"></script>
+  <script>
+    // Registro do Service Worker (PWA)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js').then(reg => {
+        console.log('Service Worker registrado com sucesso!', reg);
+      }).catch(err => {
+        console.error('Falha ao registrar Service Worker:', err);
+      });
+    }
+  </script>
 </body>
 </html>
