@@ -114,8 +114,8 @@ function displayVerse(verse) {
     </div>
   `;
   smoothUpdate(html);
-  setBackgroundImage(verse.text);
-  updateFavoriteButton();   // atualiza estrela após exibir
+  setBackgroundImage();  // agora sem parâmetro
+  updateFavoriteButton();   // atualiza estrela
 }
 
 // ========== Carregar novo versículo ==========
