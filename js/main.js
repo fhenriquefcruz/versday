@@ -114,8 +114,8 @@ function displayVerse(verse) {
     </div>
   `;
   smoothUpdate(html);
-  setBackgroundImage();  // agora sem parâmetro
-  updateFavoriteButton();   // atualiza estrela
+  setBackgroundImage(); // CHAMADA SEM PARÂMETRO (usa Unsplash)
+  updateFavoriteButton();
 }
 
 // ========== Carregar novo versículo ==========
@@ -183,7 +183,7 @@ function toggleFavoriteCurrent() {
     addFavorite(appState.currentVerse);
   }
   updateFavoriteButton();
-  renderFavorites();  // atualiza modal se estiver aberto
+  renderFavorites();
 }
 
 favoriteCurrentBtn.addEventListener('click', toggleFavoriteCurrent);
