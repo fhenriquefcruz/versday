@@ -1,4 +1,3 @@
-// 100 versículos em ARA – variados, sem repetição perceptível
 export const FALLBACK_VERSES = [
   { text: "O Senhor é o meu pastor; nada me faltará.", reference: "sl 23:1", book: "sl", chapter: 23, verse: 1 },
   { text: "Deus é amor; e aquele que permanece em amor permanece em Deus, e Deus nele.", reference: "1jo 4:16", book: "1jo", chapter: 4, verse: 16 },
