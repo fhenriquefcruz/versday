@@ -239,24 +239,25 @@ body::after {
 /* ===== CRÉDITO DO UNSPLASH (abaixo do rodapé) ===== */
 .unsplash-credit {
   text-align: center;
-  font-size: 0.6rem;
-  color: rgba(255,255,255,0.5);
-  margin-top: 8px;
+  font-size: 0.6rem;        /* menor que 0.7rem do footer-credit */
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 6px;
   padding: 4px;
-  border-radius: 20px;
+  line-height: 1.3;
   backdrop-filter: blur(4px);
   display: none;
 }
 .unsplash-credit a {
   color: var(--accent-color);
   text-decoration: none;
+  font-weight: normal;
 }
 .unsplash-credit a:hover {
   text-decoration: underline;
 }
 
 body.light .unsplash-credit {
-  color: rgba(0,0,0,0.5);
+  color: rgba(0, 0, 0, 0.6);
 }
 body.light .unsplash-credit a {
   color: #2c5a44;
