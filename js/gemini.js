@@ -1,6 +1,7 @@
 // js/gemini.js
 const API_KEY = 'AQ.Ab8RN6KTVjvGY_1WS5sCJr0k3b7-2aigxR5ix8Qln6otC6K99A';
-const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+// Chave incluída como parâmetro na URL (método mais simples e robusto)
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
 // Prompt do sistema (exegese e hermenêutica rigorosa)
 const SYSTEM_INSTRUCTION = `Você é um assistente teológico especializado, com profundo conhecimento em Hermenêutica e Exegese Bíblica.
@@ -36,6 +37,7 @@ Para cada resposta, você DEVE seguir rigorosamente estas etapas:
 Ao receber a pergunta do usuário, você apresentará sua resposta em MARKDOWN, organizada conforme a metodologia descrita, e em português claro e acessível.`;
 
 export async function askGemini(question, conversationHistory = []) {
+    // Monta o histórico de conversa (para manter contexto)
     const contents = [];
     for (const msg of conversationHistory) {
         contents.push({
@@ -52,8 +54,8 @@ export async function askGemini(question, conversationHistory = []) {
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'x-goog-api-key': API_KEY   // Autenticação correta para API Gemini
+                'Content-Type': 'application/json'
+                // Não é necessário enviar a chave no cabeçalho – ela já está na URL
             },
             body: JSON.stringify({
                 system_instruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
