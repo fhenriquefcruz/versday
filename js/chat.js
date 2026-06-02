@@ -26,12 +26,10 @@ export function initChat() {
             return;
         }
 
-        // Oculta o input inicial e mostra o chat
         const promptDiv = document.querySelector('.question-prompt');
         if (promptDiv) promptDiv.style.display = 'none';
         chatContainer.style.display = 'block';
 
-        // Adiciona pergunta do usuário
         addMessage('user', question);
         chatHistory.push({ role: 'user', content: question });
 
@@ -106,7 +104,6 @@ export function initChat() {
             if (e.key === 'Enter') sendMessage();
         });
     }
-    // Enviar com Enter no campo inicial também
     initialInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendFirstQuestion();
     });
