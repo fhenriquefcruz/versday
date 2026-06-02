@@ -1,4 +1,4 @@
-// js/main.js
+// js/main.js (versão completa)
 import { appState } from './state.js';
 import { fetchVerseFromAPI, getRandomFallbackVerse } from './api.js';
 import { getCache, setCache, addToCache, isVerseInCache } from './cache.js';
@@ -7,7 +7,7 @@ import { getFavorites, addFavorite, removeFavorite, isFavorite } from './favorit
 import { initTheme } from './theme.js';
 import { initBackgroundLayers, setBackgroundImage } from './background.js';
 import { shareWhatsApp, shareInstagram, copyVerseText } from './share.js';
-import { initChat } from './chat.js';  // <-- NOVO
+import { initChat } from './chat.js';   // <-- ADICIONADO
 
 // ========== DOM Elements ==========
 const dynamicZone = document.getElementById('verseDynamicZone');
@@ -279,4 +279,4 @@ window.onclick = (e) => {
 initTheme();
 initBackgroundLayers();
 loadNewVerse();
-initChat();  // <-- NOVO
+initChat();   // <-- ADICIONADO
