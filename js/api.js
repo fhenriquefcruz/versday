@@ -1,3 +1,5 @@
+import { FALLBACK_VERSES } from './fallbackVerses.js';
+
 export const API_URL = 'https://bible-api.com/data/ara/random';
 export const TIMEOUT_MS = 4000;
 
@@ -20,4 +22,10 @@ export async function fetchVerseFromAPI() {
     clearTimeout(timeoutId);
     return null;
   }
+}
+
+// Fallback offline: escolhe um versículo aleatório da lista local (100)
+export function getRandomFallbackVerse() {
+  const randomIndex = Math.floor(Math.random() * FALLBACK_VERSES.length);
+  return { ...FALLBACK_VERSES[randomIndex] };
 }
