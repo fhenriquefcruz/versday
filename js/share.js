@@ -36,7 +36,7 @@ export async function generateShareImage() {
   const ctx = canvas.getContext('2d');
 
   let bgUrl = appState.currentBackgroundImageUrl;
-  if (!bgUrl) bgUrl = 'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg';
+  if (!bgUrl) bgUrl = 'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1600';
   const bgImg = new Image();
   bgImg.crossOrigin = 'Anonymous';
   await new Promise((resolve) => {
@@ -101,6 +101,7 @@ async function shareWithFile(dataUrl, filename) {
     } catch(e) { download(dataUrl, filename); }
   } else { download(dataUrl, filename); }
 }
+
 function download(url, name) {
   const a = document.createElement('a');
   a.href = url; a.download = name; a.click();
@@ -110,6 +111,7 @@ export async function shareWhatsApp() {
   const dataUrl = await generateShareImage();
   if (dataUrl) await shareWithFile(dataUrl, 'versiculo_whatsapp.png');
 }
+
 export async function shareInstagram() {
   const dataUrl = await generateShareImage();
   if (dataUrl) {
@@ -117,6 +119,7 @@ export async function shareInstagram() {
     alert('✅ Imagem salva! Abra o Instagram e escolha a imagem para Feed, Story ou Reels.');
   }
 }
+
 export function copyVerseText() {
   if (appState.currentVerse) {
     const fullBook = getFullBookName(appState.currentVerse.book);
