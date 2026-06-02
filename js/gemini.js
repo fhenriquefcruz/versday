@@ -2,7 +2,6 @@
 const API_KEY = 'AQ.Ab8RN6KmnD6dH6qsDuO4270OxRRYidRK4-Qv5W0_fVVhHFz8oQ';
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
-// Prompt de sistema para exegese e hermenêutica rigorosa
 const SYSTEM_INSTRUCTION = `Você é um assistente teológico especializado, com profundo conhecimento em Hermenêutica e Exegese Bíblica.
 Sua missão é responder perguntas sobre a Bíblia com alto rigor acadêmico e fundamentação teológica.
 
@@ -36,16 +35,13 @@ Para cada resposta, você DEVE seguir rigorosamente estas etapas:
 Ao receber a pergunta do usuário, você apresentará sua resposta em MARKDOWN, organizada conforme a metodologia descrita, e em português claro e acessível.`;
 
 export async function askGemini(question, conversationHistory = []) {
-    // Monta o histórico de mensagens (para manter contexto)
     const contents = [];
-    // Adiciona mensagens anteriores (se houver)
     for (const msg of conversationHistory) {
         contents.push({
             role: msg.role === 'user' ? 'user' : 'model',
             parts: [{ text: msg.content }]
         });
     }
-    // Adiciona a nova pergunta
     contents.push({
         role: 'user',
         parts: [{ text: question }]
@@ -72,8 +68,9 @@ export async function askGemini(question, conversationHistory = []) {
 
         const data = await response.json();
         let answer = data.candidates[0].content.parts[0].text;
-        // Converte Markdown para HTML simples (caso não use biblioteca)
-        answer = answer.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Conversão simples de markdown para HTML
+        answer = answer.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        answer = answer.replace(/\n/g, '<br>');
         return answer;
     } catch (error) {
         console.error('Erro na API Gemini:', error);
