@@ -1,19 +1,20 @@
 const CACHE_NAME = 'versday-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/css/styles.css',
-  '/js/main.js',
-  '/js/api.js',
-  '/js/cache.js',
-  '/js/favorites.js',
-  '/js/history.js',
-  '/js/theme.js',
-  '/js/share.js',
-  '/js/ui.js',
-  '/js/background.js',
-  '/js/semantic.js',
-  '/manifest.json'
+  './',
+  './index.html',
+  './css/styles.css',
+  './js/state.js',
+  './js/api.js',
+  './js/fallbackVerses.js',
+  './js/semantic.js',
+  './js/cache.js',
+  './js/history.js',
+  './js/favorites.js',
+  './js/theme.js',
+  './js/background.js',
+  './js/share.js',
+  './js/main.js',
+  './manifest.json'
 ];
 
 self.addEventListener('install', event => {
