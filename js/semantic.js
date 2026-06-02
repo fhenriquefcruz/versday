@@ -112,7 +112,6 @@ export const semanticThemes = [
   }
 ];
 
-// Fallback – apenas paisagens
 export const contemplativeImages = [
   'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1600',
   'https://images.pexels.com/photos/235985/pexels-photo-235985.jpeg?auto=compress&cs=tinysrgb&w=1600',
