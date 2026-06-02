@@ -13,52 +13,70 @@ export function initChat() {
     const sendBtn = document.getElementById('sendChatBtn');
     const chatLoading = document.getElementById('chatLoading');
 
+    if (!askBtn || !initialInput) {
+        console.warn('Elementos do chat não encontrados');
+        return;
+    }
+
     async function sendFirstQuestion() {
+        if (isLoading) return;
         const question = initialInput.value.trim();
-        if (!question) return;
-        // Esconde o campo inicial e mostra o chat
-        document.querySelector('.question-prompt').style.display = 'none';
+        if (!question) {
+            alert('Digite sua pergunta bíblica.');
+            return;
+        }
+
+        // Oculta o input inicial e mostra o chat
+        const promptDiv = document.querySelector('.question-prompt');
+        if (promptDiv) promptDiv.style.display = 'none';
         chatContainer.style.display = 'block';
-        
-        // Adiciona pergunta do usuário no chat
+
+        // Adiciona pergunta do usuário
         addMessage('user', question);
         chatHistory.push({ role: 'user', content: question });
-        
-        // Busca resposta
+
         isLoading = true;
         chatLoading.style.display = 'block';
         scrollToBottom();
-        
-        const answer = await askGemini(question, chatHistory);
-        addMessage('system', answer);
-        chatHistory.push({ role: 'model', content: answer });
-        
-        isLoading = false;
-        chatLoading.style.display = 'none';
-        scrollToBottom();
-        chatInput.focus();
+
+        try {
+            const answer = await askGemini(question, chatHistory);
+            addMessage('system', answer);
+            chatHistory.push({ role: 'model', content: answer });
+        } catch (err) {
+            addMessage('system', '❌ Erro na comunicação. Tente novamente.');
+        } finally {
+            isLoading = false;
+            chatLoading.style.display = 'none';
+            scrollToBottom();
+            if (chatInput) chatInput.focus();
+        }
     }
 
     async function sendMessage() {
         if (isLoading) return;
         const question = chatInput.value.trim();
         if (!question) return;
-        
+
         addMessage('user', question);
         chatInput.value = '';
         chatHistory.push({ role: 'user', content: question });
-        
+
         isLoading = true;
         chatLoading.style.display = 'block';
         scrollToBottom();
-        
-        const answer = await askGemini(question, chatHistory);
-        addMessage('system', answer);
-        chatHistory.push({ role: 'model', content: answer });
-        
-        isLoading = false;
-        chatLoading.style.display = 'none';
-        scrollToBottom();
+
+        try {
+            const answer = await askGemini(question, chatHistory);
+            addMessage('system', answer);
+            chatHistory.push({ role: 'model', content: answer });
+        } catch (err) {
+            addMessage('system', '❌ Erro na comunicação. Tente novamente.');
+        } finally {
+            isLoading = false;
+            chatLoading.style.display = 'none';
+            scrollToBottom();
+        }
     }
 
     function addMessage(role, text) {
@@ -74,7 +92,7 @@ export function initChat() {
     }
 
     function scrollToBottom() {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
     function escapeHtml(str) {
@@ -82,8 +100,14 @@ export function initChat() {
     }
 
     askBtn.onclick = sendFirstQuestion;
-    sendBtn.onclick = sendMessage;
-    chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
+    if (sendBtn) sendBtn.onclick = sendMessage;
+    if (chatInput) {
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    }
+    // Enviar com Enter no campo inicial também
+    initialInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendFirstQuestion();
     });
 }
