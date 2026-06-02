@@ -10,18 +10,15 @@
 
 /* ========== TEMA CLARO PROFISSIONAL (VIDRO ELEGANTE) ========== */
 body.light {
-  --card-bg: rgba(245, 248, 250, 0.7);     /* fundo mais claro e translúcido */
-  --border-light: rgba(0, 0, 0, 0.08);     /* borda suave, quase imperceptível */
-  --text-primary: #1e2a2e;                 /* texto escuro, porém suave */
+  --card-bg: rgba(245, 248, 250, 0.7);
+  --border-light: rgba(0, 0, 0, 0.08);
+  --text-primary: #1e2a2e;
   --text-secondary: #2c3e3e;
-  --overlay: rgba(255, 255, 255, 0.3);     /* overlay mais claro para o gradiente */
-  --btn-bg: rgba(230, 235, 240, 0.85);     /* fundo dos botões levemente translúcido */
-  
-  /* Adiciona um leve brilho extra no glassmorphism */
+  --overlay: rgba(255, 255, 255, 0.3);
+  --btn-bg: rgba(230, 235, 240, 0.85);
   backdrop-filter: blur(12px) brightness(1.02);
 }
 
-/* Ajuste adicional para garantir que o texto dos botões no modo claro seja legível */
 body.light .btn {
   color: #1e2a2e;
   background: var(--btn-bg);
@@ -38,7 +35,7 @@ body.light .verse-reference-wrapper {
 }
 
 body.light .verse-reference {
-  color: #2c5a44; /* tom de destaque mais suave no modo claro */
+  color: #2c5a44;
 }
 
 body.light .footer-credit {
@@ -46,7 +43,6 @@ body.light .footer-credit {
   color: #4a5b5e;
 }
 
-/* Mantém o ícone de estrela e ações com a cor de destaque */
 body.light .icon-btn,
 body.light .btn-text-only {
   color: #2c5a44;
@@ -57,7 +53,15 @@ body.light .btn-text-only:hover {
   background: rgba(44, 90, 68, 0.1);
 }
 
-/* ========== ESTILOS GLOBAIS (preservados) ========== */
+body.light .btn-text-only {
+  background: rgba(0,0,0,0.05);
+  color: #2c5a44;
+}
+body.light .btn-text-only:hover {
+  background: rgba(44, 90, 68, 0.1);
+}
+
+/* ========== ESTILOS GLOBAIS ========== */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -232,6 +236,34 @@ body::after {
   color: var(--text-secondary);
 }
 
+/* Crédito do Unsplash */
+.unsplash-credit {
+  text-align: center;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.6);
+  margin-top: 12px;
+  padding: 6px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+  display: none;
+}
+.unsplash-credit a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+.unsplash-credit a:hover {
+  text-decoration: underline;
+}
+
+body.light .unsplash-credit {
+  color: rgba(0,0,0,0.6);
+  background: rgba(255,255,255,0.5);
+}
+body.light .unsplash-credit a {
+  color: #2c5a44;
+}
+
 /* Modais */
 .modal {
   display: none;
@@ -289,13 +321,4 @@ body::after {
   .btn { padding: 8px 16px; }
   .icon-btn { font-size: 1.2rem; }
   .btn-text-only { font-size: 0.8rem; padding: 6px 12px; }
-}
-
-/* Ajuste extra para o botão "Meus Favoritos" no modo claro */
-body.light .btn-text-only {
-  background: rgba(0,0,0,0.05);
-  color: #2c5a44;
-}
-body.light .btn-text-only:hover {
-  background: rgba(44, 90, 68, 0.1);
 }
