@@ -1,3 +1,4 @@
+// js/main.js
 import { appState } from './state.js';
 import { fetchVerseFromAPI, getRandomFallbackVerse } from './api.js';
 import { getCache, setCache, addToCache, isVerseInCache } from './cache.js';
@@ -7,7 +8,7 @@ import { initTheme } from './theme.js';
 import { initBackgroundLayers, setBackgroundImage } from './background.js';
 import { shareWhatsApp, shareInstagram, copyVerseText } from './share.js';
 
-// DOM elements
+// ========== DOM Elements ==========
 const dynamicZone = document.getElementById('verseDynamicZone');
 const refreshBtn = document.getElementById('refreshBtn');
 const shareWABtn = document.getElementById('shareWABtn');
@@ -19,41 +20,42 @@ const favModal = document.getElementById('favoritesModal');
 const histModal = document.getElementById('historyModal');
 const favListDiv = document.getElementById('favoritesList');
 const histListDiv = document.getElementById('historyList');
-const favoriteCurrentBtn = document.getElementById('favoriteCurrentBtn');
 
-// Estado local (histórico de referências para evitar repetição)
-let verseHistoryRefs = [];
+// ========== Estado local ==========
+let verseHistoryRefs = [];   // armazena referências para evitar repetição
 let lastVerseRef = null;
 
-function isRecentlyUsed(ref) { return verseHistoryRefs.includes(ref); }
+function isRecentlyUsed(ref) {
+  return verseHistoryRefs.includes(ref);
+}
 function addToHistoryRef(ref) {
   verseHistoryRefs.unshift(ref);
   if (verseHistoryRefs.length > 30) verseHistoryRefs.pop();
 }
 
-// Funções auxiliares
+// ========== Funções auxiliares ==========
 function getFullBookName(abbrev) {
   const map = {
-    "gn":"Gênesis","ex":"Êxodo","lv":"Levítico","nm":"Números","dt":"Deuteronômio",
-    "js":"Josué","jz":"Juízes","rt":"Rute","1sm":"1 Samuel","2sm":"2 Samuel",
-    "1rs":"1 Reis","2rs":"2 Reis","1cr":"1 Crônicas","2cr":"2 Crônicas","ed":"Esdras",
-    "ne":"Neemias","et":"Ester","jó":"Jó","sl":"Salmos","pv":"Provérbios",
-    "ec":"Eclesiastes","ct":"Cantares","is":"Isaías","jr":"Jeremias","lm":"Lamentações",
-    "ez":"Ezequiel","dn":"Daniel","os":"Oséias","jl":"Joel","am":"Amós",
-    "ob":"Obadias","jn":"Jonas","mq":"Miquéias","na":"Naum","hc":"Habacuque",
-    "sf":"Sofonias","ag":"Ageu","zc":"Zacarias","ml":"Malaquias",
-    "mt":"Mateus","mc":"Marcos","lc":"Lucas","jo":"João","atos":"Atos","rm":"Romanos",
-    "1co":"1 Coríntios","2co":"2 Coríntios","gl":"Gálatas","ef":"Efésios","fp":"Filipenses",
-    "cl":"Colossenses","1ts":"1 Tessalonicenses","2ts":"2 Tessalonicenses","1tm":"1 Timóteo",
-    "2tm":"2 Timóteo","tt":"Tito","fm":"Filemom","hb":"Hebreus","tg":"Tiago",
-    "1pe":"1 Pedro","2pe":"2 Pedro","1jo":"1 João","2jo":"2 João","3jo":"3 João",
-    "jd":"Judas","ap":"Apocalipse"
+    "gn": "Gênesis", "ex": "Êxodo", "lv": "Levítico", "nm": "Números", "dt": "Deuteronômio",
+    "js": "Josué", "jz": "Juízes", "rt": "Rute", "1sm": "1 Samuel", "2sm": "2 Samuel",
+    "1rs": "1 Reis", "2rs": "2 Reis", "1cr": "1 Crônicas", "2cr": "2 Crônicas", "ed": "Esdras",
+    "ne": "Neemias", "et": "Ester", "jó": "Jó", "sl": "Salmos", "pv": "Provérbios",
+    "ec": "Eclesiastes", "ct": "Cantares", "is": "Isaías", "jr": "Jeremias", "lm": "Lamentações",
+    "ez": "Ezequiel", "dn": "Daniel", "os": "Oséias", "jl": "Joel", "am": "Amós",
+    "ob": "Obadias", "jn": "Jonas", "mq": "Miquéias", "na": "Naum", "hc": "Habacuque",
+    "sf": "Sofonias", "ag": "Ageu", "zc": "Zacarias", "ml": "Malaquias",
+    "mt": "Mateus", "mc": "Marcos", "lc": "Lucas", "jo": "João", "atos": "Atos", "rm": "Romanos",
+    "1co": "1 Coríntios", "2co": "2 Coríntios", "gl": "Gálatas", "ef": "Efésios", "fp": "Filipenses",
+    "cl": "Colossenses", "1ts": "1 Tessalonicenses", "2ts": "2 Tessalonicenses", "1tm": "1 Timóteo",
+    "2tm": "2 Timóteo", "tt": "Tito", "fm": "Filemom", "hb": "Hebreus", "tg": "Tiago",
+    "1pe": "1 Pedro", "2pe": "2 Pedro", "1jo": "1 João", "2jo": "2 João", "3jo": "3 João",
+    "jd": "Judas", "ap": "Apocalipse"
   };
   return map[abbrev] || abbrev;
 }
 
 function escapeHtml(str) {
-  return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
+  return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
 }
 
 function smoothUpdate(html) {
@@ -68,7 +70,13 @@ function smoothUpdate(html) {
 
 function showLoading(show) {
   if (show && !dynamicZone.innerHTML.includes('timer-circle')) {
-    dynamicZone.innerHTML = `<div class="loading-timer"><div class="timer-circle">0</div><div class="loading-message">Buscando versículo...</div><div id="delayMessage"></div></div>`;
+    dynamicZone.innerHTML = `
+      <div class="loading-timer">
+        <div class="timer-circle">0</div>
+        <div class="loading-message">Buscando versículo...</div>
+        <div id="delayMessage"></div>
+      </div>
+    `;
     let seconds = 0;
     const start = Date.now();
     const timer = setInterval(() => {
@@ -90,34 +98,12 @@ function showLoading(show) {
   }
 }
 
-// Botão favoritar atual
-function updateFavoriteButton() {
-  if (!appState.currentVerse) return;
-  const isFav = isFavorite(appState.currentVerse.reference);
-  favoriteCurrentBtn.textContent = isFav ? '❤️' : '🤍';
-  favoriteCurrentBtn.setAttribute('aria-label', isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos');
-}
-
-function toggleFavoriteCurrent() {
-  if (!appState.currentVerse) return;
-  if (isFavorite(appState.currentVerse.reference)) {
-    removeFavorite(appState.currentVerse.reference);
-  } else {
-    addFavorite(appState.currentVerse);
-  }
-  updateFavoriteButton();
-  renderFavorites(); // atualiza modal se estiver aberto
-}
-
-favoriteCurrentBtn.addEventListener('click', toggleFavoriteCurrent);
-
-// Renderização do versículo
+// ========== Exibir versículo na tela ==========
 function displayVerse(verse) {
   appState.currentVerse = verse;
   lastVerseRef = verse.reference;
   addToHistoryRef(verse.reference);
   addToHistory(verse);
-  updateFavoriteButton();
   const fullBook = getFullBookName(verse.book);
   const displayRef = `${fullBook} ${verse.chapter}:${verse.verse}`;
   const html = `
@@ -129,16 +115,17 @@ function displayVerse(verse) {
   `;
   smoothUpdate(html);
   setBackgroundImage(verse.text);
+  updateFavoriteButton();   // atualiza estrela após exibir
 }
 
-// Lógica principal de carregamento
+// ========== Carregar novo versículo ==========
 async function loadNewVerse() {
   if (appState.isLoading) return;
   appState.isLoading = true;
   showLoading(true);
   try {
     let verse = null;
-    // 1) Cache centralizado
+    // 1) Tentar cache
     let cache = getCache();
     if (cache.length > 0) {
       let idx = 0;
@@ -152,7 +139,7 @@ async function loadNewVerse() {
         addToCache(lastVerseRef, isRecentlyUsed);
       }
     }
-    // 2) API
+    // 2) Tentar API
     if (!verse) {
       const apiVerse = await fetchVerseFromAPI();
       if (apiVerse && !isRecentlyUsed(apiVerse.reference)) verse = apiVerse;
@@ -178,25 +165,48 @@ async function loadNewVerse() {
   }
 }
 
-// ========== MODAIS ==========
+// ========== Favoritos (estrela) ==========
+const favoriteCurrentBtn = document.getElementById('favoriteCurrentBtn');
+
+function updateFavoriteButton() {
+  if (!appState.currentVerse) return;
+  const isFav = isFavorite(appState.currentVerse.reference);
+  favoriteCurrentBtn.textContent = isFav ? '⭐' : '☆';
+  favoriteCurrentBtn.setAttribute('aria-label', isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos');
+}
+
+function toggleFavoriteCurrent() {
+  if (!appState.currentVerse) return;
+  if (isFavorite(appState.currentVerse.reference)) {
+    removeFavorite(appState.currentVerse.reference);
+  } else {
+    addFavorite(appState.currentVerse);
+  }
+  updateFavoriteButton();
+  renderFavorites();  // atualiza modal se estiver aberto
+}
+
+favoriteCurrentBtn.addEventListener('click', toggleFavoriteCurrent);
+
+// ========== Modais ==========
 function renderFavorites() {
   const favs = getFavorites();
   if (favs.length === 0) {
-    favListDiv.innerHTML = '<p style="text-align:center">Nenhum favorito ainda. ❤️</p>';
+    favListDiv.innerHTML = '<p style="text-align:center">Nenhum favorito ainda. ⭐</p>';
     return;
   }
   favListDiv.innerHTML = favs.map(fav => `
     <div class="favorite-item">
-      <div><strong>${getFullBookName(fav.book)} ${fav.chapter}:${fav.verse}</strong><br><small>${fav.text.substring(0, 80)}...</small></div>
+      <div><strong>${getFullBookName(fav.book)} ${fav.chapter}:${fav.verse}</strong><br><small>${escapeHtml(fav.text.substring(0, 80))}...</small></div>
       <div>
         <button class="load-fav" data-ref="${fav.reference}" data-book="${fav.book}" data-chapter="${fav.chapter}" data-verse="${fav.verse}" data-text="${escapeHtml(fav.text)}">📖 Ler</button>
         <button class="remove-fav" data-ref="${fav.reference}">🗑️</button>
       </div>
     </div>
   `).join('');
-  // Eventos
+
   document.querySelectorAll('.load-fav').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', () => {
       const ref = btn.dataset.ref;
       const found = getFavorites().find(f => f.reference === ref);
       if (found) displayVerse(found);
@@ -204,7 +214,7 @@ function renderFavorites() {
     });
   });
   document.querySelectorAll('.remove-fav').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', () => {
       const ref = btn.dataset.ref;
       removeFavorite(ref);
       renderFavorites();
@@ -220,15 +230,16 @@ function renderHistory() {
   }
   histListDiv.innerHTML = history.map(hist => `
     <div class="history-item">
-      <div><strong>${getFullBookName(hist.book)} ${hist.chapter}:${hist.verse}</strong><br><small>${hist.text.substring(0, 80)}...</small></div>
+      <div><strong>${getFullBookName(hist.book)} ${hist.chapter}:${hist.verse}</strong><br><small>${escapeHtml(hist.text.substring(0, 80))}...</small></div>
       <div>
         <button class="load-hist" data-ref="${hist.reference}" data-book="${hist.book}" data-chapter="${hist.chapter}" data-verse="${hist.verse}" data-text="${escapeHtml(hist.text)}">📖 Ler</button>
-        <button class="fav-hist" data-ref="${hist.reference}" data-book="${hist.book}" data-chapter="${hist.chapter}" data-verse="${hist.verse}" data-text="${escapeHtml(hist.text)}">❤️</button>
+        <button class="fav-hist" data-ref="${hist.reference}" data-book="${hist.book}" data-chapter="${hist.chapter}" data-verse="${hist.verse}" data-text="${escapeHtml(hist.text)}">⭐</button>
       </div>
     </div>
   `).join('');
+
   document.querySelectorAll('.load-hist').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', () => {
       const ref = btn.dataset.ref;
       const found = getHistory().find(h => h.reference === ref);
       if (found) displayVerse(found);
@@ -236,7 +247,7 @@ function renderHistory() {
     });
   });
   document.querySelectorAll('.fav-hist').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', () => {
       const verse = {
         text: btn.dataset.text,
         reference: btn.dataset.ref,
@@ -245,30 +256,29 @@ function renderHistory() {
         verse: parseInt(btn.dataset.verse)
       };
       addFavorite(verse);
-      alert('Adicionado aos favoritos! ❤️');
-      renderHistory(); // atualiza lista
+      alert('⭐ Adicionado aos favoritos!');
     });
   });
 }
 
-// Fechar modais ao clicar fora
-window.onclick = (e) => {
-  if (e.target === favModal) favModal.style.display = 'none';
-  if (e.target === histModal) histModal.style.display = 'none';
-};
-
-// Eventos
+// ========== Eventos dos botões principais ==========
 refreshBtn.onclick = () => loadNewVerse();
 shareWABtn.onclick = () => shareWhatsApp();
 shareIGBtn.onclick = () => shareInstagram();
 copyBtn.onclick = () => copyVerseText();
 favoritesBtn.onclick = () => { renderFavorites(); favModal.style.display = 'flex'; };
 historyBtn.onclick = () => { renderHistory(); histModal.style.display = 'flex'; };
+
+// Fechar modais
 document.querySelectorAll('.modal .close').forEach(btn => {
   btn.onclick = () => btn.closest('.modal').style.display = 'none';
 });
+window.onclick = (e) => {
+  if (e.target === favModal) favModal.style.display = 'none';
+  if (e.target === histModal) histModal.style.display = 'none';
+};
 
-// Inicialização
+// ========== Inicialização ==========
 initTheme();
 initBackgroundLayers();
 loadNewVerse();
