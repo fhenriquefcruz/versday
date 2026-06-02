@@ -236,14 +236,13 @@ body::after {
   color: var(--text-secondary);
 }
 
-/* Crédito do Unsplash */
+/* ===== CRÉDITO DO UNSPLASH (abaixo do rodapé) ===== */
 .unsplash-credit {
   text-align: center;
-  font-size: 0.65rem;
-  color: rgba(255,255,255,0.6);
-  margin-top: 12px;
-  padding: 6px;
-  background: rgba(0,0,0,0.3);
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.5);
+  margin-top: 8px;
+  padding: 4px;
   border-radius: 20px;
   backdrop-filter: blur(4px);
   display: none;
@@ -257,14 +256,13 @@ body::after {
 }
 
 body.light .unsplash-credit {
-  color: rgba(0,0,0,0.6);
-  background: rgba(255,255,255,0.5);
+  color: rgba(0,0,0,0.5);
 }
 body.light .unsplash-credit a {
   color: #2c5a44;
 }
 
-/* Modais */
+/* ===== MODAIS ===== */
 .modal {
   display: none;
   position: fixed;
@@ -314,7 +312,7 @@ body.light .unsplash-credit a {
   min-height: 44px;
 }
 
-/* Responsividade */
+/* ===== RESPONSIVIDADE ===== */
 @media (max-width: 580px) {
   .verse-container { padding: 18px 16px; }
   .btn-icon { width: 48px; height: 48px; }
