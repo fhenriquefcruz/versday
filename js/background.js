@@ -1,3 +1,4 @@
+// js/background.js
 import { fetchLandscapeImage, getFallbackImage } from './unsplash.js';
 import { appState } from './state.js';
 
@@ -48,7 +49,7 @@ export async function setBackgroundImage() {
     currentImageUrl = imageUrl;
     appState.currentBackgroundImageUrl = imageUrl;
 
-    // Atualiza o crédito do Unsplash no rodapé (se existir o container)
+    // Atualiza o crédito do Unsplash no container
     const creditContainer = document.getElementById('unsplash-credit');
     if (creditContainer && attribution) {
         creditContainer.innerHTML = attribution.html;
