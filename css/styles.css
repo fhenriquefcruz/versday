@@ -107,7 +107,7 @@ body::after {
 
 /* Container principal responsivo para desktop */
 .verse-container {
-  max-width: 720px;      /* limite maior para desktop */
+  max-width: 720px;
   width: 90%;
   background: var(--card-bg);
   backdrop-filter: blur(16px);
