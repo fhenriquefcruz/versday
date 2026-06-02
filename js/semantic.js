@@ -1,43 +1,63 @@
+// ==============================================
+// IMAGENS EXCLUSIVAMENTE DE PAISAGEM - ALTA DEFINIÇÃO
+// NENHUMA IMAGEM COM PESSOAS, PRAIAS COM PESSOAS, URBANIZAÇÃO
+// ==============================================
+
 const baseImages = {
+  // Amanhecer / entardecer (cores quentes, sem pessoas)
   dawn: [
     'https://images.pexels.com/photos/1167355/pexels-photo-1167355.jpeg?auto=compress&cs=tinysrgb&w=1600',
     'https://images.pexels.com/photos/1493215/pexels-photo-1493215.jpeg?auto=compress&cs=tinysrgb&w=1600',
     'https://images.pexels.com/photos/274062/pexels-photo-274062.jpeg?auto=compress&cs=tinysrgb&w=1600',
-    'https://images.pexels.com/photos/1128797/pexels-photo-1128797.jpeg?auto=compress&cs=tinysrgb&w=1600'
+    'https://images.pexels.com/photos/1128797/pexels-photo-1128797.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/1591447/sunrise-sunset-sky-clouds-1591447.jpeg?auto=compress&cs=tinysrgb&w=1600'
   ],
+  // Montanhas majestosas
   mountains: [
     'https://images.pexels.com/photos/618848/pexels-photo-618848.jpeg?auto=compress&cs=tinysrgb&w=1600',
     'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?auto=compress&cs=tinysrgb&w=1600',
     'https://images.pexels.com/photos/147411/italy-mountains-dawn-daybreak-147411.jpeg?auto=compress&cs=tinysrgb&w=1600',
-    'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1600'
+    'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/1366919/mountain-range-1366919.jpeg?auto=compress&cs=tinysrgb&w=1600'
   ],
+  // Lagos e rios tranquilos (sem pessoas)
   calmWater: [
     'https://images.pexels.com/photos/457881/pexels-photo-457881.jpeg?auto=compress&cs=tinysrgb&w=1600',
     'https://images.pexels.com/photos/443446/pexels-photo-443446.jpeg?auto=compress&cs=tinysrgb&w=1600',
-    'https://images.pexels.com/photos/3533156/pexels-photo-3533156.jpeg?auto=compress&cs=tinysrgb&w=1600'
+    'https://images.pexels.com/photos/3533156/pexels-photo-3533156.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/132037/pexels-photo-132037.jpeg?auto=compress&cs=tinysrgb&w=1600'
   ],
+  // Oceanos e praias desertas (apenas natureza)
   ocean: [
     'https://images.pexels.com/photos/1112048/pexels-photo-1112048.jpeg?auto=compress&cs=tinysrgb&w=1600',
     'https://images.pexels.com/photos/158598/pexels-photo-158598.jpeg?auto=compress&cs=tinysrgb&w=1600',
-    'https://images.pexels.com/photos/994605/pexels-photo-994605.jpeg?auto=compress&cs=tinysrgb&w=1600'
+    'https://images.pexels.com/photos/994605/pexels-photo-994605.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/1126372/pexels-photo-1126372.jpeg?auto=compress&cs=tinysrgb&w=1600'
   ],
+  // Florestas e campos
   forest: [
     'https://images.pexels.com/photos/844124/pexels-photo-844124.jpeg?auto=compress&cs=tinysrgb&w=1600',
     'https://images.pexels.com/photos/344886/pexels-photo-344886.jpeg?auto=compress&cs=tinysrgb&w=1600',
-    'https://images.pexels.com/photos/1292115/pexels-photo-1292115.jpeg?auto=compress&cs=tinysrgb&w=1600'
+    'https://images.pexels.com/photos/1292115/pexels-photo-1292115.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/843226/pexels-photo-843226.jpeg?auto=compress&cs=tinysrgb&w=1600'
   ],
+  // Céu estrelado
   starry: [
     'https://images.pexels.com/photos/1252890/pexels-photo-1252890.jpeg?auto=compress&cs=tinysrgb&w=1600',
     'https://images.pexels.com/photos/912364/pexels-photo-912364.jpeg?auto=compress&cs=tinysrgb&w=1600',
-    'https://images.pexels.com/photos/158163/clouds-cloudy-aggregation-nubes-158163.jpeg?auto=compress&cs=tinysrgb&w=1600'
+    'https://images.pexels.com/photos/158163/clouds-cloudy-aggregation-nubes-158163.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/39811/star-sky-night-sky-sky-39811.jpeg?auto=compress&cs=tinysrgb&w=1600'
   ],
+  // Caminhos e trilhas na natureza
   path: [
     'https://images.pexels.com/photos/115141/pexels-photo-115141.jpeg?auto=compress&cs=tinysrgb&w=1600',
     'https://images.pexels.com/photos/41953/road-curve-asphalt-country-road-41953.jpeg?auto=compress&cs=tinysrgb&w=1600',
-    'https://images.pexels.com/photos/2193382/pexels-photo-2193382.jpeg?auto=compress&cs=tinysrgb&w=1600'
+    'https://images.pexels.com/photos/2193382/pexels-photo-2193382.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/208599/pexels-photo-208599.jpeg?auto=compress&cs=tinysrgb&w=1600'
   ]
 };
 
+// Mapeamento de temas para categorias visuais
 const themeToCategory = {
   alegria: 'forest',
   paz: 'calmWater',
