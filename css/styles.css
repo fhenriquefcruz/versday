@@ -105,16 +105,40 @@ body::after {
   pointer-events: none;
 }
 
+/* Container principal responsivo para desktop */
 .verse-container {
-  max-width: 680px;
-  width: 100%;
+  max-width: 720px;      /* limite maior para desktop */
+  width: 90%;
   background: var(--card-bg);
   backdrop-filter: blur(16px);
   border-radius: 32px;
   border: 1px solid var(--border-light);
   box-shadow: 0 25px 45px -12px rgba(0,0,0,0.3);
-  padding: 24px 20px;
+  padding: 32px 28px;
   transition: all 0.3s;
+}
+
+/* Ajuste para telas muito grandes (acima de 1440px) */
+@media (min-width: 1440px) {
+  .verse-container {
+    max-width: 800px;
+    padding: 40px 36px;
+  }
+  .verse-text {
+    font-size: 2rem;
+  }
+  .btn-icon {
+    width: 56px;
+    height: 56px;
+  }
+}
+
+/* Tablet e desktop médio */
+@media (min-width: 768px) and (max-width: 1439px) {
+  .verse-container {
+    max-width: 680px;
+    padding: 28px 24px;
+  }
 }
 
 .verse-header {
@@ -127,7 +151,7 @@ body::after {
 }
 .verse-header h1 {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(1.5rem, 6vw, 1.9rem);
+  font-size: clamp(1.5rem, 6vw, 2.2rem);
   background: linear-gradient(135deg, #F5E7D3 0%, var(--accent-color) 100%);
   background-clip: text;
   color: transparent;
@@ -162,15 +186,15 @@ body::after {
 .verse-content {
   text-align: center;
   margin: 24px 0;
-  min-height: 220px;
+  min-height: 240px;
   transition: opacity 0.2s;
 }
 .verse-text {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(1.2rem, 5vw, 1.8rem);
+  font-size: clamp(1.2rem, 4vw, 2rem);
   line-height: 1.45;
   color: var(--text-primary);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 .verse-text::before {
   content: "“";
@@ -190,11 +214,11 @@ body::after {
   gap: 10px;
   background: rgba(0,0,0,0.35);
   backdrop-filter: blur(8px);
-  padding: 6px 18px;
+  padding: 8px 20px;
   border-radius: 100px;
 }
 .verse-reference {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 500;
   color: var(--accent-color);
 }
@@ -203,14 +227,14 @@ body::after {
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
-  margin: 24px 0 12px;
+  margin: 28px 0 16px;
 }
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 10px 24px;
   border-radius: 60px;
   font-weight: 500;
   cursor: pointer;
@@ -232,16 +256,16 @@ body::after {
   margin-top: 24px;
   padding-top: 12px;
   border-top: 1px solid rgba(255,255,255,0.1);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
 }
 
 /* ===== CRÉDITO DO UNSPLASH (abaixo do rodapé) ===== */
 .unsplash-credit {
   text-align: center;
-  font-size: 0.6rem;        /* menor que 0.7rem do footer-credit */
-  color: rgba(255, 255, 255, 0.75);
-  margin-top: 6px;
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 8px;
   padding: 4px;
   line-height: 1.3;
   backdrop-filter: blur(4px);
@@ -279,8 +303,8 @@ body.light .unsplash-credit a {
   background: var(--card-bg);
   backdrop-filter: blur(16px);
   border-radius: 32px;
-  padding: 20px;
-  max-width: 500px;
+  padding: 24px;
+  max-width: 550px;
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
@@ -313,11 +337,23 @@ body.light .unsplash-credit a {
   min-height: 44px;
 }
 
-/* ===== RESPONSIVIDADE ===== */
+/* ===== RESPONSIVIDADE MOBILE ===== */
 @media (max-width: 580px) {
-  .verse-container { padding: 18px 16px; }
+  .verse-container {
+    padding: 20px 16px;
+    width: 95%;
+  }
   .btn-icon { width: 48px; height: 48px; }
-  .btn { padding: 8px 16px; }
+  .btn { padding: 8px 16px; font-size: 0.85rem; }
   .icon-btn { font-size: 1.2rem; }
-  .btn-text-only { font-size: 0.8rem; padding: 6px 12px; }
+  .btn-text-only { font-size: 0.75rem; padding: 6px 12px; }
+  .verse-reference { font-size: 0.85rem; }
+  .verse-text { margin-bottom: 16px; }
+}
+
+/* Ajustes para telas muito pequenas (iPhone SE) */
+@media (max-width: 380px) {
+  .verse-container { padding: 16px 12px; }
+  .btn-icon { width: 44px; height: 44px; }
+  .btn-text-only { font-size: 0.7rem; padding: 5px 10px; }
 }
