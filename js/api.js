@@ -24,7 +24,6 @@ export async function fetchVerseFromAPI() {
   }
 }
 
-// Fallback offline: escolhe um versículo aleatório da lista local (100)
 export function getRandomFallbackVerse() {
   const randomIndex = Math.floor(Math.random() * FALLBACK_VERSES.length);
   return { ...FALLBACK_VERSES[randomIndex] };
