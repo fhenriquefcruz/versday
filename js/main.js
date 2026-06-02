@@ -19,6 +19,7 @@ const favModal = document.getElementById('favoritesModal');
 const histModal = document.getElementById('historyModal');
 const favListDiv = document.getElementById('favoritesList');
 const histListDiv = document.getElementById('historyList');
+const favoriteCurrentBtn = document.getElementById('favoriteCurrentBtn');
 
 // Estado local (histórico de referências para evitar repetição)
 let verseHistoryRefs = [];
@@ -89,12 +90,34 @@ function showLoading(show) {
   }
 }
 
+// Botão favoritar atual
+function updateFavoriteButton() {
+  if (!appState.currentVerse) return;
+  const isFav = isFavorite(appState.currentVerse.reference);
+  favoriteCurrentBtn.textContent = isFav ? '❤️' : '🤍';
+  favoriteCurrentBtn.setAttribute('aria-label', isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos');
+}
+
+function toggleFavoriteCurrent() {
+  if (!appState.currentVerse) return;
+  if (isFavorite(appState.currentVerse.reference)) {
+    removeFavorite(appState.currentVerse.reference);
+  } else {
+    addFavorite(appState.currentVerse);
+  }
+  updateFavoriteButton();
+  renderFavorites(); // atualiza modal se estiver aberto
+}
+
+favoriteCurrentBtn.addEventListener('click', toggleFavoriteCurrent);
+
 // Renderização do versículo
 function displayVerse(verse) {
   appState.currentVerse = verse;
   lastVerseRef = verse.reference;
   addToHistoryRef(verse.reference);
   addToHistory(verse);
+  updateFavoriteButton();
   const fullBook = getFullBookName(verse.book);
   const displayRef = `${fullBook} ${verse.chapter}:${verse.verse}`;
   const html = `
@@ -108,7 +131,7 @@ function displayVerse(verse) {
   setBackgroundImage(verse.text);
 }
 
-// Lógica principal de carregamento (USANDO O CACHE CENTRALIZADO)
+// Lógica principal de carregamento
 async function loadNewVerse() {
   if (appState.isLoading) return;
   appState.isLoading = true;
@@ -116,7 +139,7 @@ async function loadNewVerse() {
   try {
     let verse = null;
     // 1) Cache centralizado
-    let cache = getCache();   // obtém o array do módulo cache.js
+    let cache = getCache();
     if (cache.length > 0) {
       let idx = 0;
       while (idx < cache.length && (cache[idx].reference === lastVerseRef || isRecentlyUsed(cache[idx].reference))) {
@@ -124,10 +147,8 @@ async function loadNewVerse() {
       }
       if (idx < cache.length) {
         verse = cache[idx];
-        // Remove do cache
         cache.splice(idx, 1);
-        setCache(cache);      // atualiza o cache no módulo
-        // Repõe um novo versículo em segundo plano
+        setCache(cache);
         addToCache(lastVerseRef, isRecentlyUsed);
       }
     }
@@ -136,7 +157,7 @@ async function loadNewVerse() {
       const apiVerse = await fetchVerseFromAPI();
       if (apiVerse && !isRecentlyUsed(apiVerse.reference)) verse = apiVerse;
     }
-    // 3) Fallback local (100 versículos)
+    // 3) Fallback local
     if (!verse) {
       let fallback = getRandomFallbackVerse();
       let attempts = 0;
@@ -153,7 +174,6 @@ async function loadNewVerse() {
   } finally {
     appState.isLoading = false;
     showLoading(false);
-    // Reabastece cache se estiver baixo (usando o cache centralizado)
     if (getCache().length < 8) addToCache(lastVerseRef, isRecentlyUsed);
   }
 }
@@ -226,6 +246,7 @@ function renderHistory() {
       };
       addFavorite(verse);
       alert('Adicionado aos favoritos! ❤️');
+      renderHistory(); // atualiza lista
     });
   });
 }
