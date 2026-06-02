@@ -1,25 +1,22 @@
-// Mantém a classificação semântica e imagens controladas
-import { getImageForVerse } from './semantic.js'; // criaremos abaixo
+import { getImageForVerse } from './semantic.js';
+import { appState } from './state.js';
 
-let currentBgUrl = '';
-let bgLayer1 = null, bgLayer2 = null;
+let bgLayer1, bgLayer2;
 let activeLayer = 1;
 
 export function initBackgroundLayers() {
-  // Criar duas camadas no DOM
-  const layer1 = document.createElement('div');
-  layer1.className = 'bg-layer bg-layer-1';
-  const layer2 = document.createElement('div');
-  layer2.className = 'bg-layer bg-layer-2';
-  document.body.prepend(layer1, layer2);
-  bgLayer1 = layer1;
-  bgLayer2 = layer2;
+  const l1 = document.createElement('div');
+  l1.className = 'bg-layer bg-layer-1';
+  const l2 = document.createElement('div');
+  l2.className = 'bg-layer bg-layer-2';
+  document.body.prepend(l1, l2);
+  bgLayer1 = l1; bgLayer2 = l2;
 }
 
 export async function setBackgroundImage(verseText) {
   const newUrl = getImageForVerse(verseText);
-  if (newUrl === currentBgUrl) return;
-  // Pré-carregar
+  if (newUrl === appState.currentBackgroundImageUrl) return;
+  // pré-carregar
   const img = new Image();
   img.crossOrigin = 'Anonymous';
   await new Promise((resolve) => {
@@ -33,5 +30,5 @@ export async function setBackgroundImage(verseText) {
   const currentLayer = activeLayer === 1 ? bgLayer1 : bgLayer2;
   currentLayer.style.opacity = '0';
   activeLayer = activeLayer === 1 ? 2 : 1;
-  currentBgUrl = newUrl;
+  appState.currentBackgroundImageUrl = newUrl;
 }
