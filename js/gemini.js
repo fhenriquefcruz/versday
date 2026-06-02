@@ -1,7 +1,8 @@
 // js/gemini.js
-const API_KEY = 'AQ.Ab8RN6KmnD6dH6qsDuO4270OxRRYidRK4-Qv5W0_fVVhHFz8oQ';
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+const API_KEY = 'AQ.Ab8RN6KTVjvGY_1WS5sCJr0k3b7-2aigxR5ix8Qln6otC6K99A';
+const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
+// Prompt do sistema (exegese e hermenêutica rigorosa)
 const SYSTEM_INSTRUCTION = `Você é um assistente teológico especializado, com profundo conhecimento em Hermenêutica e Exegese Bíblica.
 Sua missão é responder perguntas sobre a Bíblia com alto rigor acadêmico e fundamentação teológica.
 
@@ -50,7 +51,10 @@ export async function askGemini(question, conversationHistory = []) {
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': API_KEY   // Autenticação correta para API Gemini
+            },
             body: JSON.stringify({
                 system_instruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
                 contents: contents,
