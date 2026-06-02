@@ -4,7 +4,7 @@ export function initTheme() {
   let isLight = false;
   if (saved === 'light') isLight = true;
   else if (saved === 'dark') isLight = false;
-  else isLight = !systemDark; // se sistema escuro, queremos dark (body sem classe)
+  else isLight = !systemDark;
   if (isLight) document.body.classList.add('light');
   else document.body.classList.remove('light');
 
