@@ -1,1 +1,103 @@
+/* ===== Variáveis globais ===== */
+:root {
+  --accent-color: #E4B363;
+  --transition-speed: 0.4s;
+  --card-bg: rgba(20, 25, 28, 0.5);
+  --border-light: rgba(255, 255, 255, 0.1);
+  --text-primary: #FCF7F0;
+  --text-secondary: #CBD5E1;
+  --overlay: rgba(0,0,0,0.6);
+}
+body.light {
+  --card-bg: rgba(245, 245, 245, 0.85);
+  --border-light: rgba(0, 0, 0, 0.1);
+  --text-primary: #1a2a2a;
+  --text-secondary: #2c3e3e;
+  --overlay: rgba(255,255,255,0.7);
+}
 
+/* Estilos base (preservados e refinados) */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  position: relative;
+  background-size: cover;
+  background-position: center 30%;
+  background-attachment: fixed;
+  transition: background-image 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+/* Camadas para crossfade (ETAPA 1) */
+.bg-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center 30%;
+  transition: opacity 0.8s ease-in-out;
+  z-index: -2;
+}
+.bg-layer-1 { opacity: 1; }
+.bg-layer-2 { opacity: 0; }
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 20% 40%, rgba(0,0,0,0.2) 0%, var(--overlay) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+.verse-container {
+  max-width: 680px;
+  width: 100%;
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  border-radius: 2rem;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 25px 45px -12px rgba(0,0,0,0.3);
+  padding: 2rem;
+  transition: all 0.3s ease;
+}
+.verse-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.8rem; }
+.verse-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.9rem;
+  background: linear-gradient(135deg, #F5E7D3 0%, var(--accent-color) 100%);
+  background-clip: text;
+  color: transparent;
+}
+.header-actions button {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0.3rem;
+  color: var(--accent-color);
+}
+.verse-content { text-align: center; margin: 2rem 0; min-height: 240px; transition: opacity 0.2s; }
+.verse-text { font-family: 'Playfair Display', serif; font-size: clamp(1.3rem,5vw,1.9rem); line-height: 1.45; color: var(--text-primary); margin-bottom: 1.2rem; }
+.verse-text::before { content: "“"; font-size: 2rem; color: var(--accent-color); margin-right: 6px; }
+.verse-text::after { content: "”"; font-size: 2rem; color: var(--accent-color); margin-left: 6px; }
+.verse-reference-wrapper { display: inline-flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.35); backdrop-filter: blur(8px); padding: 0.35rem 1.2rem; border-radius: 100px; }
+.verse-reference { font-size: 1rem; font-weight: 500; color: var(--accent-color); }
+.buttons-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.8rem; margin: 1.5rem 0 0.5rem; }
+.btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.7rem 1.4rem; border-radius: 60px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: none; background: rgba(20,25,28,0.7); backdrop-filter: blur(8px); color: #F5E7D3; min-width: 48px; min-height: 48px; }
+.btn-icon { width: 52px; height: 52px; padding: 0; }
+.btn-wa { background: linear-gradient(135deg, #25D366, #128C7E); }
+.btn-ig-feed, .btn-ig-story { background: linear-gradient(135deg, #F58529, #DD2A7B, #8134AF); }
+.footer-credit { text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.7rem; color: rgba(200,210,215,0.7); }
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(8px); align-items: center; justify-content: center; }
+.modal-content { background: var(--card-bg); backdrop-filter: blur(16px); border-radius: 2rem; padding: 1.5rem; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; color: var(--text-primary); }
+.modal-content .close { float: right; font-size: 1.8rem; font-weight: bold; cursor: pointer; }
+.favorite-item, .history-item { background: rgba(0,0,0,0.3); margin: 0.5rem 0; padding: 0.8rem; border-radius: 1rem; display: flex; justify-content: space-between; align-items: center; }
+.favorite-item button, .history-item button { background: none; border: none; cursor: pointer; font-size: 1.2rem; margin-left: 0.5rem; }
+@media (max-width: 580px) { .verse-container { padding: 1.5rem; } .btn-icon { width: 48px; height: 48px; } }
