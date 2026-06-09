@@ -1,43 +1,50 @@
 import { FALLBACK_VERSES } from './fallbackVerses.js';
 
-export const API_URL = 'https://bible-api.com/data/ara/random';
-export const TIMEOUT_MS = 5000;
+export const TIMEOUT_MS = 6000;
 
-// Controle para não usar fallback em excesso
 let consecutiveApiFailures = 0;
-const MAX_FAILURES_BEFORE_FALLBACK = 2;
+const MAX_FAILURES = 3;
+
+// Endpoints testados — bible-api.com suporta tradução acf e nvi em pt-BR
+const BIBLE_ENDPOINTS = [
+  'https://bible-api.com/data/acf/random',
+  'https://bible-api.com/data/nvi/random',
+];
 
 export async function fetchVerseFromAPI() {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
-  try {
-    const res = await fetch(API_URL, { signal: controller.signal });
-    clearTimeout(timeoutId);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (!data.text || !data.reference) throw new Error('Resposta inválida');
-    consecutiveApiFailures = 0; // reseta contador em sucesso
-    return {
-      text: data.text,
-      reference: data.reference,
-      book: data.book_id,
-      chapter: data.chapter,
-      verse: data.verse
-    };
-  } catch (e) {
-    clearTimeout(timeoutId);
-    consecutiveApiFailures++;
-    console.warn(`[VersDay] API falhou (tentativa ${consecutiveApiFailures}):`, e.message);
-    return null;
+  for (const endpoint of BIBLE_ENDPOINTS) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    try {
+      const res = await fetch(endpoint, {
+        signal: controller.signal,
+        headers: { 'Accept': 'application/json' }
+      });
+      clearTimeout(timeoutId);
+      if (!res.ok) { console.warn(`[VersDay] ${endpoint} → ${res.status}`); continue; }
+      const data = await res.json();
+      if (!data.text || !data.reference) { console.warn('[VersDay] Resposta inválida:', data); continue; }
+      consecutiveApiFailures = 0;
+      return {
+        text: data.text.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim(),
+        reference: data.reference,
+        book: data.book_id || data.reference.match(/^([0-9]?\s?[a-záéíóúâêôãõç]+)/i)?.[1]?.toLowerCase().replace(/\s/g, '') || 'sl',
+        chapter: data.chapter || 1,
+        verse: data.verse || 1
+      };
+    } catch (e) {
+      clearTimeout(timeoutId);
+      console.warn(`[VersDay] Erro ${endpoint}:`, e.message);
+    }
   }
+  consecutiveApiFailures++;
+  return null;
 }
 
 export function getRandomFallbackVerse() {
-  const randomIndex = Math.floor(Math.random() * FALLBACK_VERSES.length);
-  return { ...FALLBACK_VERSES[randomIndex] };
+  return { ...FALLBACK_VERSES[Math.floor(Math.random() * FALLBACK_VERSES.length)] };
 }
 
-// Retorna true se deve tentar a API (não excedeu falhas consecutivas)
 export function shouldTryAPI() {
-  return consecutiveApiFailures < MAX_FAILURES_BEFORE_FALLBACK;
+  return consecutiveApiFailures < MAX_FAILURES;
 }
