@@ -1,26 +1,27 @@
-// js/main.js (versão completa)
+// js/main.js
 import { appState } from './state.js';
-import { fetchVerseFromAPI, getRandomFallbackVerse } from './api.js';
+import { fetchVerseFromAPI, getRandomFallbackVerse, shouldTryAPI } from './api.js';
 import { getCache, setCache, addToCache, isVerseInCache } from './cache.js';
 import { getHistory, addToHistory } from './history.js';
 import { getFavorites, addFavorite, removeFavorite, isFavorite } from './favorites.js';
 import { initTheme } from './theme.js';
 import { initBackgroundLayers, setBackgroundImage } from './background.js';
 import { shareWhatsApp, shareInstagram, copyVerseText } from './share.js';
-import { initChat } from './chat.js';   // <-- ADICIONADO
+import { initChat } from './chat.js';
 
-// ========== DOM Elements ==========
-const dynamicZone = document.getElementById('verseDynamicZone');
-const refreshBtn = document.getElementById('refreshBtn');
-const shareWABtn = document.getElementById('shareWABtn');
-const shareIGBtn = document.getElementById('shareIGBtn');
-const copyBtn = document.getElementById('copyTextBtn');
-const favoritesBtn = document.getElementById('favoritesBtn');
-const historyBtn = document.getElementById('historyBtn');
-const favModal = document.getElementById('favoritesModal');
-const histModal = document.getElementById('historyModal');
-const favListDiv = document.getElementById('favoritesList');
-const histListDiv = document.getElementById('historyList');
+// ========== DOM ==========
+const dynamicZone      = document.getElementById('verseDynamicZone');
+const refreshBtn       = document.getElementById('refreshBtn');
+const shareWABtn       = document.getElementById('shareWABtn');
+const shareIGBtn       = document.getElementById('shareIGBtn');
+const copyBtn          = document.getElementById('copyTextBtn');
+const favoritesBtn     = document.getElementById('favoritesBtn');
+const historyBtn       = document.getElementById('historyBtn');
+const favModal         = document.getElementById('favoritesModal');
+const histModal        = document.getElementById('historyModal');
+const favListDiv       = document.getElementById('favoritesList');
+const histListDiv      = document.getElementById('historyList');
+const favoriteCurrentBtn = document.getElementById('favoriteCurrentBtn');
 
 // ========== Estado local ==========
 let verseHistoryRefs = [];
@@ -34,43 +35,48 @@ function addToHistoryRef(ref) {
   if (verseHistoryRefs.length > 30) verseHistoryRefs.pop();
 }
 
-// ========== Funções auxiliares ==========
+// ========== Livros ==========
+const BOOK_NAMES = {
+  "gn":"Gênesis","ex":"Êxodo","lv":"Levítico","nm":"Números","dt":"Deuteronômio",
+  "js":"Josué","jz":"Juízes","rt":"Rute","1sm":"1 Samuel","2sm":"2 Samuel",
+  "1rs":"1 Reis","2rs":"2 Reis","1cr":"1 Crônicas","2cr":"2 Crônicas","ed":"Esdras",
+  "ne":"Neemias","et":"Ester","jó":"Jó","sl":"Salmos","pv":"Provérbios",
+  "ec":"Eclesiastes","ct":"Cantares","is":"Isaías","jr":"Jeremias","lm":"Lamentações",
+  "ez":"Ezequiel","dn":"Daniel","os":"Oséias","jl":"Joel","am":"Amós",
+  "ob":"Obadias","jn":"Jonas","mq":"Miquéias","na":"Naum","hc":"Habacuque",
+  "sf":"Sofonias","ag":"Ageu","zc":"Zacarias","ml":"Malaquias",
+  "mt":"Mateus","mc":"Marcos","lc":"Lucas","jo":"João","atos":"Atos","rm":"Romanos",
+  "1co":"1 Coríntios","2co":"2 Coríntios","gl":"Gálatas","ef":"Efésios","fp":"Filipenses",
+  "cl":"Colossenses","1ts":"1 Tessalonicenses","2ts":"2 Tessalonicenses","1tm":"1 Timóteo",
+  "2tm":"2 Timóteo","tt":"Tito","fm":"Filemom","hb":"Hebreus","tg":"Tiago",
+  "1pe":"1 Pedro","2pe":"2 Pedro","1jo":"1 João","2jo":"2 João","3jo":"3 João",
+  "jd":"Judas","ap":"Apocalipse"
+};
+
 function getFullBookName(abbrev) {
-  const map = {
-    "gn": "Gênesis", "ex": "Êxodo", "lv": "Levítico", "nm": "Números", "dt": "Deuteronômio",
-    "js": "Josué", "jz": "Juízes", "rt": "Rute", "1sm": "1 Samuel", "2sm": "2 Samuel",
-    "1rs": "1 Reis", "2rs": "2 Reis", "1cr": "1 Crônicas", "2cr": "2 Crônicas", "ed": "Esdras",
-    "ne": "Neemias", "et": "Ester", "jó": "Jó", "sl": "Salmos", "pv": "Provérbios",
-    "ec": "Eclesiastes", "ct": "Cantares", "is": "Isaías", "jr": "Jeremias", "lm": "Lamentações",
-    "ez": "Ezequiel", "dn": "Daniel", "os": "Oséias", "jl": "Joel", "am": "Amós",
-    "ob": "Obadias", "jn": "Jonas", "mq": "Miquéias", "na": "Naum", "hc": "Habacuque",
-    "sf": "Sofonias", "ag": "Ageu", "zc": "Zacarias", "ml": "Malaquias",
-    "mt": "Mateus", "mc": "Marcos", "lc": "Lucas", "jo": "João", "atos": "Atos", "rm": "Romanos",
-    "1co": "1 Coríntios", "2co": "2 Coríntios", "gl": "Gálatas", "ef": "Efésios", "fp": "Filipenses",
-    "cl": "Colossenses", "1ts": "1 Tessalonicenses", "2ts": "2 Tessalonicenses", "1tm": "1 Timóteo",
-    "2tm": "2 Timóteo", "tt": "Tito", "fm": "Filemom", "hb": "Hebreus", "tg": "Tiago",
-    "1pe": "1 Pedro", "2pe": "2 Pedro", "1jo": "1 João", "2jo": "2 João", "3jo": "3 João",
-    "jd": "Judas", "ap": "Apocalipse"
-  };
-  return map[abbrev] || abbrev;
+  return BOOK_NAMES[abbrev] || abbrev;
 }
 
 function escapeHtml(str) {
-  return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+  return String(str).replace(/[&<>]/g, m =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])
+  );
 }
 
+// ========== Loading ==========
 function smoothUpdate(html) {
-  const zone = dynamicZone;
-  zone.style.transition = 'opacity 0.15s';
-  zone.style.opacity = '0';
+  dynamicZone.style.transition = 'opacity 0.15s';
+  dynamicZone.style.opacity = '0';
   setTimeout(() => {
-    zone.innerHTML = html;
-    zone.style.opacity = '1';
+    dynamicZone.innerHTML = html;
+    dynamicZone.style.opacity = '1';
   }, 150);
 }
 
+let timerInterval = null;
+
 function showLoading(show) {
-  if (show && !dynamicZone.innerHTML.includes('timer-circle')) {
+  if (show) {
     dynamicZone.innerHTML = `
       <div class="loading-timer">
         <div class="timer-circle">0</div>
@@ -80,69 +86,76 @@ function showLoading(show) {
     `;
     let seconds = 0;
     const start = Date.now();
-    const timer = setInterval(() => {
-      if (!appState.isLoading) { clearInterval(timer); return; }
-      const elapsed = Math.floor((Date.now() - start) / 1000);
+    timerInterval = setInterval(() => {
+      if (!appState.isLoading) { clearInterval(timerInterval); return; }
       const el = document.querySelector('.timer-circle');
-      if (el) el.textContent = elapsed;
-      if (elapsed >= 10) {
+      if (el) el.textContent = Math.floor((Date.now() - start) / 1000);
+      if (Math.floor((Date.now() - start) / 1000) >= 8) {
         const msgDiv = document.getElementById('delayMessage');
         if (msgDiv && !msgDiv.innerHTML) {
-          msgDiv.innerHTML = '<div class="delay-message">🙏 Aguarde, muitas requisições simultâneas. Em breve aparecerá.</div>';
+          msgDiv.innerHTML = '<div class="delay-message">🙏 Aguarde, buscando nos repositórios...</div>';
         }
       }
     }, 1000);
-    appState.timerInterval = timer;
-  } else if (!show && appState.timerInterval) {
-    clearInterval(appState.timerInterval);
-    appState.timerInterval = null;
+  } else {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
   }
 }
 
-// ========== Exibir versículo na tela ==========
+// ========== Exibir versículo ==========
 function displayVerse(verse) {
   appState.currentVerse = verse;
   lastVerseRef = verse.reference;
   addToHistoryRef(verse.reference);
   addToHistory(verse);
+
   const fullBook = getFullBookName(verse.book);
   const displayRef = `${fullBook} ${verse.chapter}:${verse.verse}`;
+
   const html = `
     <div class="verse-text">${escapeHtml(verse.text)}</div>
     <div class="verse-reference-wrapper">
       <span class="verse-reference">${escapeHtml(displayRef)}</span>
-      <a href="https://www.bibliaonline.com.br/ara/${verse.book.toLowerCase()}/${verse.chapter}" target="_blank" class="chapter-link" rel="noopener noreferrer">📖</a>
+      <a href="https://www.bibliaonline.com.br/ara/${verse.book.toLowerCase()}/${verse.chapter}"
+         target="_blank" rel="noopener noreferrer" class="chapter-link" title="Ler capítulo completo">📖</a>
     </div>
   `;
+
   smoothUpdate(html);
   setBackgroundImage();
   updateFavoriteButton();
 }
 
-// ========== Carregar novo versículo ==========
+// ========== Carregar versículo — equilibrado entre API e fallback ==========
 async function loadNewVerse() {
   if (appState.isLoading) return;
   appState.isLoading = true;
   showLoading(true);
+
   try {
     let verse = null;
-    let cache = getCache();
+
+    // 1. Tenta usar o cache
+    const cache = getCache();
     if (cache.length > 0) {
-      let idx = 0;
-      while (idx < cache.length && (cache[idx].reference === lastVerseRef || isRecentlyUsed(cache[idx].reference))) {
-        idx++;
-      }
-      if (idx < cache.length) {
+      let idx = cache.findIndex(v =>
+        v.reference !== lastVerseRef && !isRecentlyUsed(v.reference)
+      );
+      if (idx !== -1) {
         verse = cache[idx];
         cache.splice(idx, 1);
         setCache(cache);
-        addToCache(lastVerseRef, isRecentlyUsed);
+        addToCache(lastVerseRef, isRecentlyUsed); // repõe cache em background
       }
     }
-    if (!verse) {
-      const apiVerse = await fetchVerseFromAPI();
-      if (apiVerse && !isRecentlyUsed(apiVerse.reference)) verse = apiVerse;
+
+    // 2. Cache vazio — tenta API se disponível
+    if (!verse && shouldTryAPI()) {
+      verse = await fetchVerseFromAPI();
+      if (verse && isRecentlyUsed(verse.reference)) verse = null;
     }
+
+    // 3. Fallback (acervo local)
     if (!verse) {
       let fallback = getRandomFallbackVerse();
       let attempts = 0;
@@ -152,25 +165,26 @@ async function loadNewVerse() {
       }
       verse = fallback;
     }
+
     displayVerse(verse);
+
   } catch (err) {
-    console.error(err);
+    console.error('[VersDay] Erro ao carregar versículo:', err);
     displayVerse(getRandomFallbackVerse());
   } finally {
     appState.isLoading = false;
     showLoading(false);
+    // Repõe cache se necessário
     if (getCache().length < 8) addToCache(lastVerseRef, isRecentlyUsed);
   }
 }
 
-// ========== Favoritos ==========
-const favoriteCurrentBtn = document.getElementById('favoriteCurrentBtn');
-
+// ========== Favoritar versículo atual ==========
 function updateFavoriteButton() {
-  if (!appState.currentVerse) return;
-  const isFav = isFavorite(appState.currentVerse.reference);
-  favoriteCurrentBtn.textContent = isFav ? '⭐' : '☆';
-  favoriteCurrentBtn.setAttribute('aria-label', isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos');
+  if (!appState.currentVerse || !favoriteCurrentBtn) return;
+  const fav = isFavorite(appState.currentVerse.reference);
+  favoriteCurrentBtn.textContent = fav ? '⭐' : '☆';
+  favoriteCurrentBtn.setAttribute('aria-label', fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos');
 }
 
 function toggleFavoriteCurrent() {
@@ -184,99 +198,115 @@ function toggleFavoriteCurrent() {
   renderFavorites();
 }
 
-favoriteCurrentBtn.addEventListener('click', toggleFavoriteCurrent);
+if (favoriteCurrentBtn) favoriteCurrentBtn.addEventListener('click', toggleFavoriteCurrent);
 
 // ========== Modais ==========
 function renderFavorites() {
   const favs = getFavorites();
-  if (favs.length === 0) {
-    favListDiv.innerHTML = '<p style="text-align:center">Nenhum favorito ainda. ⭐</p>';
+  if (!favs.length) {
+    favListDiv.innerHTML = '<p style="text-align:center;padding:20px;opacity:.7">Nenhum favorito ainda. ⭐</p>';
     return;
   }
   favListDiv.innerHTML = favs.map(fav => `
     <div class="favorite-item">
-      <div><strong>${getFullBookName(fav.book)} ${fav.chapter}:${fav.verse}</strong><br><small>${escapeHtml(fav.text.substring(0, 80))}...</small></div>
-      <div>
-        <button class="load-fav" data-ref="${fav.reference}" data-book="${fav.book}" data-chapter="${fav.chapter}" data-verse="${fav.verse}" data-text="${escapeHtml(fav.text)}">📖 Ler</button>
-        <button class="remove-fav" data-ref="${fav.reference}">🗑️</button>
+      <div style="flex:1;min-width:0">
+        <strong>${getFullBookName(fav.book)} ${fav.chapter}:${fav.verse}</strong>
+        <br><small style="opacity:.75">${escapeHtml(fav.text.substring(0, 90))}…</small>
+      </div>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        <button class="load-fav" data-ref="${escapeHtml(fav.reference)}" title="Ler">📖</button>
+        <button class="remove-fav" data-ref="${escapeHtml(fav.reference)}" title="Remover">🗑️</button>
       </div>
     </div>
   `).join('');
 
-  document.querySelectorAll('.load-fav').forEach(btn => {
+  favListDiv.querySelectorAll('.load-fav').forEach(btn => {
     btn.addEventListener('click', () => {
-      const ref = btn.dataset.ref;
-      const found = getFavorites().find(f => f.reference === ref);
+      const found = getFavorites().find(f => f.reference === btn.dataset.ref);
       if (found) displayVerse(found);
       favModal.style.display = 'none';
     });
   });
-  document.querySelectorAll('.remove-fav').forEach(btn => {
+  favListDiv.querySelectorAll('.remove-fav').forEach(btn => {
     btn.addEventListener('click', () => {
-      const ref = btn.dataset.ref;
-      removeFavorite(ref);
+      removeFavorite(btn.dataset.ref);
       renderFavorites();
+      updateFavoriteButton();
     });
   });
 }
 
 function renderHistory() {
   const history = getHistory();
-  if (history.length === 0) {
-    histListDiv.innerHTML = '<p style="text-align:center">Nenhum versículo visto ainda. 📜</p>';
+  if (!history.length) {
+    histListDiv.innerHTML = '<p style="text-align:center;padding:20px;opacity:.7">Nenhum versículo visto ainda. 📜</p>';
     return;
   }
   histListDiv.innerHTML = history.map(hist => `
     <div class="history-item">
-      <div><strong>${getFullBookName(hist.book)} ${hist.chapter}:${hist.verse}</strong><br><small>${escapeHtml(hist.text.substring(0, 80))}...</small></div>
-      <div>
-        <button class="load-hist" data-ref="${hist.reference}" data-book="${hist.book}" data-chapter="${hist.chapter}" data-verse="${hist.verse}" data-text="${escapeHtml(hist.text)}">📖 Ler</button>
-        <button class="fav-hist" data-ref="${hist.reference}" data-book="${hist.book}" data-chapter="${hist.chapter}" data-verse="${hist.verse}" data-text="${escapeHtml(hist.text)}">⭐</button>
+      <div style="flex:1;min-width:0">
+        <strong>${getFullBookName(hist.book)} ${hist.chapter}:${hist.verse}</strong>
+        <br><small style="opacity:.75">${escapeHtml(hist.text.substring(0, 90))}…</small>
+      </div>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        <button class="load-hist" data-ref="${escapeHtml(hist.reference)}" title="Ler">📖</button>
+        <button class="fav-hist" data-ref="${escapeHtml(hist.reference)}"
+          data-book="${escapeHtml(hist.book)}"
+          data-chapter="${hist.chapter}"
+          data-verse="${hist.verse}"
+          data-text="${escapeHtml(hist.text)}"
+          title="Favoritar">⭐</button>
       </div>
     </div>
   `).join('');
 
-  document.querySelectorAll('.load-hist').forEach(btn => {
+  histListDiv.querySelectorAll('.load-hist').forEach(btn => {
     btn.addEventListener('click', () => {
-      const ref = btn.dataset.ref;
-      const found = getHistory().find(h => h.reference === ref);
+      const found = getHistory().find(h => h.reference === btn.dataset.ref);
       if (found) displayVerse(found);
       histModal.style.display = 'none';
     });
   });
-  document.querySelectorAll('.fav-hist').forEach(btn => {
+  histListDiv.querySelectorAll('.fav-hist').forEach(btn => {
     btn.addEventListener('click', () => {
-      const verse = {
+      addFavorite({
         text: btn.dataset.text,
         reference: btn.dataset.ref,
         book: btn.dataset.book,
         chapter: parseInt(btn.dataset.chapter),
         verse: parseInt(btn.dataset.verse)
-      };
-      addFavorite(verse);
-      alert('⭐ Adicionado aos favoritos!');
+      });
+      btn.textContent = '✅';
+      btn.disabled = true;
     });
   });
 }
 
 // ========== Eventos ==========
-refreshBtn.onclick = () => loadNewVerse();
-shareWABtn.onclick = () => shareWhatsApp();
-shareIGBtn.onclick = () => shareInstagram();
-copyBtn.onclick = () => copyVerseText();
-favoritesBtn.onclick = () => { renderFavorites(); favModal.style.display = 'flex'; };
-historyBtn.onclick = () => { renderHistory(); histModal.style.display = 'flex'; };
+refreshBtn.addEventListener('click', loadNewVerse);
+shareWABtn.addEventListener('click', shareWhatsApp);
+shareIGBtn.addEventListener('click', shareInstagram);
+copyBtn.addEventListener('click', copyVerseText);
+
+favoritesBtn.addEventListener('click', () => {
+  renderFavorites();
+  favModal.style.display = 'flex';
+});
+historyBtn.addEventListener('click', () => {
+  renderHistory();
+  histModal.style.display = 'flex';
+});
 
 document.querySelectorAll('.modal .close').forEach(btn => {
-  btn.onclick = () => btn.closest('.modal').style.display = 'none';
+  btn.addEventListener('click', () => btn.closest('.modal').style.display = 'none');
 });
-window.onclick = (e) => {
-  if (e.target === favModal) favModal.style.display = 'none';
+window.addEventListener('click', e => {
+  if (e.target === favModal)  favModal.style.display  = 'none';
   if (e.target === histModal) histModal.style.display = 'none';
-};
+});
 
-// ========== Inicialização ==========
+// ========== Boot ==========
 initTheme();
 initBackgroundLayers();
 loadNewVerse();
-initChat();   // <-- ADICIONADO
+initChat();
