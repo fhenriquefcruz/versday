@@ -1,7 +1,7 @@
 // js/gemini.js — Groq API
 // IMPORTANTE: A chave abaixo foi reportada como inválida (erro 401).
 // O usuário deve substituir por uma chave válida em https://console.groq.com/keys
-const GROQ_API_KEY = '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';
+const GROQ_API_KEY = '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';
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 const SYSTEM_INSTRUCTION = `Você é um amigo que entende muito da Bíblia e adora explicar as coisas de um jeito simples e gostoso de ler. Ajude as pessoas a entenderem as Escrituras como se estivessem conversando sobre a vida.
