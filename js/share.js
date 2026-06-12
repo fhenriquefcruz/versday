@@ -1,5 +1,6 @@
-import { appState } from './state.js';
+import { appState } from './state.js'; [cite: 5739]
 
+// ========== MAPEAMENTO DE LIVROS ==========
 const BOOK_NAMES = {
   "gn":"Gênesis","ex":"Êxodo","lv":"Levítico","nm":"Números","dt":"Deuteronômio",
   "js":"Josué","jz":"Juízes","rt":"Rute","1sm":"1 Samuel","2sm":"2 Samuel",
@@ -15,256 +16,206 @@ const BOOK_NAMES = {
   "2tm":"2 Timóteo","tt":"Tito","fm":"Filemom","hb":"Hebreus","tg":"Tiago",
   "1pe":"1 Pedro","2pe":"2 Pedro","1jo":"1 João","2jo":"2 João","3jo":"3 João",
   "jd":"Judas","ap":"Apocalipse"
-};
+}; [cite: 5740]
 
 function getBookName(abbrev) {
   return BOOK_NAMES[abbrev] || abbrev;
-}
+} [cite: 5741]
 
-// Quebra texto respeitando largura máxima
+// ========== FUNÇÕES AUXILIARES DE RENDERIZAÇÃO ==========
+
+// Quebra o texto respeitando a largura máxima e mantendo a fluidez visual
 function wrapText(ctx, text, maxWidth) {
-  const words = text.split(' ');
-  const lines = [];
+  const words = text.split(' '); [cite: 5741]
+  const lines = []; [cite: 5742]
   let current = '';
   for (const word of words) {
-    const test = current ? `${current} ${word}` : word;
+    const test = current ? `${current} ${word}` : word; [cite: 5742, 5743]
     if (ctx.measureText(test).width > maxWidth && current) {
-      lines.push(current);
-      current = word;
+      lines.push(current); [cite: 5743]
+      current = word; [cite: 5743]
     } else {
-      current = test;
+      current = test; [cite: 5744]
     }
   }
-  if (current) lines.push(current);
-  return lines;
+  if (current) lines.push(current); [cite: 5744]
+  return lines; [cite: 5744]
 }
 
-// Retângulo com bordas arredondadas
+// Desenha retângulos com bordas arredondadas de alta precisão
 function roundRect(ctx, x, y, w, h, r) {
-  r = Math.min(r, w / 2, h / 2);
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
+  r = Math.min(r, w / 2, h / 2); [cite: 5745]
+  ctx.beginPath(); [cite: 5746]
+  ctx.moveTo(x + r, y); [cite: 5746]
+  ctx.lineTo(x + w - r, y); [cite: 5746]
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r); [cite: 5747]
+  ctx.lineTo(x + w, y + h - r); [cite: 5747]
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); [cite: 5748]
+  ctx.lineTo(x + r, y + h); [cite: 5748]
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r); [cite: 5749]
+  ctx.lineTo(x, y + r); [cite: 5749]
+  ctx.quadraticCurveTo(x, y, x + r, y); [cite: 5749]
+  ctx.closePath(); [cite: 5750]
 }
 
-// Gera canvas 1080×1920 (9:16 — Stories/Reels/Feed vertical)
-// ============================================================================
-// SUBSTITUI DESDE AQUI (Procure por generateShareImage no seu ficheiro)
-// ============================================================================
-
-// Otimização e Ajuste Premium para Geração da Imagem de Partilha
+// ========== GERAÇÃO DA IMAGEM ULTRA-HD (9:16) ==========
 export async function generateShareImage() {
-  if (!appState.currentVerse) return null;
-  const verse = appState.currentVerse;
-  const refText = `${getBookName(verse.book)} ${verse.chapter}:${verse.verse}`;
+  if (!appState.currentVerse) return null; [cite: 5750]
+  const verse = appState.currentVerse; [cite: 5751]
+  const fullBook = getBookName(verse.book); [cite: 5751]
+  const refText  = `${fullBook} ${verse.chapter}:${verse.verse}`; [cite: 5751]
+  
+  const W = 1080, H = 1920; [cite: 5752]
+  const canvas = document.createElement('canvas'); [cite: 5752]
+  canvas.width = W; canvas.height = H; [cite: 5752]
+  const ctx = canvas.getContext('2d'); [cite: 5753]
 
-  // Cria um canvas em alta resolução nativa (1080x1920 - Proporção Perfeita 9:16 para Stories/Reels)
-  const canvas = document.createElement('canvas');
-  const W = 1080;
-  const H = 1920;
-  canvas.width = W;
-  canvas.height = H;
-  
-  const ctx = canvas.getContext('2d');
-  
-  // GARANTIA DE NITIDEZ MÁXIMA: Força suavização de imagem no topo do motor do browser
+  // GARANTIA DE NITIDEZ: Ativa suavização máxima vetorial no motor do canvas
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
 
   // ── 1. Fundo fotográfico com tratamento ──
-  const bgUrl = appState.currentBackgroundImageUrl || 'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1920';
-  const bgImg = new Image();
-  bgImg.crossOrigin = 'Anonymous';
+  const bgUrl = appState.currentBackgroundImageUrl ||
+    'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1920'; [cite: 5753, 5754]
+  const bgImg = new Image(); [cite: 5754]
+  bgImg.crossOrigin = 'Anonymous'; [cite: 5754]
+  await new Promise(resolve => { bgImg.onload = resolve; bgImg.onerror = resolve; bgImg.src = bgUrl; }); [cite: 5754]
   
-  await new Promise(resolve => { 
-    bgImg.onload = resolve; 
-    bgImg.onerror = resolve; 
-    bgImg.src = bgUrl; 
-  });
-
   if (bgImg.complete && bgImg.naturalWidth > 0) {
-    const scale = Math.max(W / bgImg.width, H / bgImg.height);
-    const ox = (W - bgImg.width * scale) / 2;
-    const oy = (H - bgImg.height * scale) / 2;
-    ctx.drawImage(bgImg, ox, oy, bgImg.width * scale, bgImg.height * scale);
+    const scale = Math.max(W / bgImg.width, H / bgImg.height); [cite: 5755]
+    const ox = (W - bgImg.width  * scale) / 2; [cite: 5756]
+    const oy = (H - bgImg.height * scale) / 2; [cite: 5757]
+    ctx.drawImage(bgImg, ox, oy, bgImg.width * scale, bgImg.height * scale); [cite: 5757]
   } else {
-    const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, '#1a2535');
-    grad.addColorStop(0.5, '#0d1520');
-    grad.addColorStop(1, '#070d18');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
+    const grad = ctx.createLinearGradient(0, 0, 0, H); [cite: 5758]
+    grad.addColorStop(0,   '#1a2535'); [cite: 5758]
+    grad.addColorStop(0.5, '#0d1520'); [cite: 5758]
+    grad.addColorStop(1,   '#070d18'); [cite: 5759]
+    ctx.fillStyle = grad; [cite: 5759]
+    ctx.fillRect(0, 0, W, H); [cite: 5760]
   }
 
   // ── 2. Overlay multicamada escuro e imersivo ──
-  const topGrad = ctx.createLinearGradient(0, 0, 0, H);
-  topGrad.addColorStop(0, 'rgba(13, 17, 23, 0.85)');
-  topGrad.addColorStop(0.3, 'rgba(13, 17, 23, 0.55)');
-  topGrad.addColorStop(0.7, 'rgba(13, 17, 23, 0.55)');
-  topGrad.addColorStop(1, 'rgba(13, 17, 23, 0.92)');
-  ctx.fillStyle = topGrad;
-  ctx.fillRect(0, 0, W, H);
+  const topGrad = ctx.createLinearGradient(0, 0, 0, H * 0.4); [cite: 5760]
+  topGrad.addColorStop(0,   'rgba(13, 17, 23, 0.88)');
+  topGrad.addColorStop(1,   'rgba(13, 17, 23, 0.25)');
+  ctx.fillStyle = topGrad; [cite: 5761]
+  ctx.fillRect(0, 0, W, H * 0.4); [cite: 5761]
+
+  const botGrad = ctx.createLinearGradient(0, H * 0.55, 0, H); [cite: 5762]
+  botGrad.addColorStop(0,   'rgba(13, 17, 23, 0.25)');
+  botGrad.addColorStop(1,   'rgba(13, 17, 23, 0.94)');
+  ctx.fillStyle = botGrad; [cite: 5762]
+  ctx.fillRect(0, H * 0.55, W, H * 0.45); [cite: 5763]
+
+  const midVeil = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, W * 0.75); [cite: 5763]
+  midVeil.addColorStop(0,   'rgba(0,0,0,0.42)');
+  midVeil.addColorStop(1,   'rgba(0,0,0,0.0)');
+  ctx.fillStyle = midVeil; [cite: 5764]
+  ctx.fillRect(0, 0, W, H); [cite: 5764]
+
+  const PAD = 96; [cite: 5764]
 
   // ── 3. Aspas de abertura conceituais ──
-  const PAD = 90;
   ctx.save();
-  ctx.textAlign = 'center';
-  ctx.font = `italic 260px 'Lora', 'Georgia', serif`;
-  ctx.fillStyle = 'rgba(228, 179, 99, 0.15)';
-  ctx.fillText('\u201C', PAD + 30, 420);
+  ctx.font = `italic 280px 'Lora', 'Georgia', serif`;
+  ctx.fillStyle = 'rgba(228, 179, 99, 0.16)'; [cite: 5769]
+  ctx.shadowBlur = 0; [cite: 5770]
+  ctx.fillText('\u201C', PAD - 10, H * 0.42);
   ctx.restore();
 
-  // ── 4. Renderização do Texto do Versículo (Elegante e Fluído) ──
-  ctx.save();
-  ctx.fillStyle = '#ECE8E0';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  
-  const fontSize = 54;
-  ctx.font = `400 ${fontSize}px 'Lora', 'Georgia', serif`;
-  
-  const maxW = W - PAD * 2.4;
-  const lines = wrapText(ctx, verse.text, maxW);
-  const lineH = fontSize * 1.62; // Alinhado com a fluidez do CSS comercial
-  const blockH = lines.length * lineH;
-  const startY = H / 2 - blockH / 2 - 40; // Deslocado ligeiramente para cima para balancear com o rodapé
+  // ── 4. Texto do Versículo (Elegante e Fluído) ──
+  const textLen = verse.text.length; [cite: 5771]
+  let fontSize = textLen > 220 ? 54 : textLen > 160 ? 62 : textLen > 110 ? 70 : 78; [cite: 5771, 5772]
 
-  lines.forEach((line, i) => { 
-    ctx.fillText(line, W / 2, startY + i * lineH); 
+  ctx.save();
+  ctx.textAlign = 'center'; [cite: 5772]
+  ctx.textBaseline = 'middle';
+  ctx.font = `400 ${fontSize}px 'Lora', 'Georgia', serif`;
+  ctx.fillStyle = '#ECE8E0'; [cite: 5773]
+  ctx.shadowColor = 'rgba(0,0,0,0.65)'; [cite: 5773]
+  ctx.shadowBlur = 20; [cite: 5773]
+  ctx.shadowOffsetX = 0; [cite: 5773]
+  ctx.shadowOffsetY = 2; [cite: 5774]
+
+  const maxW = W - PAD * 2.5; [cite: 5774]
+  const lines = wrapText(ctx, verse.text, maxW); [cite: 5774]
+  const lineH = fontSize * 1.62; // Altura de linha fluída (estilo editorial) 
+  const blockH = lines.length * lineH; [cite: 5775]
+  const startY = H / 2 - blockH / 2 + fontSize * 0.2; [cite: 5776]
+
+  lines.forEach((line, i) => {
+    ctx.fillText(line, W / 2, startY + i * lineH); [cite: 5777]
   });
   ctx.restore();
 
   // ── 5. Aspas de fechamento ──
-  const lastY = startY + (lines.length - 1) * lineH;
+  const lastY = startY + (lines.length - 1) * lineH; [cite: 5778]
   ctx.save();
-  ctx.textAlign = 'center';
-  ctx.font = `italic 260px 'Lora', 'Georgia', serif`;
-  ctx.fillStyle = 'rgba(228, 179, 99, 0.15)';
-  ctx.fillText('\u201D', W - PAD - 30, lastY + 120);
+  ctx.textAlign = 'center'; [cite: 5779]
+  ctx.font = `italic 280px 'Lora', 'Georgia', serif`;
+  ctx.fillStyle = 'rgba(228, 179, 99, 0.16)'; [cite: 5779]
+  ctx.fillText('\u201D', W - PAD + 10, lastY + 110);
   ctx.restore();
 
   // ── 6. Pílula de Referência Bíblica ──
-  const refY = lastY + lineH + 90;
-  ctx.save();
-  ctx.font = `600 38px 'Inter', sans-serif`;
-  ctx.textAlign = 'center';
-  
-  const refMeasure = ctx.measureText(refText).width;
-  const pillW = refMeasure + 80;
-  const pillH = 76;
-  const pillX = W / 2 - pillW / 2;
-  const pillYtop = refY - pillH / 2;
+  const refY = lastY + lineH + 72; [cite: 5781]
 
-  // Desenho da pílula com cantos arredondados premium
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+  ctx.save();
+  ctx.font = `600 42px 'Inter', sans-serif`; [cite: 5782]
+  ctx.textAlign = 'center'; [cite: 5782]
+  const refMeasure = ctx.measureText(refText).width; [cite: 5782]
+  const pillW = refMeasure + 86; [cite: 5782]
+  const pillH = 76; [cite: 5783]
+  const pillX = W / 2 - pillW / 2; [cite: 5783]
+  const pillYtop = refY - pillH + 16; [cite: 5784]
+
+  // Fundo opaco para legibilidade
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.48)'; [cite: 5784]
+  roundRect(ctx, pillX, pillYtop, pillW, pillH, 38); [cite: 5785]
+  ctx.fill(); [cite: 5785]
+
+  // Contorno acetinado fino
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-  ctx.lineWidth = 2;
-  
-  ctx.beginPath();
-  ctx.roundRect(pillX, pillYtop, pillW, pillH, 38);
-  ctx.fill();
-  ctx.stroke();
+  ctx.lineWidth = 1.5; [cite: 5785]
+  roundRect(ctx, pillX, pillYtop, pillW, pillH, 38); [cite: 5786]
+  ctx.stroke(); [cite: 5786]
 
-  // Texto da referência dentro da pílula
-  ctx.fillStyle = '#E4B363';
-  ctx.shadowColor = 'rgba(0,0,0,0.3)';
-  ctx.shadowBlur = 6;
-  ctx.fillText(refText, W / 2, refY + 12);
+  // Texto em Destaque Ouro
+  ctx.fillStyle = '#E4B363'; [cite: 5786]
+  ctx.shadowColor = 'rgba(0,0,0,0.4)'; [cite: 5786]
+  ctx.shadowBlur = 8; [cite: 5787]
+  ctx.fillText(refText, W / 2, refY); [cite: 5787]
   ctx.restore();
 
-  // ── 7. ASSINATURA DE MARCA CONCEITUAL "VERS DAY" ──
+  // ── 7. ASSINATURA DE MARCA CONCEITUAL "VERS DAY" (Substituição Avançada) ──
   ctx.save();
-  ctx.textAlign = 'center';
+  ctx.textAlign = 'center'; [cite: 5787]
   
-  // Pequeno ponto minimalista geométrico dourado
+  // Pequena joia geométrica (ponto minimalista dourado)
   ctx.beginPath();
-  ctx.arc(W / 2, H - 180, 5, 0, 2 * Math.PI);
-  ctx.fillStyle = '#E4B363'; 
+  ctx.arc(W / 2, H - 150, 5, 0, 2 * Math.PI);
+  ctx.fillStyle = '#E4B363';
   ctx.fill();
 
-  // Branding tipográfico com espaçamento sofisticado
-  ctx.font = `300 28px 'Inter', sans-serif`;
-  ctx.fillStyle = 'rgba(236, 232, 224, 0.4)'; 
-  ctx.fillText("V E R S   D A Y", W / 2, H - 130);
+  // Branding tipográfico com tracking espaçado de luxo
+  ctx.font = `300 30px 'Inter', sans-serif`; [cite: 5788]
+  ctx.fillStyle = 'rgba(236, 232, 224, 0.45)'; [cite: 5788]
+  ctx.shadowBlur = 0; [cite: 5788]
+  ctx.fillText("V E R S   D A Y", W / 2, H - 95);
   ctx.restore();
 
-  // Retorna em alta qualidade JPEG (0.95 evita a re-compressão agressiva do Instagram)
+  // Exporta em alta definição JPEG (0.95 preserva os canais de cor e blinda contra compressão do IG)
   return canvas.toDataURL('image/jpeg', 0.95);
 }
 
-// ── FUNÇÕES DE COMPARTILHAMENTO ATUALIZADAS ──
-export async function shareInstagram() {
-  showToast('⏳ A otimizar imagem para o Instagram...');
-  const dataUrl = await generateShareImage();
-  if (!dataUrl) {
-    showToast('❌ Erro ao processar a imagem.');
-    return;
-  }
-  forceDownload(dataUrl, 'versday_instagram_story.jpg');
-  showToast('📸 Imagem Ultra-HD salva! Pronta para Stories ou Reels.');
-}
+// ========== GERENCIAMENTO DE COMPARTILHAMENTO / INTERAÇÃO ==========
 
-export async function shareWhatsApp() {
-  const dataUrl = await generateShareImage();
-  if (!dataUrl) {
-    showToast('❌ Erro ao gerar imagem.');
-    return;
-  }
-  
-  const verse = appState.currentVerse;
-  const refText = verse ? `${getBookName(verse.book)} ${verse.chapter}:${verse.verse}` : '';
-  const blob = await blobFromDataUrl(dataUrl);
-  const file = new File([blob], 'versday_share.jpg', { type: 'image/jpeg' });
-  
-  if (navigator.canShare?.({ files: [file] })) {
-    try {
-      await navigator.share({
-        files: [file],
-        title: 'VersDay',
-        text: verse ? `"${verse.text}" — ${refText}` : ''
-      });
-      return;
-    } catch (e) {
-      if (e.name === 'AbortError') return;
-    }
-  }
-  forceDownload(dataUrl, 'versday_share.jpg');
-  showToast('📥 Imagem salva com qualidade máxima!');
-}
-
-// Função auxiliar estável para quebra de linhas no Canvas
-function wrapText(ctx, text, maxWidth) {
-  const words = text.split(' ');
-  const lines = [];
-  let currentLine = words[0];
-
-  for (let i = 1; i < words.length; i++) {
-    const word = words[i];
-    const width = ctx.measureText(currentLine + " " + word).width;
-    if (width < maxWidth) {
-      currentLine += " " + word;
-    } else {
-      lines.push(currentLine);
-      currentLine = word;
-    }
-  }
-  lines.push(currentLine);
-  return lines;
-}
-// Toast não-bloqueante
 function showToast(msg) {
-  let t = document.getElementById('vd-toast');
+  let t = document.getElementById('vd-toast'); [cite: 5790]
   if (!t) {
-    t = document.createElement('div');
-    t.id = 'vd-toast';
+    t = document.createElement('div'); [cite: 5790]
+    t.id = 'vd-toast'; [cite: 5791]
     t.style.cssText = `
       position:fixed; bottom:32px; left:50%;
       transform:translateX(-50%) translateY(16px);
@@ -283,77 +234,78 @@ function showToast(msg) {
       white-space:nowrap;
       max-width:90vw;
       text-align:center;
-    `;
-    document.body.appendChild(t);
+    `; [cite: 5791, 5792, 5793]
+    document.body.appendChild(t); [cite: 5793]
   }
-  t.textContent = msg;
-  t.style.opacity = '1';
-  t.style.transform = 'translateX(-50%) translateY(0)';
-  clearTimeout(t._tid);
+  t.textContent = msg; [cite: 5793]
+  t.style.opacity = '1'; [cite: 5793]
+  t.style.transform = 'translateX(-50%) translateY(0)'; [cite: 5793]
+  clearTimeout(t._tid); [cite: 5793]
   t._tid = setTimeout(() => {
-    t.style.opacity = '0';
-    t.style.transform = 'translateX(-50%) translateY(16px)';
-  }, 3200);
+    t.style.opacity = '0'; [cite: 5794]
+    t.style.transform = 'translateX(-50%) translateY(16px)'; [cite: 5794]
+  }, 3200); [cite: 5794]
 }
 
 async function blobFromDataUrl(dataUrl) {
-  return fetch(dataUrl).then(r => r.blob());
+  return fetch(dataUrl).then(r => r.blob()); [cite: 5795]
 }
 
 function forceDownload(dataUrl, filename) {
-  const a = document.createElement('a');
-  a.href = dataUrl; a.download = filename;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
+  const a = document.createElement('a'); [cite: 5795]
+  a.href = dataUrl; a.download = filename; [cite: 5796]
+  document.body.appendChild(a); a.click(); [cite: 5796]
+  document.body.removeChild(a); [cite: 5796]
 }
 
 export async function shareWhatsApp() {
-  showToast('⏳ Gerando imagem...');
-  const dataUrl = await generateShareImage();
-  if (!dataUrl) { showToast('❌ Erro ao gerar imagem.'); return; }
+  showToast('⏳ A processar imagem de alta fidelidade...'); [cite: 5796]
+  const dataUrl = await generateShareImage(); [cite: 5797]
+  if (!dataUrl) { showToast('❌ Erro ao gerar imagem.'); return; } [cite: 5797]
 
-  const blob = await blobFromDataUrl(dataUrl);
-  const file = new File([blob], 'versiculo_whatsapp.png', { type: 'image/png' });
-
-  if (navigator.canShare?.({ files: [file] })) {
+  const blob = await blobFromDataUrl(dataUrl); [cite: 5798]
+  const file = new File([blob], 'versday_whatsapp.jpg', { type: 'image/jpeg' });
+  
+  if (navigator.canShare?.({ files: [file] })) { [cite: 5799]
     try {
       await navigator.share({
         files: [file],
-        title: 'Versículo do Dia',
+        title: 'VersDay',
         text: appState.currentVerse
           ? `"${appState.currentVerse.text}" — ${getBookName(appState.currentVerse.book)} ${appState.currentVerse.chapter}:${appState.currentVerse.verse}`
-          : ''
+          : '' [cite: 5799]
       });
-      return;
+      return; [cite: 5800]
     } catch (e) {
-      if (e.name === 'AbortError') return; // usuário cancelou
+      if (e.name === 'AbortError') return; [cite: 5800]
     }
   }
-  forceDownload(dataUrl, 'versiculo_whatsapp.png');
-  showToast('📥 Imagem baixada!');
+  forceDownload(dataUrl, 'versday_whatsapp.jpg');
+  showToast('📥 Imagem Ultra-HD guardada!');
 }
 
 export async function shareInstagram() {
-  showToast('⏳ Gerando imagem 9:16...');
-  const dataUrl = await generateShareImage();
-  if (!dataUrl) { showToast('❌ Erro ao gerar imagem.'); return; }
-  forceDownload(dataUrl, 'versiculo_story_ig.png');
-  showToast('📸 Imagem 9:16 salva! Abra o Instagram → Story ou Reels.');
+  showToast('⏳ A otimizar imagem para o Instagram (9:16)...'); [cite: 5802]
+  const dataUrl = await generateShareImage(); [cite: 5802]
+  if (!dataUrl) { showToast('❌ Erro ao gerar imagem.'); return; } [cite: 5803]
+  
+  forceDownload(dataUrl, 'versday_instagram_story.jpg'); [cite: 5803]
+  showToast('📸 Imagem Ultra-HD salva! Abra o Instagram → Stories.'); [cite: 5804]
 }
 
 export function copyVerseText() {
-  if (!appState.currentVerse) return;
-  const v = appState.currentVerse;
-  const text = `"${v.text}" — ${getBookName(v.book)} ${v.chapter}:${v.verse} (ARA)`;
-  navigator.clipboard.writeText(text)
-    .then(() => showToast('📋 Versículo copiado!'))
+  if (!appState.currentVerse) return; [cite: 5804]
+  const v = appState.currentVerse; [cite: 5805]
+  const text = `"${v.text}" — ${getBookName(v.book)} ${v.chapter}:${v.verse} (ARA)`; [cite: 5805]
+  navigator.clipboard.writeText(text) [cite: 5806]
+    .then(() => showToast('📋 Versículo copiado para a área de transferência!')) [cite: 5806]
     .catch(() => {
-      const el = document.createElement('textarea');
-      el.value = text;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand('copy');
-      document.body.removeChild(el);
-      showToast('📋 Versículo copiado!');
+      const el = document.createElement('textarea'); [cite: 5806]
+      el.value = text; [cite: 5806]
+      document.body.appendChild(el); [cite: 5806]
+      el.select(); [cite: 5806]
+      document.execCommand('copy'); [cite: 5806]
+      document.body.removeChild(el); [cite: 5806]
+      showToast('📋 Versículo copiado!'); [cite: 5806]
     });
 }
