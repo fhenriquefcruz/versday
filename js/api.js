@@ -42,7 +42,7 @@ export async function fetchVerseFromAPI() {
   }
 }
 
-// Mapeamento de nomes para abreviações (mesmo do seu código, mantido)
+// Mapeamento de nomes para abreviações
 function mapBookNameToAbbreviation(bookName) {
   const map = {
     "Gênesis": "gn", "Êxodo": "ex", "Levítico": "lv", "Números": "nm", "Deuteronômio": "dt",
