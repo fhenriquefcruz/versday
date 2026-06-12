@@ -56,169 +56,209 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 // Gera canvas 1080×1920 (9:16 — Stories/Reels/Feed vertical)
+// ============================================================================
+// SUBSTITUI DESDE AQUI (Procure por generateShareImage no seu ficheiro)
+// ============================================================================
+
+// Otimização e Ajuste Premium para Geração da Imagem de Partilha
 export async function generateShareImage() {
   if (!appState.currentVerse) return null;
   const verse = appState.currentVerse;
-  const fullBook = getBookName(verse.book);
-  const refText  = `${fullBook} ${verse.chapter}:${verse.verse}`;
+  const refText = `${getBookName(verse.book)} ${verse.chapter}:${verse.verse}`;
 
-  const W = 1080, H = 1920;
+  // Cria um canvas em alta resolução nativa (1080x1920 - Proporção Perfeita 9:16 para Stories/Reels)
   const canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
+  const W = 1080;
+  const H = 1920;
+  canvas.width = W;
+  canvas.height = H;
+  
   const ctx = canvas.getContext('2d');
+  
+  // GARANTIA DE NITIDEZ MÁXIMA: Força suavização de imagem no topo do motor do browser
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
 
-  // ── 1. Fundo fotográfico ──
-  const bgUrl = appState.currentBackgroundImageUrl ||
-    'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1920';
-
+  // ── 1. Fundo fotográfico com tratamento ──
+  const bgUrl = appState.currentBackgroundImageUrl || 'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1920';
   const bgImg = new Image();
   bgImg.crossOrigin = 'Anonymous';
-  await new Promise(resolve => { bgImg.onload = resolve; bgImg.onerror = resolve; bgImg.src = bgUrl; });
+  
+  await new Promise(resolve => { 
+    bgImg.onload = resolve; 
+    bgImg.onerror = resolve; 
+    bgImg.src = bgUrl; 
+  });
 
   if (bgImg.complete && bgImg.naturalWidth > 0) {
     const scale = Math.max(W / bgImg.width, H / bgImg.height);
-    const ox = (W - bgImg.width  * scale) / 2;
+    const ox = (W - bgImg.width * scale) / 2;
     const oy = (H - bgImg.height * scale) / 2;
     ctx.drawImage(bgImg, ox, oy, bgImg.width * scale, bgImg.height * scale);
   } else {
     const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0,   '#1a2535');
+    grad.addColorStop(0, '#1a2535');
     grad.addColorStop(0.5, '#0d1520');
-    grad.addColorStop(1,   '#070d18');
+    grad.addColorStop(1, '#070d18');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
   }
 
-  // ── 2. Overlay multicamada ──
-  // Escurece topo e base, mantém centro um pouco mais vivo
-  const topGrad = ctx.createLinearGradient(0, 0, 0, H * 0.4);
-  topGrad.addColorStop(0,   'rgba(0,0,0,0.72)');
-  topGrad.addColorStop(1,   'rgba(0,0,0,0.08)');
+  // ── 2. Overlay multicamada escuro e imersivo ──
+  const topGrad = ctx.createLinearGradient(0, 0, 0, H);
+  topGrad.addColorStop(0, 'rgba(13, 17, 23, 0.85)');
+  topGrad.addColorStop(0.3, 'rgba(13, 17, 23, 0.55)');
+  topGrad.addColorStop(0.7, 'rgba(13, 17, 23, 0.55)');
+  topGrad.addColorStop(1, 'rgba(13, 17, 23, 0.92)');
   ctx.fillStyle = topGrad;
-  ctx.fillRect(0, 0, W, H * 0.4);
-
-  const botGrad = ctx.createLinearGradient(0, H * 0.55, 0, H);
-  botGrad.addColorStop(0,   'rgba(0,0,0,0.08)');
-  botGrad.addColorStop(1,   'rgba(0,0,0,0.80)');
-  ctx.fillStyle = botGrad;
-  ctx.fillRect(0, H * 0.55, W, H * 0.45);
-
-  // Véu central suave para destacar o texto
-  const midVeil = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, W * 0.75);
-  midVeil.addColorStop(0,   'rgba(0,0,0,0.38)');
-  midVeil.addColorStop(1,   'rgba(0,0,0,0.0)');
-  ctx.fillStyle = midVeil;
   ctx.fillRect(0, 0, W, H);
 
-  const PAD = 96; // margem horizontal
-
-  // ── 3. Topo: logotipo app ──
+  // ── 3. Aspas de abertura conceituais ──
+  const PAD = 90;
   ctx.save();
   ctx.textAlign = 'center';
-  ctx.shadowColor = 'rgba(0,0,0,0.6)';
-  ctx.shadowBlur   = 18;
-
-  // Ícone + nome do app
-  ctx.font = `700 52px 'Inter', sans-serif`;
-  ctx.fillStyle = '#E4B363';
-  ctx.letterSpacing = '6px';
-  ctx.fillText('VERS DAY', W / 2, 148);
-
-  // Linha dourada decorativa
-  ctx.restore();
-  ctx.save();
-  ctx.globalAlpha = 0.45;
-  ctx.strokeStyle = '#E4B363';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(PAD * 1.5, 178);
-  ctx.lineTo(W - PAD * 1.5, 178);
-  ctx.stroke();
+  ctx.font = `italic 260px 'Lora', 'Georgia', serif`;
+  ctx.fillStyle = 'rgba(228, 179, 99, 0.15)';
+  ctx.fillText('\u201C', PAD + 30, 420);
   ctx.restore();
 
-  // ── 4. Aspas de abertura ──
+  // ── 4. Renderização do Texto do Versículo (Elegante e Fluído) ──
   ctx.save();
-  ctx.font = `italic 280px 'Georgia', serif`;
-  ctx.fillStyle = 'rgba(228,179,99,0.22)';
-  ctx.shadowBlur = 0;
-  ctx.fillText('\u201C', PAD - 20, H * 0.43);
-  ctx.restore();
-
-  // ── 5. Texto do versículo ──
-  const textLen = verse.text.length;
-  let fontSize = textLen > 220 ? 58 : textLen > 160 ? 66 : textLen > 110 ? 74 : 82;
-
-  ctx.save();
+  ctx.fillStyle = '#ECE8E0';
   ctx.textAlign = 'center';
-  ctx.font = `400 ${fontSize}px 'Georgia', serif`;
-  ctx.fillStyle = '#F5F0E8';
-  ctx.shadowColor = 'rgba(0,0,0,0.75)';
-  ctx.shadowBlur   = 22;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 2;
-
+  ctx.textBaseline = 'middle';
+  
+  const fontSize = 54;
+  ctx.font = `400 ${fontSize}px 'Lora', 'Georgia', serif`;
+  
   const maxW = W - PAD * 2.4;
   const lines = wrapText(ctx, verse.text, maxW);
-  const lineH = fontSize * 1.48;
+  const lineH = fontSize * 1.62; // Alinhado com a fluidez do CSS comercial
   const blockH = lines.length * lineH;
-  const startY = H / 2 - blockH / 2 + fontSize * 0.36;
+  const startY = H / 2 - blockH / 2 - 40; // Deslocado ligeiramente para cima para balancear com o rodapé
 
-  lines.forEach((line, i) => {
-    ctx.fillText(line, W / 2, startY + i * lineH);
+  lines.forEach((line, i) => { 
+    ctx.fillText(line, W / 2, startY + i * lineH); 
   });
   ctx.restore();
 
-  // ── 6. Aspas de fechamento ──
+  // ── 5. Aspas de fechamento ──
   const lastY = startY + (lines.length - 1) * lineH;
   ctx.save();
   ctx.textAlign = 'center';
-  ctx.font = `italic 280px 'Georgia', serif`;
-  ctx.fillStyle = 'rgba(228,179,99,0.22)';
-  ctx.fillText('\u201D', W - PAD + 20, lastY + 80);
+  ctx.font = `italic 260px 'Lora', 'Georgia', serif`;
+  ctx.fillStyle = 'rgba(228, 179, 99, 0.15)';
+  ctx.fillText('\u201D', W - PAD - 30, lastY + 120);
   ctx.restore();
 
-  // ── 7. Pílula de referência ──
-  const refY = lastY + lineH + 54;
-
+  // ── 6. Pílula de Referência Bíblica ──
+  const refY = lastY + lineH + 90;
   ctx.save();
-  ctx.font = `600 52px 'Inter', sans-serif`;
+  ctx.font = `600 38px 'Inter', sans-serif`;
   ctx.textAlign = 'center';
+  
   const refMeasure = ctx.measureText(refText).width;
-  const pillW = refMeasure + 90;
-  const pillH = 80;
+  const pillW = refMeasure + 80;
+  const pillH = 76;
   const pillX = W / 2 - pillW / 2;
-  const pillYtop = refY - pillH + 14;
+  const pillYtop = refY - pillH / 2;
 
-  // Fundo da pílula
-  ctx.fillStyle = 'rgba(0,0,0,0.52)';
-  roundRect(ctx, pillX, pillYtop, pillW, pillH, 40);
+  // Desenho da pílula com cantos arredondados premium
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+  ctx.lineWidth = 2;
+  
+  ctx.beginPath();
+  ctx.roundRect(pillX, pillYtop, pillW, pillH, 38);
   ctx.fill();
-
-  // Borda dourada fina
-  ctx.strokeStyle = 'rgba(228,179,99,0.5)';
-  ctx.lineWidth = 1.5;
-  roundRect(ctx, pillX, pillYtop, pillW, pillH, 40);
   ctx.stroke();
 
-  // Texto da referência
+  // Texto da referência dentro da pílula
   ctx.fillStyle = '#E4B363';
-  ctx.shadowColor = 'rgba(0,0,0,0.5)';
-  ctx.shadowBlur = 10;
-  ctx.fillText(refText, W / 2, refY);
+  ctx.shadowColor = 'rgba(0,0,0,0.3)';
+  ctx.shadowBlur = 6;
+  ctx.fillText(refText, W / 2, refY + 12);
   ctx.restore();
 
-  // ── 8. Rodapé ──
+  // ── 7. ASSINATURA DE MARCA CONCEITUAL "VERS DAY" ──
   ctx.save();
   ctx.textAlign = 'center';
-  ctx.font = `400 38px 'Inter', sans-serif`;
-  ctx.fillStyle = 'rgba(255,255,255,0.5)';
-  ctx.shadowBlur = 0;
-  ctx.fillText('✨  Vers Day  ·  Fábio Cruz', W / 2, H - 72);
+  
+  // Pequeno ponto minimalista geométrico dourado
+  ctx.beginPath();
+  ctx.arc(W / 2, H - 180, 5, 0, 2 * Math.PI);
+  ctx.fillStyle = '#E4B363'; 
+  ctx.fill();
+
+  // Branding tipográfico com espaçamento sofisticado
+  ctx.font = `300 28px 'Inter', sans-serif`;
+  ctx.fillStyle = 'rgba(236, 232, 224, 0.4)'; 
+  ctx.fillText("V E R S   D A Y", W / 2, H - 130);
   ctx.restore();
 
-  return canvas.toDataURL('image/png', 1.0);
+  // Retorna em alta qualidade JPEG (0.95 evita a re-compressão agressiva do Instagram)
+  return canvas.toDataURL('image/jpeg', 0.95);
 }
 
+// ── FUNÇÕES DE COMPARTILHAMENTO ATUALIZADAS ──
+export async function shareInstagram() {
+  showToast('⏳ A otimizar imagem para o Instagram...');
+  const dataUrl = await generateShareImage();
+  if (!dataUrl) {
+    showToast('❌ Erro ao processar a imagem.');
+    return;
+  }
+  forceDownload(dataUrl, 'versday_instagram_story.jpg');
+  showToast('📸 Imagem Ultra-HD salva! Pronta para Stories ou Reels.');
+}
+
+export async function shareWhatsApp() {
+  const dataUrl = await generateShareImage();
+  if (!dataUrl) {
+    showToast('❌ Erro ao gerar imagem.');
+    return;
+  }
+  
+  const verse = appState.currentVerse;
+  const refText = verse ? `${getBookName(verse.book)} ${verse.chapter}:${verse.verse}` : '';
+  const blob = await blobFromDataUrl(dataUrl);
+  const file = new File([blob], 'versday_share.jpg', { type: 'image/jpeg' });
+  
+  if (navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: 'VersDay',
+        text: verse ? `"${verse.text}" — ${refText}` : ''
+      });
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+    }
+  }
+  forceDownload(dataUrl, 'versday_share.jpg');
+  showToast('📥 Imagem salva com qualidade máxima!');
+}
+
+// Função auxiliar estável para quebra de linhas no Canvas
+function wrapText(ctx, text, maxWidth) {
+  const words = text.split(' ');
+  const lines = [];
+  let currentLine = words[0];
+
+  for (let i = 1; i < words.length; i++) {
+    const word = words[i];
+    const width = ctx.measureText(currentLine + " " + word).width;
+    if (width < maxWidth) {
+      currentLine += " " + word;
+    } else {
+      lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+  lines.push(currentLine);
+  return lines;
+}
 // Toast não-bloqueante
 function showToast(msg) {
   let t = document.getElementById('vd-toast');
