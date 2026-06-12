@@ -40,8 +40,10 @@
   --radius-pill:     100px;
   --radius-input:    14px;
   --radius-msg:      20px;
+
   --font-serif:      'Lora', 'Georgia', serif;
   --font-sans:       'Inter', system-ui, sans-serif;
+
   --transition:      0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -234,8 +236,8 @@ body:not(.light) .verse-header h1 {
   font-family: var(--font-serif);
   font-size: clamp(1.18rem, 3.2vw, 1.68rem);
   font-weight: 400;
-  line-height: 1.68; /* Aumentado ligeiramente para maior elegância editorial */
-  letter-spacing: -0.01em; /* Encaixe orgânico das serifas */
+  line-height: 1.68;
+  letter-spacing: 0.01em;   /* Ajustado para dar respiração */
   color: var(--text-primary);
   margin-bottom: 20px;
   position: relative;
@@ -364,7 +366,7 @@ body:not(.light) .verse-header h1 {
   height: 48px;
   padding: 0;
   border-radius: 50%;
-  font-size: 0;   /* oculta texto, mostra apenas SVG */
+  font-size: 0;
 }
 .btn-icon svg { width: 22px; height: 22px; }
 .btn-icon:hover { border-color: var(--border-focus); }
@@ -412,8 +414,7 @@ body:not(.light) .verse-header h1 {
   color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: 0.92rem;
-  transition: border-color var(--transition), background var(--transition),
-              box-shadow var(--transition);
+  transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
   min-width: 0;
 }
 #initialQuestion:focus {
