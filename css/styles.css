@@ -40,10 +40,8 @@
   --radius-pill:     100px;
   --radius-input:    14px;
   --radius-msg:      20px;
-
   --font-serif:      'Lora', 'Georgia', serif;
   --font-sans:       'Inter', system-ui, sans-serif;
-
   --transition:      0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -75,10 +73,12 @@ body.light {
                      0 4px 12px -4px rgba(0, 0, 0, 0.1);
 }
 
-/* ── RESET ── */
+/* ── RESET & MELHORIA DE FONTES ── */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; }
+html { 
+  -webkit-text-size-adjust: 100%;
+}
 
 body {
   min-height: 100vh;
@@ -94,6 +94,11 @@ body {
   background-position: center 30%;
   background-attachment: fixed;
   color: var(--text-primary);
+  
+  /* Renderização fluída e elegante de fontes nas telas atuais */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* ── FUNDO COM CROSSFADE ── */
@@ -152,7 +157,6 @@ body::after {
   line-height: 1.2;
 }
 
-/* gradiente dourado nas letras apenas no tema escuro */
 body:not(.light) .verse-header h1 {
   background: linear-gradient(135deg, #F5E7D3 0%, var(--accent) 70%);
   -webkit-background-clip: text;
@@ -178,8 +182,7 @@ body:not(.light) .verse-header h1 {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  transition: background var(--transition), transform var(--transition),
-              border-color var(--transition);
+  transition: background var(--transition), transform var(--transition), border-color var(--transition);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -226,18 +229,17 @@ body:not(.light) .verse-header h1 {
   transition: opacity 0.18s ease;
 }
 
-/* Texto principal — serifado, generoso */
+/* Texto principal — serifado, generoso e fluído */
 .verse-text {
   font-family: var(--font-serif);
   font-size: clamp(1.18rem, 3.2vw, 1.68rem);
   font-weight: 400;
-  line-height: 1.62;
+  line-height: 1.68; /* Aumentado ligeiramente para maior elegância editorial */
+  letter-spacing: -0.01em; /* Encaixe orgânico das serifas */
   color: var(--text-primary);
   margin-bottom: 20px;
   position: relative;
   max-width: 580px;
-
-  /* Aspas tipográficas via pseudo-elementos — mais elegante */
   padding: 0 4px;
 }
 .verse-text::before {
@@ -277,7 +279,7 @@ body:not(.light) .verse-header h1 {
   font-size: 0.88rem;
   font-weight: 600;
   color: var(--accent-text);
-  letter-spacing: 0.03em;
+  letter-spacing: 0.05em;
 }
 .chapter-link {
   font-size: 0.85rem;
