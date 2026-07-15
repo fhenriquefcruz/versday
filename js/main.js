@@ -1,6 +1,6 @@
 // js/main.js
 import { appState } from './state.js';
-import { fetchVerseFromAPI, getRandomFallbackVerse, shouldTryAPI } from './api.js';
+import { getRandomFallbackVerse } from './api.js';
 import { getCache, setCache, addToCache, isVerseInCache } from './cache.js';
 import { getHistory, addToHistory } from './history.js';
 import { getFavorites, addFavorite, removeFavorite, isFavorite } from './favorites.js';
@@ -122,7 +122,7 @@ function displayVerse(verse) {
   `;
 
   smoothUpdate(html);
-  setBackgroundImage();
+  setBackgroundImage(verse);
   updateFavoriteButton();
 }
 
@@ -149,13 +149,7 @@ async function loadNewVerse() {
       }
     }
 
-    // 2. Cache vazio — tenta API se disponível
-    if (!verse && shouldTryAPI()) {
-      verse = await fetchVerseFromAPI();
-      if (verse && isRecentlyUsed(verse.reference)) verse = null;
-    }
-
-    // 3. Fallback (acervo local)
+    // 2. Cache vazio — sorteia do acervo curado local
     if (!verse) {
       let fallback = getRandomFallbackVerse();
       let attempts = 0;
