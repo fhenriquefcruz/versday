@@ -1,5 +1,6 @@
 // js/background.js
-import { fetchLandscapeImage, getFallbackImage } from './unsplash.js';
+import { fetchContextualImage, getFallbackImage } from './unsplash.js';
+import { getImageQueryForVerse } from './semantic.js';
 import { appState } from './state.js';
 
 let bgLayer1, bgLayer2;
@@ -16,9 +17,13 @@ export function initBackgroundLayers() {
     bgLayer2 = l2;
 }
 
-export async function setBackgroundImage() {
-    // Busca imagem do Unsplash
-    const result = await fetchLandscapeImage();
+// Recebe o versículo atual para escolher uma imagem contextualizada
+// com o tema dele (paz, coragem, gratidão, etc.), em vez de uma busca
+// genérica de paisagem sempre igual.
+export async function setBackgroundImage(verse) {
+    const { theme, query } = getImageQueryForVerse(verse);
+
+    const result = await fetchContextualImage(query);
     let imageUrl;
     let attribution = null;
 
@@ -26,7 +31,7 @@ export async function setBackgroundImage() {
         imageUrl = result.imageUrl;
         attribution = result.attribution;
     } else {
-        imageUrl = getFallbackImage();
+        imageUrl = getFallbackImage(theme);
     }
 
     if (imageUrl === currentImageUrl) return;
