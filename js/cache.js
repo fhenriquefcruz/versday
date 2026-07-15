@@ -1,4 +1,4 @@
-import { fetchVerseFromAPI, getRandomFallbackVerse, shouldTryAPI } from './api.js';
+import { getRandomFallbackVerse } from './api.js';
 import { appState } from './state.js';
 
 let verseCache = [];
@@ -13,24 +13,12 @@ export function isVerseInCache(verse) {
 export async function addToCache(lastVerseRef, isRecentlyUsed) {
   if (appState.isLoading) return;
 
-  // Alterna entre API e fallback para manter diversidade
-  const useAPI = shouldTryAPI() && Math.random() > 0.3; // 70% API, 30% fallback quando API ok
-
   let newVerse = null;
   let attempts = 0;
-  const maxAttempts = 5;
+  const maxAttempts = 10;
 
   while (!newVerse && attempts < maxAttempts) {
-    let fetched = null;
-
-    if (useAPI) {
-      fetched = await fetchVerseFromAPI();
-    }
-
-    // Se API falhou ou não foi tentada, usa fallback
-    if (!fetched) {
-      fetched = getRandomFallbackVerse();
-    }
+    const fetched = getRandomFallbackVerse();
 
     if (
       fetched &&
@@ -42,7 +30,6 @@ export async function addToCache(lastVerseRef, isRecentlyUsed) {
       break;
     }
     attempts++;
-    if (useAPI) await new Promise(r => setTimeout(r, 200));
   }
 
   if (newVerse) {
