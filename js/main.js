@@ -8,6 +8,7 @@ import { initTheme } from './theme.js';
 import { initBackgroundLayers, setBackgroundImage } from './background.js';
 import { shareWhatsApp, shareInstagram, copyVerseText } from './share.js';
 import { initChat } from './chat.js';
+import { saveVisualFeedback, getFeedback } from './visualMemory.js';
 
 // ========== DOM ==========
 const dynamicZone      = document.getElementById('verseDynamicZone');
@@ -22,6 +23,7 @@ const histModal        = document.getElementById('historyModal');
 const favListDiv       = document.getElementById('favoritesList');
 const histListDiv      = document.getElementById('historyList');
 const favoriteCurrentBtn = document.getElementById('favoriteCurrentBtn');
+const visualFeedback   = document.getElementById('visualFeedback');
 
 // ========== Estado local ==========
 let verseHistoryRefs = [];
@@ -122,8 +124,25 @@ function displayVerse(verse) {
   `;
 
   smoothUpdate(html);
-  setBackgroundImage(verse);
+  setBackgroundImage(verse)
+    .then(() => renderVisualFeedback())
+    .catch(error => console.warn('[VersDay] Falha visual não bloqueante:', error));
   updateFavoriteButton();
+}
+
+function renderVisualFeedback() {
+  if (!visualFeedback || !appState.currentVerse || appState.currentVisual?.mode !== 'photo') {
+    if (visualFeedback) visualFeedback.hidden = true;
+    return;
+  }
+
+  visualFeedback.hidden = false;
+  const current = getFeedback(appState.currentVerse.reference, appState.currentVisual.id);
+  visualFeedback.querySelectorAll('[data-visual-feedback]').forEach(button => {
+    const active = button.dataset.visualFeedback === current;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
 }
 
 // ========== Carregar versículo — equilibrado entre API e fallback ==========
@@ -281,6 +300,26 @@ refreshBtn.addEventListener('click', loadNewVerse);
 shareWABtn.addEventListener('click', shareWhatsApp);
 shareIGBtn.addEventListener('click', shareInstagram);
 copyBtn.addEventListener('click', copyVerseText);
+
+if (visualFeedback) {
+  visualFeedback.addEventListener('click', async event => {
+    const button = event.target.closest('[data-visual-feedback]');
+    if (!button || !appState.currentVerse || !appState.currentVisual?.id) return;
+
+    const value = button.dataset.visualFeedback;
+    saveVisualFeedback(appState.currentVerse.reference, appState.currentVisual.id, value);
+    renderVisualFeedback();
+
+    if (value === 'down') {
+      visualFeedback.hidden = true;
+      try {
+        await setBackgroundImage(appState.currentVerse, { force: true });
+      } finally {
+        renderVisualFeedback();
+      }
+    }
+  });
+}
 
 favoritesBtn.addEventListener('click', () => {
   renderFavorites();
