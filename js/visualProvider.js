@@ -27,6 +27,18 @@ function getSelectEndpoint() {
   return search.replace(/\/visual-search(?:\?.*)?$/, '/visual-select');
 }
 
+function getValidateEndpoint() {
+  if (isVercelRuntime()) return '/api/visual-validate';
+
+  const search = getSearchEndpoint();
+  if (!search) return '';
+
+  return search.replace(
+    /\/visual-search(?:\?.*)?$/,
+    '/visual-validate'
+  );
+}
+
 function sanitizeCandidate(raw) {
   if (!raw || !raw.id || !raw.imageUrl) return null;
 
@@ -141,5 +153,115 @@ export async function notifyProviderSelection(candidate) {
     });
   } catch {
     // Tracking do provedor jamais bloqueia a experiência.
+  }
+}
+
+export async function validateVisualFinalists(
+  intent,
+  candidates,
+  purpose = 'background'
+) {
+  const shortlist = Array.isArray(candidates)
+    ? candidates.slice(0, 3)
+    : [];
+
+  if (!shortlist.length) {
+    return {
+      enabled: false,
+      reason: 'NO_CANDIDATES',
+      decisions: []
+    };
+  }
+
+  const ready = await isBackendProviderReady('vlm');
+  if (ready !== true) {
+    return {
+      enabled: false,
+      reason: ready === false ? 'VLM_NOT_CONFIGURED' : 'NO_BACKEND_HEALTH',
+      decisions: []
+    };
+  }
+
+  const endpoint = getValidateEndpoint();
+  if (!endpoint) {
+    return {
+      enabled: false,
+      reason: 'NO_VLM_ENDPOINT',
+      decisions: []
+    };
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        verseReference: intent.verseReference,
+        purpose,
+        intent: {
+          semantic: intent.semantic,
+          representation: intent.representation,
+          visualIntent: intent.visualIntent,
+          biblicalContext: intent.biblicalContext
+        },
+        candidates: shortlist.map(candidate => ({
+          id: candidate.id,
+          provider: candidate.provider,
+          imageUrl: candidate.previewUrl || candidate.imageUrl,
+          description: candidate.description,
+          alt: candidate.alt,
+          tags: candidate.tags
+        }))
+      }),
+      signal: controller.signal
+    });
+
+    if (!response.ok) {
+      throw new Error(`visual validator HTTP ${response.status}`);
+    }
+
+    const payload = await response.json();
+    const decisions = Array.isArray(payload.decisions)
+      ? payload.decisions
+          .map(decision => ({
+            id: String(decision?.id || ''),
+            semanticCompatibility: Number(
+              decision?.semanticCompatibility ?? 0
+            ),
+            emotionalCompatibility: Number(
+              decision?.emotionalCompatibility ?? 0
+            ),
+            contradiction: Boolean(decision?.contradiction),
+            unsafeOrCliche: Boolean(decision?.unsafeOrCliche),
+            accepted: Boolean(decision?.accepted),
+            reason: String(decision?.reason || '').slice(0, 240)
+          }))
+          .filter(decision => decision.id)
+      : [];
+
+    return {
+      enabled: true,
+      model: String(payload.model || ''),
+      decisions
+    };
+  } catch (error) {
+    console.info(
+      '[VersDay] VLM indisponível; ranking local permanece soberano.',
+      error?.name || error
+    );
+
+    return {
+      enabled: false,
+      reason:
+        error?.name === 'AbortError'
+          ? 'VLM_TIMEOUT'
+          : 'VLM_FAILED_OPEN',
+      decisions: []
+    };
+  } finally {
+    clearTimeout(timeout);
   }
 }
