@@ -85,6 +85,29 @@ Os valores reais nunca devem ir para `index.html`, `js/` ou para commits. Creden
 
 Em uma implantação Vercel (`*.vercel.app`), os endpoints `/api/visual-search`, `/api/visual-select` e `/api/chat` são detectados automaticamente. No GitHub Pages, o VersDay continua sem segredos e usa o catálogo curado + fallback abstrato.
 
+### Bootstrap do backend Vercel
+
+O workflow manual `.github/workflows/deploy-vercel-api.yml` cria ou reutiliza o projeto `versday-api`, faz o deploy de produção e valida automaticamente `/api/health`.
+
+Para habilitá-lo, cadastre no GitHub apenas:
+
+```text
+VERCEL_TOKEN=...
+```
+
+Depois execute o workflow **Deploy VersDay API to Vercel** em `Actions → Run workflow`.
+
+O deploy usa a Vercel CLI pinada e não copia credenciais antigas do frontend. Após a primeira publicação, cadastre no ambiente **Production** do projeto Vercel as chaves novas/rotacionadas:
+
+```text
+UNSPLASH_ACCESS_KEY=...
+GROQ_API_KEY=...
+GROQ_MODEL=llama-3.3-70b-versatile
+ALLOWED_ORIGIN=https://fhenriquefcruz.github.io
+```
+
+O endpoint `/api/health` informa apenas se os providers estão configurados, nunca seus valores.
+
 ## Share cards
 
 O engine suporta:

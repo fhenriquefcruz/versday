@@ -1,0 +1,137 @@
+name: Deploy VersDay API to Vercel
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_name:
+        description: Vercel project name
+        required: true
+        default: versday-api
+        type: string
+      scope:
+        description: Vercel team slug
+        required: true
+        default: rtm11
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: versday-api-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      PROJECT_NAME: ${{ inputs.project_name }}
+      VERCEL_SCOPE: ${{ inputs.scope }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Require Vercel token
+        shell: bash
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::Missing repository secret VERCEL_TOKEN."
+            echo "Add a Vercel token as the repository secret VERCEL_TOKEN before running this workflow."
+            exit 1
+          fi
+
+      - name: Install pinned Vercel CLI
+        run: npm install --global vercel@59.19.1
+
+      - name: Create project when needed
+        shell: bash
+        run: |
+          set +e
+          OUTPUT="$(vercel project add "$PROJECT_NAME" \
+            --scope "$VERCEL_SCOPE" \
+            --token "$VERCEL_TOKEN" \
+            --yes 2>&1)"
+          STATUS=$?
+          set -e
+
+          echo "$OUTPUT"
+
+          if [ "$STATUS" -ne 0 ] && ! echo "$OUTPUT" | grep -qiE "already exists|exists already|project.*exists"; then
+            exit "$STATUS"
+          fi
+
+      - name: Link repository workspace
+        run: |
+          vercel link \
+            --yes \
+            --project "$PROJECT_NAME" \
+            --scope "$VERCEL_SCOPE" \
+            --token "$VERCEL_TOKEN"
+
+      - name: Deploy production backend
+        id: deploy
+        shell: bash
+        run: |
+          set -o pipefail
+
+          vercel deploy \
+            --prod \
+            --yes \
+            --scope "$VERCEL_SCOPE" \
+            --token "$VERCEL_TOKEN" \
+            --no-color | tee deploy.log
+
+          DEPLOY_URL="$(grep -Eo 'https://[A-Za-z0-9.-]+\.vercel\.app' deploy.log | tail -n 1)"
+
+          if [ -z "$DEPLOY_URL" ]; then
+            echo "::error::Vercel deployment completed without a detectable deployment URL."
+            exit 1
+          fi
+
+          echo "url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
+          {
+            echo "## VersDay API deployment"
+            echo ""
+            echo "- Project: $PROJECT_NAME"
+            echo "- Scope: $VERCEL_SCOPE"
+            echo "- Production URL: $DEPLOY_URL"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify health endpoint
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.url }}
+        shell: bash
+        run: |
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            --retry 5 \
+            --retry-delay 2 \
+            "$DEPLOY_URL/api/health" \
+            --output health.json
+
+          cat health.json
+
+          node -e "
+            const fs = require('fs');
+            const payload = JSON.parse(fs.readFileSync('health.json', 'utf8'));
+            if (payload.ok !== true || payload.service !== 'versday-api') {
+              throw new Error('Unexpected health response');
+            }
+            console.log('VersDay API healthcheck passed.');
+          "
+
+          {
+            echo ""
+            echo "### Health payload"
+            cat health.json
+          } >> "$GITHUB_STEP_SUMMARY"
