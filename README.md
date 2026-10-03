@@ -32,7 +32,10 @@ A regra é simples:
 - composição precisa funcionar com texto;
 - focal point é separado para desktop e mobile;
 - repetição reduz score, mas nunca supera pertinência;
-- feedback negativo invalida a associação para aquela passagem.
+- feedback negativo invalida a associação para aquela passagem;
+- contexto bíblico curado é aplicado antes da intenção visual em passagens sensíveis;
+- os 5 melhores candidatos passam por análise de pixels para luminância, complexidade e safe area;
+- watermark, texto embutido, baixa resolução, publicidade e clichê religioso sem suporte literal são hard filters.
 
 ## GitHub Pages e segurança
 
@@ -60,6 +63,14 @@ O assistente bíblico segue a mesma regra:
 
 Sem esses endpoints, o VersDay continua funcional com o motor visual local, catálogo curado e fallback abstrato.
 
+O repositório também contém os endpoints server-side opcionais em `api/`:
+
+- `/api/visual-search` — busca de até 30 candidatos no Unsplash;
+- `/api/visual-select` — download tracking exigido pelo provedor;
+- `/api/chat` — proxy seguro para o assistente bíblico.
+
+Em uma implantação Vercel (`*.vercel.app`), esses endpoints são detectados automaticamente. Configure apenas as variáveis de ambiente descritas em `.env.example`. No GitHub Pages, nenhuma chave é necessária e nenhuma credencial privada é enviada ao navegador.
+
 ## Share cards
 
 O engine suporta:
@@ -69,7 +80,7 @@ O engine suporta:
 - Quadrado — 1080 × 1080
 - Open Graph — 1200 × 630
 
-O share visual é composto independentemente do background da interface.
+O share visual é selecionado e composto independentemente do background da interface. Story/Feed/Square usam finalidade vertical; Open Graph usa finalidade landscape. Se a fotografia não atingir os gates naquele formato, o share cai para composição abstrata premium.
 
 ## Testes
 
@@ -88,7 +99,10 @@ Os gates cobrem:
 - rejeição de imagens bonitas porém incoerentes;
 - controle de repetição;
 - fallback abstrato;
-- ausência de chaves privadas no cliente.
+- ausência de chaves privadas no cliente;
+- contexto bíblico curado;
+- hard filters técnicos e semânticos;
+- acervo premium com pelo menos 12 imagens classificadas.
 
 ## Debug visual
 
