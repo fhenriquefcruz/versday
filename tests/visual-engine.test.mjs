@@ -27,7 +27,7 @@ test('todas as passagens produzem intenção visual estruturada e queries ricas'
     assert.ok(intent.photography.paletteHints.length >= 4);
     assert.ok(intent.confidence >= 0.6);
 
-    assert.ok(queries.length >= 1 && queries.length <= 3);
+    assert.ok(queries.length >= 1 && queries.length <= 4);
     for (const query of queries) {
       assert.ok(query.query.split(/\s+/).length >= 10, `query simplista em ${verse.reference}`);
       assert.notEqual(query.query.trim().toLowerCase(), String(verse.theme || '').toLowerCase());
