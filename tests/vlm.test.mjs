@@ -14,6 +14,7 @@ import {
 import { validateVisualFinalists } from '../js/visualProvider.js';
 import { hardFilterCandidate } from '../js/visualSelector.js';
 import { analyzeVerse } from '../js/visualIntelligence.js';
+import { cachedVisualNeedsVlmRefresh } from '../js/visualEngine.js';
 
 function mockReq({
   method = 'POST',
@@ -406,4 +407,95 @@ test('engine aplica VLM somente depois da análise de pixels e antes da seleçã
   assert.ok(vlmIndex > pixelIndex);
   assert.ok(finalSelectIndex > vlmIndex);
   assert.match(source, /curationConfidence \?\? 0\) < 1/);
+});
+
+test('cache externo antigo é revalidado quando VLM passa a estar ativo', async () => {
+  const hadDocument = Object.hasOwn(globalThis, 'document');
+  const oldDocument = globalThis.document;
+  const hadLocation = Object.hasOwn(globalThis, 'location');
+  const oldLocation = globalThis.location;
+  const hadFetch = Object.hasOwn(globalThis, 'fetch');
+  const oldFetch = globalThis.fetch;
+  let calls = 0;
+
+  try {
+    installDocumentMeta({
+      'versday-health-endpoint':
+        'https://api.example.com/api/health'
+    });
+    globalThis.location = { hostname: 'fhenriquefcruz.github.io' };
+    globalThis.fetch = async () => {
+      calls++;
+      return {
+        ok: true,
+        async json() {
+          return {
+            ok: true,
+            service: 'versday-api',
+            providers: { vlmConfigured: true }
+          };
+        }
+      };
+    };
+
+    clearBackendHealthCache();
+
+    assert.equal(
+      await cachedVisualNeedsVlmRefresh({
+        mode: 'photo',
+        id: 'external-old',
+        provider: 'Unsplash',
+        curationConfidence: 0,
+        vlmValidation: null
+      }),
+      true
+    );
+    assert.equal(calls, 1);
+
+    assert.equal(
+      await cachedVisualNeedsVlmRefresh({
+        mode: 'photo',
+        id: 'curated',
+        provider: 'Pexels',
+        curationConfidence: 1,
+        vlmValidation: null
+      }),
+      false
+    );
+
+    assert.equal(
+      await cachedVisualNeedsVlmRefresh({
+        mode: 'photo',
+        id: 'already-validated',
+        provider: 'Unsplash',
+        curationConfidence: 0,
+        vlmValidation: { accepted: true }
+      }),
+      false
+    );
+    assert.equal(calls, 1);
+  } finally {
+    clearBackendHealthCache();
+    restoreGlobal('document', oldDocument, hadDocument);
+    restoreGlobal('location', oldLocation, hadLocation);
+    restoreGlobal('fetch', oldFetch, hadFetch);
+  }
+});
+
+test('chat e workflow não usam modelo Groq descontinuado', async () => {
+  const [chatSource, workflowSource, readmeSource] = await Promise.all([
+    readFile(new URL('../api/chat.js', import.meta.url), 'utf8'),
+    readFile(
+      new URL('../.github/workflows/deploy-vercel-api.yml', import.meta.url),
+      'utf8'
+    ),
+    readFile(new URL('../README.md', import.meta.url), 'utf8')
+  ]);
+
+  for (const source of [chatSource, workflowSource, readmeSource]) {
+    assert.doesNotMatch(source, /llama-3\.3-70b-versatile/);
+  }
+
+  assert.match(chatSource, /qwen\/qwen3\.8-27b/);
+  assert.match(workflowSource, /qwen\/qwen3\.8-27b/);
 });
