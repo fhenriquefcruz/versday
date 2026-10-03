@@ -68,23 +68,31 @@ export function configureBackendContent(indexHtml, serviceWorker, options) {
   nextIndex = replaceMetaContent(nextIndex, 'versday-visual-select-endpoint', endpoints.visualSelect);
   nextIndex = replaceMetaContent(nextIndex, 'versday-chat-endpoint', endpoints.chat);
 
-  const cacheName = `versday-v8-backend-${cacheTag}`;
-  const cachePattern = /const CACHE_NAME = '[^']+';/;
+  const cachePattern = /const CACHE_NAME = '([^']+)';/;
+  const currentCache = serviceWorker.match(cachePattern)?.[1];
 
-  if (!cachePattern.test(serviceWorker)) {
+  if (!currentCache) {
     throw new Error('Service Worker CACHE_NAME declaration not found.');
   }
 
-  const nextServiceWorker = serviceWorker.replace(
-    cachePattern,
-    `const CACHE_NAME = '${cacheName}';`
-  );
+  const changed = nextIndex !== indexHtml;
+  const cacheName = changed
+    ? `versday-v8-backend-${cacheTag}`
+    : currentCache;
+
+  const nextServiceWorker = changed
+    ? serviceWorker.replace(
+        cachePattern,
+        `const CACHE_NAME = '${cacheName}';`
+      )
+    : serviceWorker;
 
   return {
     indexHtml: nextIndex,
     serviceWorker: nextServiceWorker,
     endpoints,
-    cacheName
+    cacheName,
+    changed
   };
 }
 
@@ -129,7 +137,8 @@ async function main() {
   process.stdout.write(JSON.stringify({
     ok: true,
     endpoints: configured.endpoints,
-    cacheName: configured.cacheName
+    cacheName: configured.cacheName,
+    changed: configured.changed
   }, null, 2) + '\n');
 }
 
