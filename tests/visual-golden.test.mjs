@@ -6,6 +6,7 @@ import {
   buildVisualQueries,
   getThemeProfile
 } from '../js/visualIntelligence.js';
+import { hardFilterCandidate } from '../js/visualSelector.js';
 
 const CASES = [
   {
@@ -305,3 +306,70 @@ for (const item of CASES) {
     }
   });
 }
+
+test('hard filters sensíveis rejeitam morbidez e clichês temáticos', () => {
+  const scenarios = [
+    {
+      theme: 'morte',
+      candidate: {
+        id: 'graphic-death',
+        imageUrl: 'https://example.com/death.jpg',
+        width: 2400,
+        height: 1600,
+        tags: ['dead body', 'bloody corpse']
+      },
+      reason: 'GRAPHIC_OR_EXPLOITATIVE'
+    },
+    {
+      theme: 'justica',
+      candidate: {
+        id: 'justice-stock',
+        imageUrl: 'https://example.com/justice.jpg',
+        width: 2400,
+        height: 1600,
+        tags: ['gavel', 'courtroom stock photo']
+      },
+      reason: 'THEMATIC_CLICHE'
+    },
+    {
+      theme: 'ressurreicao',
+      candidate: {
+        id: 'resurrection-cliche',
+        imageUrl: 'https://example.com/resurrection.jpg',
+        width: 2400,
+        height: 1600,
+        tags: ['white robe actor', 'divine rays']
+      },
+      reason: 'THEMATIC_CLICHE'
+    },
+    {
+      theme: 'guerra',
+      candidate: {
+        id: 'war-glorification',
+        imageUrl: 'https://example.com/war.jpg',
+        width: 2400,
+        height: 1600,
+        tags: ['heroic soldier', 'rifle portrait']
+      },
+      reason: 'THEMATIC_CLICHE'
+    }
+  ];
+
+  for (const scenario of scenarios) {
+    const intent = analyzeVerse({
+      text: 'Texto de benchmark sem elementos literais adicionais.',
+      reference: `golden:${scenario.theme}`,
+      book: 'sl',
+      chapter: 1,
+      verse: 1,
+      theme: scenario.theme
+    });
+
+    const filtered = hardFilterCandidate(scenario.candidate, intent);
+    assert.equal(filtered.accepted, false);
+    assert.ok(
+      filtered.reasons.includes(scenario.reason),
+      `motivo ${scenario.reason} ausente para ${scenario.theme}: ${filtered.reasons.join(', ')}`
+    );
+  }
+});
