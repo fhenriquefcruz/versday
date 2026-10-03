@@ -1,101 +1,127 @@
 # VersDay
 
-Experiência contemplativa de versículos com sistema visual semântico.
-
-## Sistema visual
-
-O VersDay não associa mais uma palavra do versículo a uma foto aleatória.
-
-Pipeline atual:
-
-```
-passagem
-→ interpretação semântica
-→ intenção visual
-→ modo literal / conceitual / híbrido
-→ queries enriquecidas
-→ candidatos
-→ gates semânticos
-→ ranking multidimensional
-→ foto validada OU fallback editorial abstrato
-```
-
-A regra é simples:
+Experiência contemplativa de versículos com **Visual Semantic Intelligence**.
 
 > Nenhuma imagem é melhor do que uma imagem sem sentido.
 
-### Critérios de seleção
+## Sistema visual
+
+O VersDay não transforma mais uma keyword em uma foto aleatória. O pipeline atual é:
+
+passagem → contexto bíblico → intenção visual estruturada → literal/conceitual/híbrido/abstrato → queries editoriais → candidatos → hard filters → pré-ranking → análise visual dos finalistas → ranking final → fotografia aprovada ou fallback premium.
+
+O engine considera tema, emoção, gênero bíblico, elementos literais, metáforas, contexto de capítulo e, quando disponíveis, versículos próximos do acervo local.
+
+### Gates
 
 - coerência semântica é eliminatória;
-- clima emocional precisa combinar;
-- qualidade estética não compensa incompatibilidade;
-- composição precisa funcionar com texto;
-- focal point é separado para desktop e mobile;
-- repetição reduz score, mas nunca supera pertinência;
-- feedback negativo invalida a associação para aquela passagem.
+- clima emocional incompatível pode eliminar;
+- beleza não compensa imagem errada;
+- clichês religiosos automáticos são bloqueados;
+- watermark, texto embutido, publicidade, conteúdo inseguro e baixa resolução são rejeitados;
+- os 5 melhores candidatos passam por análise de luminância, complexidade, safe-area e focal point;
+- repetição do mesmo asset/fotógrafo reduz o score;
+- 👎 invalida a associação daquela imagem com a passagem.
 
-## GitHub Pages e segurança
+## Fallback
 
-A aplicação publicada em GitHub Pages é estática. Por isso, nenhuma chave de API privada pode existir em `index.html` ou `js/`.
+A ordem é:
 
-A busca dinâmica de imagens é opcional e usa `js/visualProvider.js`. Para ativá-la, configure:
+1. fotografia externa aprovada;
+2. catálogo curado aprovado;
+3. composição abstrata editorial.
 
-```html
-<meta
-  name="versday-visual-endpoint"
-  content="https://seu-backend.example/api/visual-search"
-/>
-```
+Não existe “usar a melhor das imagens ruins”.
 
-O endpoint deve guardar as credenciais de Unsplash/Pexels no servidor e devolver candidatos normalizados.
+## Background e Share são separados
 
-O assistente bíblico segue a mesma regra:
+O background prioriza atmosfera e legibilidade.
 
-```html
-<meta
-  name="versday-chat-endpoint"
-  content="https://seu-backend.example/api/chat"
-/>
-```
+O Share Engine possui finalidade e cache próprios:
 
-Sem esses endpoints, o VersDay continua funcional com o motor visual local, catálogo curado e fallback abstrato.
+- Story/Reels — 1080 × 1920;
+- Feed vertical — 1080 × 1350;
+- Quadrado — 1080 × 1080;
+- Open Graph — 1200 × 630.
 
-## Share cards
+Uma foto landscape extrema não é forçada para Story; o share usa outra seleção ou composição abstrata.
 
-O engine suporta:
+## Segurança
 
-- Story/Reels — 1080 × 1920
-- Feed vertical — 1080 × 1350
-- Quadrado — 1080 × 1080
-- Open Graph — 1200 × 630
+O repositório já teve credenciais expostas no frontend em versões antigas. Elas foram removidas do código atual, mas **precisam ser revogadas/rotacionadas nos respectivos provedores**, pois remover do HEAD não invalida segredo já publicado.
 
-O share visual é composto independentemente do background da interface.
+Nenhuma chave privada deve existir em HTML ou em js/.
+
+O repositório agora inclui endpoints server-side:
+
+- POST /api/visual-search — busca de candidatos no Unsplash;
+- POST /api/visual-select — tracking do download_location da foto escolhida;
+- POST /api/chat — proxy seguro para Groq.
+
+Variáveis de ambiente esperadas estão em .env.example:
+
+UNSPLASH_ACCESS_KEY
+GROQ_API_KEY
+GROQ_MODEL
+ALLOWED_ORIGINS
+
+### GitHub Pages
+
+GitHub Pages é estático. Sem backend configurado, o VersDay continua funcionando com catálogo curado + fallback abstrato e o chat permanece desabilitado por segurança.
+
+Para um backend externo, configure os meta endpoints já existentes no index.html ou defina antes do main.js:
+
+window.VERSDAY_CONFIG = {
+  apiBase: 'https://seu-backend-seguro.example'
+};
+
+Em hospedagem server-side de mesma origem, /api é detectado automaticamente.
+
+## Unsplash
+
+A integração server-side preserva:
+
+- chave confidencial;
+- hotlink das URLs fornecidas pela API;
+- atribuição de fotógrafo e Unsplash;
+- download_location quando uma foto é efetivamente selecionada;
+- orientação distinta para background, portrait share e square share;
+- cache HTTP curto para reduzir chamadas.
 
 ## Testes
 
-O benchmark usa o próprio acervo curado do VersDay, hoje com mais de 100 passagens.
+Execute:
 
-```bash
 npm test
-```
 
-Os gates cobrem:
+A suíte cobre 100+ passagens do acervo e Golden Cases para:
 
-- estrutura da intenção visual;
-- queries semânticas;
-- metáforas;
-- seleção literal;
-- rejeição de imagens bonitas porém incoerentes;
-- controle de repetição;
+- metáforas como luz/caminho;
+- contexto bíblico;
+- pastoreio literal;
+- confiança conceitual;
+- imagens bonitas porém erradas;
+- clichês religiosos;
+- repetição;
+- share portrait;
 - fallback abstrato;
-- ausência de chaves privadas no cliente.
+- ausência de segredos no cliente e no servidor.
 
-## Debug visual
+## Debug
 
-Use:
+Abra com:
 
-```
 ?visualDebug=1
-```
 
-O console exibirá intenção, queries, top candidatos, scores e motivos de rejeição.
+O console mostra:
+
+- intenção;
+- contexto;
+- queries;
+- candidatos;
+- scores;
+- análise visual;
+- motivos de rejeição;
+- seleção/fallback.
+
+Detalhes completos: docs/VISUAL_SYSTEM.md
