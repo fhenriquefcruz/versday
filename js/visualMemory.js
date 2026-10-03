@@ -6,6 +6,39 @@ const USAGE_KEY = 'versday.visual.usage.v3';
 const FEEDBACK_KEY = 'versday.visual.feedback.v3';
 const USAGE_LIMIT = 80;
 
+function normalizeTheme(value = '') {
+  return String(value)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+export function resolveVisualFeedback(
+  feedback = [],
+  reference,
+  visualId,
+  primaryTheme = null
+) {
+  const exact = feedback.find(item =>
+    item.reference === reference &&
+    item.visualId === visualId
+  );
+
+  if (exact) return exact.value;
+
+  const normalizedTheme = normalizeTheme(primaryTheme);
+  if (!normalizedTheme) return null;
+
+  const thematicDown = feedback.find(item =>
+    item.visualId === visualId &&
+    item.value === 'down' &&
+    normalizeTheme(item.primaryTheme) === normalizedTheme
+  );
+
+  return thematicDown ? 'down' : null;
+}
+
 function readJson(key, fallback) {
   try {
     return JSON.parse(localStorage.getItem(key)) ?? fallback;
@@ -31,13 +64,15 @@ export function getCachedVisual(reference, purpose = 'background') {
   const entry = cache[cacheKey(reference, purpose)];
   if (!entry || entry.engineVersion !== VISUAL_ENGINE_VERSION) return null;
 
-  const negative = readJson(FEEDBACK_KEY, []).some(item =>
-    item.reference === reference &&
-    item.visualId === entry.visual?.id &&
-    item.value === 'down'
+  const feedback = readJson(FEEDBACK_KEY, []);
+  const value = resolveVisualFeedback(
+    feedback,
+    reference,
+    entry.visual?.id,
+    entry.intent?.semantic?.primaryTheme || null
   );
 
-  return negative ? null : entry;
+  return value === 'down' ? null : entry;
 }
 
 export function setCachedVisual(reference, intent, visual, purpose = 'background') {
@@ -86,9 +121,15 @@ export function getRecentVisualIds(limit = 8, purpose = null) {
     .map(item => item.visualId);
 }
 
-export function saveVisualFeedback(reference, visualId, value) {
+export function saveVisualFeedback(
+  reference,
+  visualId,
+  value,
+  context = {}
+) {
   if (!reference || !visualId || !['up', 'down'].includes(value)) return;
 
+  const primaryTheme = context.primaryTheme || null;
   const feedback = readJson(FEEDBACK_KEY, [])
     .filter(item => !(item.reference === reference && item.visualId === visualId));
 
@@ -96,6 +137,9 @@ export function saveVisualFeedback(reference, visualId, value) {
     reference,
     visualId,
     value,
+    primaryTheme,
+    sceneSignature: context.sceneSignature || null,
+    provider: context.provider || null,
     createdAt: new Date().toISOString()
   });
 
@@ -103,17 +147,28 @@ export function saveVisualFeedback(reference, visualId, value) {
 
   if (value === 'down') {
     const cache = readJson(CACHE_KEY, {});
+    const normalizedTheme = normalizeTheme(primaryTheme);
+
     for (const [key, entry] of Object.entries(cache)) {
-      if (entry?.reference === reference && entry?.visual?.id === visualId) {
+      const sameVisual = entry?.visual?.id === visualId;
+      const sameReference = entry?.reference === reference;
+      const sameTheme = Boolean(normalizedTheme) &&
+        normalizeTheme(entry?.intent?.semantic?.primaryTheme) === normalizedTheme;
+
+      if (sameVisual && (sameReference || sameTheme)) {
         delete cache[key];
       }
     }
+
     writeJson(CACHE_KEY, cache);
   }
 }
 
-export function getFeedback(reference, visualId) {
-  return readJson(FEEDBACK_KEY, []).find(item =>
-    item.reference === reference && item.visualId === visualId
-  )?.value || null;
+export function getFeedback(reference, visualId, primaryTheme = null) {
+  return resolveVisualFeedback(
+    readJson(FEEDBACK_KEY, []),
+    reference,
+    visualId,
+    primaryTheme
+  );
 }

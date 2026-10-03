@@ -307,7 +307,19 @@ if (visualFeedback) {
     if (!button || !appState.currentVerse || !appState.currentVisual?.id) return;
 
     const value = button.dataset.visualFeedback;
-    saveVisualFeedback(appState.currentVerse.reference, appState.currentVisual.id, value);
+    saveVisualFeedback(
+      appState.currentVerse.reference,
+      appState.currentVisual.id,
+      value,
+      {
+        primaryTheme:
+          appState.currentVisualIntent?.semantic?.primaryTheme || null,
+        sceneSignature:
+          appState.currentVisual?.sceneSignature || null,
+        provider:
+          appState.currentVisual?.provider || null
+      }
+    );
     renderVisualFeedback();
 
     if (value === 'down') {

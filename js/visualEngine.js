@@ -127,7 +127,13 @@ export async function resolveVisualForVerse(verse, options = {}) {
   ]);
 
   let candidates = [...providerCandidates, ...curatedCandidates]
-    .filter(candidate => getFeedback(reference, candidate.id) !== 'down');
+    .filter(candidate =>
+      getFeedback(
+        reference,
+        candidate.id,
+        intent.semantic.primaryTheme
+      ) !== 'down'
+    );
 
   const recentUsage = getRecentVisualUsage(12, purpose);
 
