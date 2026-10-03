@@ -62,7 +62,7 @@ export async function analyzeCandidateVisual(candidate){
     ...candidate,
     width:candidate.width || img.naturalWidth,
     height:candidate.height || img.naturalHeight,
-    safeAreas:candidate.safeAreas?.length ? candidate.safeAreas : safeAreas,
+    safeTextAreas:candidate.safeTextAreas?.length ? candidate.safeTextAreas : safeAreas,
     focalPoint:candidate.focalPoint || {x:saliency.x,y:saliency.y},
     compositionScore: typeof candidate.compositionScore==='number' ? Math.max(candidate.compositionScore,compositionScore) : compositionScore,
     technicalAnalysis:{averageLuminance:avg,complexity:globalContrast,bestSafeArea:regions[0]?.name || 'center',bestSafeScore:bestSafe}
