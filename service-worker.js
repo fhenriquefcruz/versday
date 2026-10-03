@@ -1,5 +1,7 @@
-// Incrementar versão a cada deploy para forçar atualização do cache
-const CACHE_NAME = 'versday-v7-backend-health';
+// Service Worker do VersDay.
+// Assets locais usam network-first para que um deploy novo nunca fique preso
+// atrás de um cache antigo. O cache permanece apenas como fallback offline.
+const CACHE_NAME = 'versday-v9-responsive-safe-area';
 
 // Caminhos relativos — funciona tanto na raiz quanto em /versday/
 const ASSETS = [
@@ -35,10 +37,9 @@ const ASSETS = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        // addAll falha se qualquer arquivo não existir — usa add individual com tratamento
-        return Promise.allSettled(ASSETS.map(url => cache.add(url)));
-      })
+      .then(cache => Promise.allSettled(
+        ASSETS.map(url => cache.add(url))
+      ))
       .then(() => self.skipWaiting())
   );
 });
@@ -47,45 +48,66 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
       ))
       .then(() => self.clients.claim())
   );
 });
 
+function isBypassedRequest(url) {
+  return (
+    url.pathname.startsWith('/api/') ||
+    url.hostname === 'bible-api.com' ||
+    url.hostname === 'api.groq.com' ||
+    url.hostname.endsWith('googleapis.com') ||
+    url.hostname.endsWith('unsplash.com') ||
+    url.hostname.endsWith('pexels.com') ||
+    url.hostname === 'fonts.gstatic.com' ||
+    url.hostname === 'fonts.googleapis.com'
+  );
+}
+
+async function cacheSuccessfulResponse(request, response) {
+  if (!response?.ok) return response;
+
+  const cache = await caches.open(CACHE_NAME);
+  await cache.put(request, response.clone());
+  return response;
+}
+
+async function localNetworkFirst(request) {
+  try {
+    const response = await fetch(request, { cache: 'no-cache' });
+    return await cacheSuccessfulResponse(request, response);
+  } catch {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+
+    if (request.mode === 'navigate') {
+      return await caches.match('./index.html');
+    }
+
+    throw new Error('VERSDAY_OFFLINE_ASSET_MISS');
+  }
+}
+
 self.addEventListener('fetch', event => {
-  // POSTs (chat, busca visual, tracking) sempre seguem direto para a rede.
   if (event.request.method !== 'GET') return;
 
-  // APIs sempre via rede — nunca cacheadas, inclusive healthchecks GET.
-  const url = event.request.url;
-  let parsedUrl = null;
-  try { parsedUrl = new URL(url); } catch {}
-
-  if (
-    parsedUrl?.pathname?.startsWith('/api/') ||
-    url.includes('bible-api.com') ||
-    url.includes('api.groq.com') ||
-    url.includes('googleapis.com') ||
-    url.includes('unsplash.com') ||
-    url.includes('pexels.com') ||
-    url.includes('fonts.gstatic.com') ||
-    url.includes('fonts.googleapis.com')
-  ) {
-    return; // deixa o browser lidar normalmente
+  let url;
+  try {
+    url = new URL(event.request.url);
+  } catch {
+    return;
   }
 
-  event.respondWith(
-    caches.match(event.request)
-      .then(cached => cached || fetch(event.request)
-        .then(response => {
-          // Só cacheia respostas válidas de assets locais
-          if (response.ok && event.request.method === 'GET') {
-            caches.open(CACHE_NAME).then(c => c.put(event.request, response.clone()));
-          }
-          return response;
-        })
-      )
-      .catch(() => caches.match('./index.html'))
-  );
+  // APIs, fontes e imagens externas ficam sob controle do navegador/provider.
+  if (isBypassedRequest(url)) return;
+
+  // O Service Worker só administra recursos do próprio origin do VersDay.
+  if (url.origin !== self.location.origin) return;
+
+  event.respondWith(localNetworkFirst(event.request));
 });
