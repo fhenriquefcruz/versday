@@ -403,9 +403,7 @@ function normalize(value = '') {
 }
 
 function escapeRegex(value = '') {
-  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\function includesAny(text, terms) {
-  return terms.some(term => text.includes(normalize(term)));
-}');
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function containsSemanticTerm(text, term) {
@@ -413,14 +411,13 @@ function containsSemanticTerm(text, term) {
   const needle = normalize(term).trim();
   if (!needle) return false;
 
-  const pattern = escapeRegex(needle).replace(/\\\s+/g, '\\s+');
+  const pattern = escapeRegex(needle).replace(/\s+/g, '\\s+');
   return new RegExp('(^|[^a-z0-9])' + pattern + '(?=$|[^a-z0-9])').test(haystack);
 }
 
 function includesAny(text, terms) {
   return terms.some(term => containsSemanticTerm(text, term));
 }
-
 function detectLiteralSignals(text) {
   const signals = [];
   const rules = [
