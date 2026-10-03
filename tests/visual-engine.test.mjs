@@ -134,8 +134,8 @@ test('memória de novidade reduz repetição sem superar semântica', () => {
 });
 
 
-test('acervo curado premium possui pelo menos 12 imagens classificadas', () => {
-  assert.ok(CURATED_VISUALS.length >= 12);
+test('acervo curado premium possui pelo menos 18 imagens classificadas', () => {
+  assert.ok(CURATED_VISUALS.length >= 18);
   for (const candidate of CURATED_VISUALS) {
     assert.ok(candidate.imageUrl);
     assert.ok(candidate.themes.length >= 1);
@@ -261,4 +261,125 @@ test('foto bonita e sem contradição explícita ainda falha quando é semantica
 
   assert.equal(scored.accepted, false);
   assert.ok(scored.rejectedReasons.includes('SEMANTIC_MISMATCH'));
+});
+
+test('acervo curado cobre temas humanos sem forçar temas sensíveis', () => {
+  const themes = new Set(
+    CURATED_VISUALS.flatMap(candidate => candidate.themes)
+  );
+
+  for (const theme of [
+    'alegria',
+    'gratidão',
+    'relacionamento',
+    'reconciliação',
+    'sofrimento',
+    'lamento',
+    'justiça'
+  ]) {
+    assert.ok(themes.has(theme), `tema curado ausente: ${theme}`);
+  }
+
+  for (const abstractFirst of [
+    'morte',
+    'guerra',
+    'julgamento',
+    'profecia',
+    'ressurreição'
+  ]) {
+    assert.equal(
+      themes.has(abstractFirst),
+      false,
+      `tema sensível deve permanecer abstract-first: ${abstractFirst}`
+    );
+  }
+});
+
+test('confiança de curadoria só ajuda quando o tema primário coincide', () => {
+  const intent = analyzeVerse({
+    text: 'Confia no Senhor de todo o teu coração.',
+    reference: 'pv 3:5',
+    book: 'pv',
+    chapter: 3,
+    verse: 5,
+    theme: 'confianca'
+  });
+
+  const unrelated = scoreCandidate({
+    id: 'curated-but-wrong',
+    imageUrl: 'https://example.com/joy.jpg',
+    width: 3000,
+    height: 2000,
+    themes: ['alegria'],
+    tags: ['alegria', 'authentic joy', 'natural light'],
+    moods: ['luminoso', 'vivo', 'leve'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['center'],
+    focalPoint: { x: 0.5, y: 0.5 },
+    mobileFocalPoint: { x: 0.5, y: 0.5 },
+    qualityScore: 0.95,
+    compositionScore: 0.95,
+    identityScore: 0.95,
+    curationConfidence: 1
+  }, intent, []);
+
+  assert.equal(unrelated.scores.curation, 0);
+  assert.equal(unrelated.accepted, false);
+  assert.ok(unrelated.rejectedReasons.includes('SEMANTIC_MISMATCH'));
+});
+
+test('novas fotos curadas conseguem superar o limiar apenas com alinhamento semântico forte', () => {
+  const cases = [
+    {
+      theme: 'gratidao',
+      text: 'Em tudo dai graças.',
+      reference: '1ts 5:18',
+      expectedId: 'pexels-9511828'
+    },
+    {
+      theme: 'relacionamento',
+      text: 'Levai as cargas uns dos outros.',
+      reference: 'gl 6:2',
+      expectedId: 'pexels-5055239'
+    },
+    {
+      theme: 'sofrimento',
+      text: 'Os sofrimentos do tempo presente não podem ser comparados com a glória a ser revelada.',
+      reference: 'rm 8:18',
+      expectedId: 'pexels-6670100'
+    },
+    {
+      theme: 'lamento',
+      text: 'Junto aos rios da Babilônia nos assentamos e choramos.',
+      reference: 'sl 137:1',
+      expectedId: 'pexels-5028920'
+    },
+    {
+      theme: 'justica',
+      text: 'Não façais acepção de pessoas.',
+      reference: 'tg 2:1',
+      expectedId: 'pexels-6994855'
+    }
+  ];
+
+  for (const item of cases) {
+    const intent = analyzeVerse({
+      text: item.text,
+      reference: item.reference,
+      book: item.reference.split(' ')[0],
+      chapter: Number(item.reference.match(/\d+/)?.[0] || 1),
+      verse: 1,
+      theme: item.theme
+    });
+
+    const candidate = CURATED_VISUALS.find(entry => entry.id === item.expectedId);
+    assert.ok(candidate, `candidato ausente: ${item.expectedId}`);
+
+    const scored = scoreCandidate(candidate, intent, []);
+    assert.ok(
+      scored.scores.semantic >= 0.72,
+      `${item.expectedId} semantic=${scored.scores.semantic}`
+    );
+    assert.equal(scored.accepted, true, `${item.expectedId}: ${scored.rejectedReasons.join(', ')}`);
+  }
 });
