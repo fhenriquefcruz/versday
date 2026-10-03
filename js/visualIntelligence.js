@@ -4,7 +4,7 @@
 
 import { resolveBiblicalContext } from './biblical-context.js';
 
-export const VISUAL_ENGINE_VERSION = '2.1.0';
+export const VISUAL_ENGINE_VERSION = '2.2.0';
 
 const STYLE_SIGNATURE = [
   'editorial photography',
@@ -372,7 +372,11 @@ const THEME_PROFILES = {
 };
 
 const BOOK_GENRES = {
-  sl: 'poesia', pv: 'sabedoria', ec: 'sabedoria', jó: 'poesia sapiencial', ct: 'poesia',
+  gn: 'narrativa/torá', ex: 'narrativa/torá', lv: 'lei/torá', nm: 'narrativa/torá', dt: 'lei/torá',
+  js: 'narrativa', jz: 'narrativa', rt: 'narrativa', '1sm': 'narrativa', '2sm': 'narrativa',
+  '1rs': 'narrativa', '2rs': 'narrativa', '1cr': 'narrativa', '2cr': 'narrativa',
+  ed: 'narrativa', ne: 'narrativa', et: 'narrativa',
+  sl: 'poesia', pv: 'sabedoria', ec: 'sabedoria', 'jó': 'poesia sapiencial', ct: 'poesia',
   is: 'profecia', jr: 'profecia', lm: 'lamento', ez: 'profecia', dn: 'profecia/apocalíptica',
   os: 'profecia', jl: 'profecia', am: 'profecia', ob: 'profecia', jn: 'narrativa/profecia',
   mq: 'profecia', na: 'profecia', hc: 'profecia', sf: 'profecia', ag: 'profecia', zc: 'profecia', ml: 'profecia',
@@ -491,7 +495,8 @@ export function analyzeVerse(verse = {}) {
       .map(signal => `${signal} como imagem contextual`)
   ]);
 
-  const genre = BOOK_GENRES[normalize(verse.book)] || 'bíblico';
+  const rawBook = String(verse.book || '').trim().toLowerCase();
+  const genre = BOOK_GENRES[rawBook] || BOOK_GENRES[normalize(rawBook)] || 'bíblico';
 
   const confidenceBase = verse.theme ? 0.84 : 0.68;
   const contextBonus = context.source === 'curated-context' ? 0.04 : 0;
