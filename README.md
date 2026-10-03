@@ -251,4 +251,16 @@ Use:
 ?visualDebug=1
 ```
 
-O console exibirá intenção, queries, top candidatos, scores e motivos de rejeição.
+Além do console técnico, o VersDay exibe um painel flutuante de diagnóstico com:
+
+- decisão final e fonte;
+- tema, representação e contexto bíblico utilizado;
+- score final, semântico e de composição;
+- placement desktop/mobile;
+- tempos de busca, pixels, VLM, ranking e total;
+- contagem de candidatos;
+- estado do VLM;
+- top 5 candidatos, scores e motivos de rejeição;
+- média e p95 das decisões da sessão.
+
+O painel pode ser recolhido e a telemetria local pode ser limpa. Ele **não é criado sem a flag `visualDebug=1`**, não faz chamadas de rede próprias e trabalha apenas com os diagnósticos/telemetria técnica já mantidos em `sessionStorage`.
