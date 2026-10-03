@@ -28,7 +28,7 @@ const CONTEXT_HINTS = [
   { book:'ap', chapter:6, summary:'Visão apocalíptica de juízo, conflito, fome e morte em linguagem simbólica; deve evitar literalismo sensacionalista e estética de fantasia genérica.', narrativeSituation:'visão simbólica de crise e julgamento', characters:['vidente'] },
   { book:'sl', chapter:23, summary:'Poema pastoral sobre cuidado, condução, provisão, descanso, travessia de perigo e segurança sob a presença de Deus.', narrativeSituation:'metáfora pastoral de condução e proteção', characters:['salmista','Senhor como pastor'] },
   { book:'sl', chapter:91, summary:'Poema de confiança que usa abrigo, sombra, proteção e perigo como imagens de segurança em Deus.', narrativeSituation:'proteção em meio a ameaças', characters:['salmista','Deus'] },
-  { book:'sl', chapter:121, summary:'Cântico de peregrinação em que os montes introduzem a pergunta pelo socorro; a resposta desloca a confiança da paisagem para o Criador.', narrativeSituation:'peregrino busca socorro e proteção', characters:['peregrino','Senhor'] },
+  { book:'sl', chapter:121, summary:'Cântico de peregrinação em que os montes introduzem a pergunta pelo socorro; a resposta desloca a confiança da paisagem para o Criador.', narrativeSituation:'peregrino busca socorro e proteção', characters:['peregrino','Senhor'], suppressLiteral:['montanha'] },
   { book:'mt', chapter:5, summary:'Ensino público de Jesus no Sermão do Monte sobre caráter, justiça, testemunho e vida no Reino.', narrativeSituation:'Jesus ensina discípulos e multidão', characters:['Jesus','discípulos','multidão'] },
   { book:'mt', chapter:6, summary:'Continuação do Sermão do Monte; Jesus ensina confiança, prioridade do Reino e liberdade da ansiedade usando exemplos cotidianos da criação.', narrativeSituation:'ensino sobre confiança e ansiedade', characters:['Jesus','discípulos'] },
   { book:'mt', chapter:8, summary:'Narrativa de Jesus e os discípulos atravessando o mar, com perigo real durante uma tempestade e medo diante da ameaça.', narrativeSituation:'tempestade literal durante travessia de barco', characters:['Jesus','discípulos'] },
@@ -50,6 +50,9 @@ export function resolveBiblicalContext(verse={}) {
     text: explicit || match?.summary || '',
     narrativeSituation: verse.narrativeSituation || match?.narrativeSituation || null,
     characters: verse.characters?.length ? verse.characters : (match?.characters || []),
+    suppressLiteral: Array.isArray(verse.suppressLiteral)
+      ? verse.suppressLiteral
+      : (match?.suppressLiteral || []),
     source: explicit ? 'verse' : match ? 'curated-context' : 'genre-only'
   };
 }
