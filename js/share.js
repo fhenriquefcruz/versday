@@ -179,9 +179,12 @@ export async function generateShareImage(formatName='story'){
   );
   const ref=`${getBookName(verse.book)} ${verse.chapter}:${verse.verse}`;
   let fontSize=Math.round(W*(verse.text.length>220?.050:verse.text.length>150?.058:verse.text.length>90?.067:.077));
+  const minFontSize = formatName === 'og'
+    ? Math.round(W*.027)
+    : Math.round(W*.040);
   ctx.textAlign=anchor.align; ctx.textBaseline='middle';
   let lines=[];
-  for(let i=0;i<10;i++){
+  for(let i=0;i<14;i++){
     ctx.font=`500 ${fontSize}px "Cormorant Garamond", Georgia, serif`;
     lines=wrapText(ctx,verse.text,anchor.maxWidth);
     const lineH=fontSize*1.28;
@@ -191,7 +194,8 @@ export async function generateShareImage(formatName='story'){
       footer.contentBottom-(format.safeTop+70)
     );
     if(lines.length*lineH+referenceReserve <= availableHeight) break;
-    fontSize=Math.max(Math.round(W*.040),fontSize-5);
+    if(fontSize<=minFontSize) break;
+    fontSize=Math.max(minFontSize,fontSize-5);
   }
   const lineHeight=fontSize*1.32;
   const total=lines.length*lineHeight;
