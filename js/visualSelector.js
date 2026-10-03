@@ -117,6 +117,84 @@ function containsAny(text, terms = []) {
   return terms.some(term => text.includes(normalize(term)));
 }
 
+const SCENE_STOPWORDS = new Set([
+  'editorial','photography','cinematic','natural','light','restrained','color',
+  'palette','clean','composition','contemplative','atmosphere','negative','space',
+  'photo','image','background','avoid','soft','subtle'
+]);
+
+export function buildSceneSignature(candidate = {}) {
+  const source = [
+    candidate.query,
+    candidate.description,
+    candidate.alt,
+    ...(candidate.tags || [])
+  ].filter(Boolean).join(' ');
+
+  const tokens = tokenize(source)
+    .filter(token => !SCENE_STOPWORDS.has(token));
+
+  const unique = [...new Set(tokens)].slice(0, 8);
+  if (unique.length) return unique.join(':');
+
+  return normalize((candidate.themes || [])[0] || candidate.id || '');
+}
+
+function focalBucket(point = { x: 0.5, y: 0.5 }) {
+  const x = Number(point?.x ?? 0.5);
+  const y = Number(point?.y ?? 0.5);
+  const horizontal = x < 0.34 ? 'left' : x > 0.66 ? 'right' : 'center';
+  const vertical = y < 0.34 ? 'upper' : y > 0.66 ? 'lower' : 'middle';
+  return `${vertical}-${horizontal}`;
+}
+
+export function buildCompositionSignature(candidate = {}) {
+  const safe = String(candidate.safeTextAreas?.[0] || 'center');
+  return `${safe}|${focalBucket(candidate.focalPoint)}`;
+}
+
+function normalizeRecentUsage(recent = []) {
+  if (!Array.isArray(recent)) return [];
+  return recent.map(item =>
+    typeof item === 'string'
+      ? { visualId: item }
+      : (item || {})
+  );
+}
+
+function computeNovelty(candidate, recent = []) {
+  const usage = normalizeRecentUsage(recent);
+  const sceneSignature = buildSceneSignature(candidate);
+  const compositionSignature = buildCompositionSignature(candidate);
+  const photographer = normalize(candidate.photographer || '');
+
+  const exactImage = usage.some(item => item.visualId === candidate.id);
+  const samePhotographer = Boolean(photographer) && usage.some(item =>
+    normalize(item.photographer || '') === photographer
+  );
+  const sameScene = Boolean(sceneSignature) && usage.some(item =>
+    normalize(item.sceneSignature || '') === normalize(sceneSignature)
+  );
+  const sameComposition = Boolean(compositionSignature) && usage.some(item =>
+    normalize(item.compositionSignature || '') === normalize(compositionSignature)
+  );
+
+  let score = exactImage ? 0.25 : 1;
+  if (!exactImage && samePhotographer) score *= 0.82;
+  if (!exactImage && sameScene) score *= 0.72;
+  if (!exactImage && sameComposition) score *= 0.92;
+
+  return {
+    score: Math.max(0.25, Math.min(1, score)),
+    sceneSignature,
+    compositionSignature,
+    samePhotographer,
+    sameScene,
+    sameComposition,
+    exactImage
+  };
+}
+
 function overlapScore(aValues, bValues) {
   const a = normalizedSet(aValues);
   const b = normalizedSet(bValues);
@@ -258,7 +336,8 @@ function responsiveScore(candidate, intent) {
   return Math.max(0, Math.min(1, score));
 }
 
-export function scoreCandidate(candidate, intent, recentIds = []) {
+export function scoreCandidate(candidate, intent, recentUsage = []) {
+  const novelty = computeNovelty(candidate, recentUsage);
   const hard = hardFilterCandidate(candidate, intent);
   if (!hard.accepted) {
     return {
@@ -270,10 +349,11 @@ export function scoreCandidate(candidate, intent, recentIds = []) {
         composition: Number(candidate?.compositionScore ?? 0),
         identity: Number(candidate?.identityScore ?? 0),
         responsive: responsiveScore(candidate || {}, intent),
-        novelty: recentIds.includes(candidate?.id) ? 0.25 : 1,
+        novelty: Number(novelty.score.toFixed(3)),
         curation: Number(candidate?.curationConfidence ?? 0),
         final: 0
       },
+      noveltySignals: novelty,
       rejectedReasons: hard.reasons,
       accepted: false
     };
@@ -316,7 +396,7 @@ export function scoreCandidate(candidate, intent, recentIds = []) {
   const qualityScore = Math.max(0, Math.min(1, Number(candidate.qualityScore ?? 0.8)));
   const compositionScore = Math.max(0, Math.min(1, Number(candidate.compositionScore ?? 0.76)));
   const identityScore = Math.max(0, Math.min(1, Number(candidate.identityScore ?? 0.78)));
-  const noveltyScore = recentIds.includes(candidate.id) ? 0.25 : 1;
+  const noveltyScore = novelty.score;
   const responsive = responsiveScore(candidate, intent);
 
   const rejectedReasons = [];
@@ -348,19 +428,20 @@ export function scoreCandidate(candidate, intent, recentIds = []) {
       curation: Number(curationConfidence.toFixed(3)),
       final: Number(finalScore.toFixed(3))
     },
+    noveltySignals: novelty,
     rejectedReasons: [...new Set(rejectedReasons)],
     accepted: rejectedReasons.length === 0
   };
 }
 
-export function rankCandidates(candidates, intent, recentIds = []) {
+export function rankCandidates(candidates, intent, recentUsage = []) {
   return candidates
-    .map(candidate => scoreCandidate(candidate, intent, recentIds))
+    .map(candidate => scoreCandidate(candidate, intent, recentUsage))
     .sort((a, b) => b.scores.final - a.scores.final);
 }
 
-export function selectBestCandidate(candidates, intent, recentIds = []) {
-  const ranked = rankCandidates(candidates, intent, recentIds);
+export function selectBestCandidate(candidates, intent, recentUsage = []) {
+  const ranked = rankCandidates(candidates, intent, recentUsage);
   const selected = ranked.find(result => result.accepted) || null;
   return { selected, ranked };
 }

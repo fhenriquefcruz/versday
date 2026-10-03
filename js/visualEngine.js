@@ -12,7 +12,7 @@ import {
   getCachedVisual,
   setCachedVisual,
   rememberVisualUsage,
-  getRecentVisualIds,
+  getRecentVisualUsage,
   getFeedback
 } from './visualMemory.js';
 import {
@@ -78,6 +78,8 @@ function buildPhotoVisual(candidate, scoring, intent, purpose) {
     photographer: candidate.photographer || null,
     photographerLink: candidate.photographerLink || null,
     query: candidate.query || null,
+    sceneSignature: scoring.noveltySignals?.sceneSignature || null,
+    compositionSignature: scoring.noveltySignals?.compositionSignature || null,
     technicalAnalysis: candidate.technicalAnalysis || null
   };
 }
@@ -123,10 +125,10 @@ export async function resolveVisualForVerse(verse, options = {}) {
   let candidates = [...providerCandidates, ...curatedCandidates]
     .filter(candidate => getFeedback(reference, candidate.id) !== 'down');
 
-  const recentIds = getRecentVisualIds(8, purpose);
+  const recentUsage = getRecentVisualUsage(12, purpose);
 
   // Primeiro ranking barato: só os melhores chegam à análise real de pixels.
-  const preliminary = rankCandidates(candidates, intent, recentIds);
+  const preliminary = rankCandidates(candidates, intent, recentUsage);
   const hardReasons = new Set([
     'NO_IMAGE_URL',
     'EMBEDDED_TEXT',
@@ -150,7 +152,7 @@ export async function resolveVisualForVerse(verse, options = {}) {
     candidates = candidates.map(candidate => byId.get(candidate.id) || candidate);
   }
 
-  const { selected, ranked } = selectBestCandidate(candidates, intent, recentIds);
+  const { selected, ranked } = selectBestCandidate(candidates, intent, recentUsage);
 
   let visual;
   if (selected) {
@@ -180,6 +182,7 @@ export async function resolveVisualForVerse(verse, options = {}) {
       id: item.candidate.id,
       accepted: item.accepted,
       scores: item.scores,
+      noveltySignals: item.noveltySignals,
       rejectedReasons: item.rejectedReasons
     }))
   };

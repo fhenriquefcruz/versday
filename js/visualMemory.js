@@ -63,19 +63,26 @@ export function rememberVisualUsage(reference, visual, intent = null, purpose = 
     reference,
     purpose,
     provider: visual.provider || 'VersDay',
+    photographer: visual.photographer || null,
     primaryTheme: intent?.semantic?.primaryTheme || null,
     score: visual.score ?? null,
     query: visual.query || null,
+    sceneSignature: visual.sceneSignature || null,
+    compositionSignature: visual.compositionSignature || null,
     usedAt: new Date().toISOString()
   });
 
   writeJson(USAGE_KEY, usage.slice(0, USAGE_LIMIT));
 }
 
-export function getRecentVisualIds(limit = 8, purpose = null) {
+export function getRecentVisualUsage(limit = 12, purpose = null) {
   return readJson(USAGE_KEY, [])
     .filter(item => !purpose || item.purpose === purpose)
-    .slice(0, limit)
+    .slice(0, limit);
+}
+
+export function getRecentVisualIds(limit = 8, purpose = null) {
+  return getRecentVisualUsage(limit, purpose)
     .map(item => item.visualId);
 }
 
