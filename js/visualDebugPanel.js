@@ -85,11 +85,15 @@ export function buildVisualDebugViewModel(selection = {}) {
       semanticScore: round(visual.semanticScore),
       compositionScore: round(visual.compositionScore),
       textPlacement: String(visual.textPlacement || ''),
+      tabletTextPlacement: String(
+        visual.tabletTextPlacement || ''
+      ),
       mobileTextPlacement: String(
         visual.mobileTextPlacement || ''
       ),
       overlayStrength: round(visual.overlayStrength),
       focalPoint: visual.focalPoint || null,
+      tabletFocalPoint: visual.tabletFocalPoint || null,
       mobileFocalPoint: visual.mobileFocalPoint || null
     },
     decision: {
@@ -360,6 +364,11 @@ function renderPanelBody(panel, model) {
     visualGrid,
     'Texto desktop',
     model.visual.textPlacement
+  );
+  addMetric(
+    visualGrid,
+    'Texto tablet',
+    model.visual.tabletTextPlacement
   );
   addMetric(
     visualGrid,

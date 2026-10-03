@@ -4,7 +4,7 @@
 // e só participa do ranking quando tem relação real com a passagem.
 
 function pexels(id, filename, meta = {}) {
-  return {
+  const visual = {
     id: `pexels-${id}`,
     provider: 'Pexels',
     providerUrl: 'https://www.pexels.com/',
@@ -22,7 +22,6 @@ function pexels(id, filename, meta = {}) {
     nsfw: false,
     safeTextAreas: ['center'],
     focalPoint: { x: 0.5, y: 0.5 },
-    mobileFocalPoint: { x: 0.5, y: 0.5 },
     negativeTags: [],
     representationModes: ['conceptual'],
     themes: [],
@@ -30,6 +29,23 @@ function pexels(id, filename, meta = {}) {
     moods: [],
     ...meta
   };
+
+  visual.tabletFocalPoint =
+    meta.tabletFocalPoint ||
+    visual.mobileFocalPoint ||
+    visual.focalPoint;
+  visual.mobileFocalPoint =
+    visual.mobileFocalPoint ||
+    visual.tabletFocalPoint ||
+    visual.focalPoint;
+  visual.tabletSafeTextAreas =
+    meta.tabletSafeTextAreas ||
+    visual.safeTextAreas;
+  visual.mobileSafeTextAreas =
+    meta.mobileSafeTextAreas ||
+    visual.safeTextAreas;
+
+  return visual;
 }
 
 export const CURATED_VISUALS = [

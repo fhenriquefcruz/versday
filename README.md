@@ -30,11 +30,11 @@ A regra é simples:
 - clima emocional precisa combinar;
 - qualidade estética não compensa incompatibilidade;
 - composição precisa funcionar com texto;
-- focal point é separado para desktop e mobile;
+- focal point, safe area e placement são separados para desktop, tablet e mobile;
 - repetição reduz score, mas nunca supera pertinência;
 - feedback negativo invalida a associação para aquela passagem e impede a mesma imagem de reaparecer em outras passagens do mesmo tema;
 - contexto bíblico curado é aplicado antes da intenção visual em passagens sensíveis, com granularidade de capítulo ou faixa imediata de versículos quando necessário;
-- os 5 melhores candidatos passam por análise de pixels para luminância, complexidade e safe area;
+- os 5 melhores candidatos passam por análise de pixels para luminância, complexidade e safe area em 16:9 desktop, 3:4 tablet e 9:16 mobile;
 - watermark, texto embutido, baixa resolução, publicidade e clichê religioso sem suporte literal são hard filters.
 
 ## GitHub Pages e segurança
@@ -168,6 +168,16 @@ A intenção é usar visão computacional somente onde ela agrega valor, depois 
 - o VersDay não redistribui as fotos como biblioteca de stock ou wallpaper independente.
 
 As regras devem ser revalidadas antes de trocar de fornecedor ou ativar nova API.
+
+### Responsividade visual
+
+O background possui três composições independentes:
+
+- **desktop** — análise 16:9, `focalPoint`, `safeTextAreas`, `textPlacement`;
+- **tablet** — análise 3:4, `tabletFocalPoint`, `tabletSafeTextAreas`, `tabletTextPlacement`;
+- **mobile** — análise 9:16, `mobileFocalPoint`, `mobileSafeTextAreas`, `mobileTextPlacement`.
+
+A faixa tablet é tratada entre **641 e 899 px**. O catálogo curado já fornece metadados tablet antes mesmo da análise de pixels; candidatos externos recebem esses valores durante a análise visual. O engine 2.4.0 invalida caches visuais anteriores para evitar reaproveitar objetos sem metadados tablet.
 
 ## Performance e observabilidade visual
 
