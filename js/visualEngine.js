@@ -238,13 +238,30 @@ export async function resolveVisualForVerse(verse, options = {}) {
 
       candidates = candidates.map(candidate => {
         const decision = decisionsById.get(candidate.id);
-        if (!decision) return candidate;
+        const isCurated =
+          Number(candidate.curationConfidence ?? 0) >= 1;
 
-        return {
-          ...candidate,
-          vlmValidation: decision,
-          vlmRejected: !decision.accepted
-        };
+        if (decision) {
+          return {
+            ...candidate,
+            vlmValidation: decision,
+            vlmRejected: !decision.accepted,
+            vlmRejectionReason:
+              decision.accepted
+                ? null
+                : 'VLM_REJECTED'
+          };
+        }
+
+        if (!isCurated) {
+          return {
+            ...candidate,
+            vlmRejected: true,
+            vlmRejectionReason: 'VLM_NOT_VALIDATED'
+          };
+        }
+
+        return candidate;
       });
     }
   }
