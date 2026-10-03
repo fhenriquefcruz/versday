@@ -148,11 +148,19 @@ A composição respeita `safeTop`/`safeBottom` de cada formato: versículo, refe
 
 ## Testes
 
-O benchmark usa o próprio acervo curado do VersDay, hoje com mais de 100 passagens.
+O benchmark usa o próprio acervo curado do VersDay, hoje com 150+ passagens, somado a casos dedicados para temas sensíveis e tipos de texto que não devem depender do sorteio normal do app.
 
 ```bash
 npm test
+npm run benchmark:visual
 ```
+
+O gate agregado exige **approval rate mínimo de 95%**. Uma passagem só é aprovada quando produz intenção/queries válidas e termina em uma destas saídas:
+
+- fotografia que ultrapassa os thresholds semântico, de qualidade e composição, com focal point e safe area;
+- fallback abstrato editorial válido quando nenhuma fotografia merece ser exibida.
+
+O benchmark dedicado cobre amor, fé, medo, morte, ressurreição, perdão, sabedoria, justiça, guerra, oração, alegria, sofrimento, esperança, natureza, profecia, narrativa, poesia e epístolas.
 
 Os gates cobrem:
 
