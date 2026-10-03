@@ -31,6 +31,20 @@ function overlapRatio(a=[], b=[]) {
 }
 function clamp(n,min=0,max=1){ return Math.max(min,Math.min(max,n)); }
 
+function contradictionReasons(candidate, intent) {
+  const haystack = normalize([candidate?.description,candidate?.alt,...(candidate?.tags || [])].join(' '));
+  const concepts = (intent?.visualIntent?.negativeConcepts || []).map(normalize);
+  const signals = [
+    ['party','PARTY'],['celebration','CELEBRATION'],['confetti','CONFETTI'],
+    ['cross','RELIGIOUS_CLICHE'],['open bible','RELIGIOUS_CLICHE'],['church','RELIGIOUS_CLICHE'],
+    ['hands praying','RELIGIOUS_CLICHE'],['wedding','STAGED_ROMANCE'],['advertising','ADVERTISING'],
+    ['tropical beach','EMOTIONAL_MISMATCH']
+  ];
+  return [...new Set(signals
+    .filter(([needle]) => haystack.includes(needle) && concepts.some(c => c.includes(needle)))
+    .map(([,reason]) => reason))];
+}
+
 export function hardFilterCandidate(candidate, intent) {
   const reasons = [];
   if (!candidate?.imageUrl) reasons.push('NO_IMAGE_URL');
@@ -41,6 +55,7 @@ export function hardFilterCandidate(candidate, intent) {
   if ((candidate?.width || 0) && candidate.width < 1000) reasons.push('LOW_RESOLUTION');
   if ((candidate?.height || 0) && candidate.height < 700) reasons.push('LOW_RESOLUTION');
   if (isImageRejected(intent?.verseReference, candidate?.id)) reasons.push('USER_REJECTED');
+  reasons.push(...contradictionReasons(candidate,intent));
   return { accepted: reasons.length === 0, reasons };
 }
 
@@ -104,10 +119,10 @@ function responsiveScore(candidate, intent) {
   const hasFocal = !!candidate?.focalPoint;
   const purpose = intent?.visualPurpose || 'background';
   let score = Math.max(w,h) >= 1600 ? 0.78 : 0.68;
-  if (purpose === 'share-portrait') {
+  if (purpose === 'share-portrait' || purpose === 'background-mobile') {
     if (ratio >= 0.55 && ratio <= 0.95) score += 0.18;
     else if (ratio > 1.35) score -= 0.18;
-  } else if (purpose === 'share-landscape') {
+  } else if (purpose === 'share-landscape' || purpose === 'background-desktop') {
     if (ratio >= 1.45 && ratio <= 2.2) score += 0.16;
   } else if (ratio > 1.15 && ratio < 2.2) score += 0.09;
   if (hasFocal) score += 0.08;
