@@ -36,7 +36,7 @@ export default async function handler(req, res) {
         Authorization: `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+        model: process.env.GROQ_MODEL || 'qwen/qwen3.8-27b',
         messages,
         temperature: 0.68,
         max_tokens: 1200,

@@ -12,6 +12,11 @@ on:
         description: Vercel account/team slug dedicated to VersDay
         required: true
         type: string
+      enable_vlm:
+        description: Enable multimodal validation for uncurated top finalists
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -30,6 +35,7 @@ jobs:
       VERCEL_SCOPE: ${{ inputs.scope }}
       UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      VISUAL_VLM_ENABLED: ${{ inputs.enable_vlm }}
 
     steps:
       - name: Checkout
@@ -120,7 +126,9 @@ jobs:
 
           sync_env "UNSPLASH_ACCESS_KEY" "$UNSPLASH_ACCESS_KEY"
           sync_env "GROQ_API_KEY" "$GROQ_API_KEY"
-          sync_env "GROQ_MODEL" "llama-3.3-70b-versatile"
+          sync_env "GROQ_MODEL" "qwen/qwen3.8-27b"
+          sync_env "GROQ_VISION_MODEL" "qwen/qwen3.8-27b"
+          sync_env "VISUAL_VLM_ENABLED" "$VISUAL_VLM_ENABLED"
           sync_env "ALLOWED_ORIGIN" "https://fhenriquefcruz.github.io"
 
       - name: Deploy production backend
@@ -180,9 +188,11 @@ jobs:
 
           IMAGES_CONFIGURED="$(node -p 'JSON.parse(require("fs").readFileSync("health.json","utf8")).providers?.imagesConfigured === true')"
           CHAT_CONFIGURED="$(node -p 'JSON.parse(require("fs").readFileSync("health.json","utf8")).providers?.chatConfigured === true')"
+          VLM_CONFIGURED="$(node -p 'JSON.parse(require("fs").readFileSync("health.json","utf8")).providers?.vlmConfigured === true')"
 
           echo "images=$IMAGES_CONFIGURED" >> "$GITHUB_OUTPUT"
           echo "chat=$CHAT_CONFIGURED" >> "$GITHUB_OUTPUT"
+          echo "vlm=$VLM_CONFIGURED" >> "$GITHUB_OUTPUT"
 
           {
             echo ""
@@ -228,5 +238,6 @@ jobs:
             echo "### GitHub Pages runtime"
             echo "- imagesConfigured: ${{ steps.health.outputs.images }}"
             echo "- chatConfigured: ${{ steps.health.outputs.chat }}"
+            echo "- vlmConfigured: ${{ steps.health.outputs.vlm }}"
             echo "- Runtime endpoints committed to main."
           } >> "$GITHUB_STEP_SUMMARY"

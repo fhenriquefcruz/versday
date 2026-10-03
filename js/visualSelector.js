@@ -365,6 +365,11 @@ export function hardFilterCandidate(candidate, intent) {
   if (candidate?.hasWatermark) reasons.push('WATERMARK');
   if (candidate?.isAdvertising) reasons.push('ADVERTISING');
   if (candidate?.nsfw) reasons.push('UNSAFE_CONTENT');
+  if (candidate?.vlmRejected) {
+    reasons.push(
+      candidate.vlmRejectionReason || 'VLM_REJECTED'
+    );
+  }
 
   reasons.push(...metadataQualityConflicts(candidate));
 

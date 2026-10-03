@@ -128,5 +128,9 @@ export async function isBackendProviderReady(provider, options = {}) {
     return health.providers?.imagesConfigured === true;
   }
 
+  if (provider === 'vlm') {
+    return health.providers?.vlmConfigured === true;
+  }
+
   return false;
 }

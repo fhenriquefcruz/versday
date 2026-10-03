@@ -13,7 +13,10 @@ export default async function handler(req, res) {
     region: process.env.VERCEL_REGION || null,
     providers: {
       imagesConfigured: Boolean(process.env.UNSPLASH_ACCESS_KEY),
-      chatConfigured: Boolean(process.env.GROQ_API_KEY)
+      chatConfigured: Boolean(process.env.GROQ_API_KEY),
+      vlmConfigured:
+        Boolean(process.env.GROQ_API_KEY) &&
+        String(process.env.VISUAL_VLM_ENABLED || '').toLowerCase() === 'true'
     }
   });
 }
