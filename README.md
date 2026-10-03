@@ -69,6 +69,7 @@ O diretório `api/` já contém funções server-side para uma implantação ser
 
 - `api/visual-search.js` — consulta semanticamente o Unsplash e retorna vários candidatos normalizados;
 - `api/visual-select.js` — executa o download tracking exigido pelo Unsplash quando uma foto é escolhida;
+- `api/visual-validate.js` — valida opcionalmente até 3 finalistas externos com visão multimodal;
 - `api/chat.js` — mantém a credencial do assistente bíblico fora do navegador;
 - `api/health.js` — informa somente quais providers estão configurados, sem revelar segredos;
 - `api/_cors.js` — restringe origens e centraliza validação de payload/CORS.
@@ -141,6 +142,8 @@ Regras:
 - máximo de 3 imagens por validação;
 - timeout curto e comportamento fail-open: indisponibilidade do VLM nunca quebra o VersDay;
 - reprovação multimodal adiciona `VLM_REJECTED` e é eliminatória;
+- quando o VLM está ativo, candidatos externos fora do lote avaliado recebem `VLM_NOT_VALIDATED` e não podem subir por leapfrog;
+- candidatos curados manualmente continuam elegíveis sem chamada VLM;
 - o VLM não aumenta artificialmente o score de beleza ou semântica — ele funciona como gate de contradição/compatibilidade;
 - modelo padrão atual: `qwen/qwen3.8-27b`;
 - ativação: `VISUAL_VLM_ENABLED=true` ou `enable_vlm=true` no workflow de deploy.
