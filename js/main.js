@@ -9,6 +9,10 @@ import { initBackgroundLayers, setBackgroundImage } from './background.js';
 import { shareWhatsApp, shareInstagram, copyVerseText } from './share.js';
 import { initChat } from './chat.js';
 import { saveVisualFeedback, getFeedback } from './visualMemory.js';
+import {
+  initVisualDebugPanel,
+  renderVisualDebugPanel
+} from './visualDebugPanel.js';
 
 // ========== DOM ==========
 const dynamicZone      = document.getElementById('verseDynamicZone');
@@ -125,8 +129,13 @@ function displayVerse(verse) {
 
   smoothUpdate(html);
   setBackgroundImage(verse)
-    .then(() => renderVisualFeedback())
-    .catch(error => console.warn('[VersDay] Falha visual não bloqueante:', error));
+    .then(selection => {
+      renderVisualFeedback();
+      renderVisualDebugPanel(selection);
+    })
+    .catch(error =>
+      console.warn('[VersDay] Falha visual não bloqueante:', error)
+    );
   updateFavoriteButton();
 }
 
@@ -325,7 +334,11 @@ if (visualFeedback) {
     if (value === 'down') {
       visualFeedback.hidden = true;
       try {
-        await setBackgroundImage(appState.currentVerse, { force: true });
+        const selection = await setBackgroundImage(
+          appState.currentVerse,
+          { force: true }
+        );
+        renderVisualDebugPanel(selection);
       } finally {
         renderVisualFeedback();
       }
@@ -353,5 +366,6 @@ window.addEventListener('click', e => {
 // ========== Boot ==========
 initTheme();
 initBackgroundLayers();
+initVisualDebugPanel();
 loadNewVerse();
 initChat();
