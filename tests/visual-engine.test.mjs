@@ -409,3 +409,71 @@ test('novas fotos curadas conseguem superar o limiar apenas com alinhamento sem�
     assert.equal(scored.accepted, true, `${item.expectedId}: ${scored.rejectedReasons.join(', ')}`);
   }
 });
+
+test('memória visual penaliza fotógrafo, cena e composição repetidos sem mexer na semântica', () => {
+  const intent = analyzeVerse({
+    text: 'O Senhor é o meu pastor; nada me faltará. Em verdes pastos me faz repousar.',
+    reference: 'sl 23:1-2',
+    book: 'sl',
+    chapter: 23,
+    verse: 1,
+    theme: 'pastor'
+  });
+
+  const base = getCuratedCandidates()
+    .find(item => item.id === 'pexels-115141');
+
+  const candidate = {
+    ...base,
+    id: 'pastoral-style-a',
+    photographer: 'Fotógrafo Exemplo',
+    query: 'sheep grazing pastoral field editorial photography'
+  };
+
+  const fresh = scoreCandidate(candidate, intent, []);
+  const recentUsage = [{
+    visualId: 'different-photo-id',
+    photographer: 'Fotógrafo Exemplo',
+    sceneSignature: fresh.noveltySignals.sceneSignature,
+    compositionSignature: fresh.noveltySignals.compositionSignature
+  }];
+  const repeatedStyle = scoreCandidate(candidate, intent, recentUsage);
+
+  assert.equal(fresh.scores.semantic, repeatedStyle.scores.semantic);
+  assert.ok(repeatedStyle.scores.novelty < fresh.scores.novelty);
+  assert.ok(repeatedStyle.scores.final < fresh.scores.final);
+  assert.equal(repeatedStyle.noveltySignals.samePhotographer, true);
+  assert.equal(repeatedStyle.noveltySignals.sameScene, true);
+  assert.equal(repeatedStyle.noveltySignals.sameComposition, true);
+  assert.equal(repeatedStyle.noveltySignals.exactImage, false);
+});
+
+test('novidade continua sendo critério secundário e não altera limiar semântico', () => {
+  const intent = analyzeVerse({
+    text: 'O Senhor é o meu pastor; nada me faltará.',
+    reference: 'sl 23:1',
+    book: 'sl',
+    chapter: 23,
+    verse: 1,
+    theme: 'pastor'
+  });
+
+  const candidate = {
+    ...getCuratedCandidates().find(item => item.id === 'pexels-115141'),
+    photographer: 'Fotógrafo Repetido',
+    query: 'sheep grazing pastoral field editorial photography'
+  };
+
+  const baseline = scoreCandidate(candidate, intent, []);
+  const heavilyRepeated = scoreCandidate(candidate, intent, [{
+    visualId: candidate.id,
+    photographer: 'Fotógrafo Repetido',
+    sceneSignature: baseline.noveltySignals.sceneSignature,
+    compositionSignature: baseline.noveltySignals.compositionSignature
+  }]);
+
+  assert.equal(baseline.scores.semantic, heavilyRepeated.scores.semantic);
+  assert.ok(baseline.scores.semantic >= 0.72);
+  assert.ok(heavilyRepeated.scores.novelty >= 0.25);
+  assert.ok(heavilyRepeated.scores.final < baseline.scores.final);
+});
