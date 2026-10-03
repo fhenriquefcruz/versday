@@ -144,6 +144,8 @@ O engine suporta:
 
 O share visual é selecionado e composto independentemente do background da interface. Story/Feed/Square usam finalidade vertical; Open Graph usa finalidade landscape. Se a fotografia não atingir os gates naquele formato, o share cai para composição abstrata premium.
 
+A composição respeita `safeTop`/`safeBottom` de cada formato: versículo, referência, assinatura VersDay e crédito fotográfico ficam fora das regiões mais sujeitas à sobreposição das interfaces sociais. Quando a foto vem da Unsplash API, a própria peça também recebe crédito discreto ao fotógrafo + Unsplash.
+
 ## Testes
 
 O benchmark usa o próprio acervo curado do VersDay, hoje com mais de 100 passagens.
