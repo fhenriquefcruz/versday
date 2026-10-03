@@ -6,7 +6,8 @@ import {
   VISUAL_ENGINE_VERSION
 } from './visualIntelligence.js';
 import { getCuratedCandidates } from './visualCatalog.js';
-import { selectBestCandidate } from './visualSelector.js';
+import { rankCandidates, selectBestCandidate } from './visualSelector.js';
+import { analyzeShortlist } from './visual-analysis.js';
 import {
   getCachedVisual,
   setCachedVisual,
@@ -19,24 +20,35 @@ import {
   notifyProviderSelection
 } from './visualProvider.js';
 
-function buildPhotoVisual(candidate, scoring, intent) {
-  const safeAreas = candidate.safeTextAreas || ['center'];
+function buildPhotoVisual(candidate, scoring, intent, purpose) {
+  const safeAreas = candidate.safeTextAreas?.length ? candidate.safeTextAreas : ['center'];
+
   return {
     mode: 'photo',
+    purpose,
     id: candidate.id,
     provider: candidate.provider || 'VersDay',
     providerUrl: candidate.providerUrl || '',
     imageUrl: candidate.imageUrl,
+    previewUrl: candidate.previewUrl || candidate.imageUrl,
     score: scoring.scores.final,
     semanticScore: scoring.scores.semantic,
     emotionalScore: scoring.scores.emotional,
     compositionScore: scoring.scores.composition,
+    width: candidate.width || 0,
+    height: candidate.height || 0,
     focalPoint: candidate.focalPoint || { x: 0.5, y: 0.5 },
-    mobileFocalPoint: candidate.mobileFocalPoint || candidate.focalPoint || { x: 0.5, y: 0.5 },
+    mobileFocalPoint:
+      candidate.mobileFocalPoint ||
+      candidate.focalPoint ||
+      { x: 0.5, y: 0.5 },
     safeTextAreas: safeAreas,
     textPlacement: safeAreas[0] || 'center',
-    overlayStrength: scoring.scores.composition >= 0.88 ? 0.22 : 0.3,
-    visualIntent: intent.visualIntent.description
+    overlayStrength: scoring.scores.composition >= 0.88 ? 0.2 : 0.3,
+    visualIntent: intent.visualIntent.description,
+    photographer: candidate.photographer || null,
+    photographerLink: candidate.photographerLink || null,
+    query: candidate.query || null
   };
 }
 
@@ -46,53 +58,91 @@ function debugEnabled() {
 }
 
 export async function resolveVisualForVerse(verse, options = {}) {
-  const force = Boolean(options.force);
+  const force = Boolean(options.force || options.forceRefresh);
+  const purpose = String(options.purpose || 'background');
   const reference = verse?.reference || '';
 
   if (!force) {
-    const cached = getCachedVisual(reference);
+    const cached = getCachedVisual(reference, purpose);
     if (cached?.visual) {
-      rememberVisualUsage(reference, cached.visual);
+      rememberVisualUsage(reference, cached.visual, cached.intent, purpose);
       return {
         intent: cached.intent,
         queries: buildVisualQueries(cached.intent),
         visual: cached.visual,
-        diagnostics: { source: 'cache', engineVersion: VISUAL_ENGINE_VERSION }
+        diagnostics: {
+          source: 'cache',
+          purpose,
+          engineVersion: VISUAL_ENGINE_VERSION
+        }
       };
     }
   }
 
   const intent = analyzeVerse(verse);
+  intent.visualPurpose = purpose;
   const queries = buildVisualQueries(intent);
 
-  // O provedor seguro é opcional. No GitHub Pages, sem endpoint server-side,
-  // retorna [] e o motor usa somente catálogo curado + fallback abstrato.
+  // O provedor seguro é opcional. Sem backend, o GitHub Pages permanece
+  // funcional com acervo curado e fallback abstrato.
   const [providerCandidates, curatedCandidates] = await Promise.all([
-    fetchProviderCandidates(intent, queries, 20),
-    Promise.resolve(getCuratedCandidates())
+    fetchProviderCandidates(intent, queries, 24, purpose),
+    Promise.resolve(getCuratedCandidates(intent, 12))
   ]);
 
-  const candidates = [...providerCandidates, ...curatedCandidates]
+  let candidates = [...providerCandidates, ...curatedCandidates]
     .filter(candidate => getFeedback(reference, candidate.id) !== 'down');
 
-  const recentIds = getRecentVisualIds(8);
+  const recentIds = getRecentVisualIds(8, purpose);
+
+  // Primeiro ranking barato: só os melhores chegam à análise real de pixels.
+  const preliminary = rankCandidates(candidates, intent, recentIds);
+  const hardReasons = new Set([
+    'NO_IMAGE_URL',
+    'EMBEDDED_TEXT',
+    'WATERMARK',
+    'ADVERTISING',
+    'UNSAFE_CONTENT',
+    'LOW_RESOLUTION',
+    'RELIGIOUS_CLICHE'
+  ]);
+
+  const shortlist = preliminary
+    .filter(item => !item.rejectedReasons.some(reason => hardReasons.has(reason)))
+    .slice(0, 5)
+    .map(item => item.candidate);
+
+  const analyzed = await analyzeShortlist(shortlist, 5);
+  if (analyzed.length) {
+    const byId = new Map(analyzed.map(candidate => [candidate.id, candidate]));
+    candidates = candidates.map(candidate => byId.get(candidate.id) || candidate);
+  }
+
   const { selected, ranked } = selectBestCandidate(candidates, intent, recentIds);
 
   let visual;
   if (selected) {
-    visual = buildPhotoVisual(selected.candidate, selected, intent);
+    visual = buildPhotoVisual(selected.candidate, selected, intent, purpose);
     await notifyProviderSelection(selected.candidate);
   } else {
-    visual = buildAbstractVisual(intent);
+    visual = {
+      ...buildAbstractVisual(intent),
+      purpose
+    };
   }
 
-  setCachedVisual(reference, intent, visual);
-  rememberVisualUsage(reference, visual);
+  setCachedVisual(reference, intent, visual, purpose);
+  rememberVisualUsage(reference, visual, intent, purpose);
 
   const diagnostics = {
     source: selected ? selected.candidate.provider || 'catalog' : 'abstract-fallback',
+    purpose,
     engineVersion: VISUAL_ENGINE_VERSION,
+    contextSource: intent.biblicalContext?.contextSource || 'genre-only',
     candidateCount: candidates.length,
+    providerCandidateCount: providerCandidates.length,
+    curatedCandidateCount: curatedCandidates.length,
+    analyzedCandidateCount: analyzed.length,
     acceptedCandidateId: selected?.candidate?.id || null,
     ranked: ranked.slice(0, 5).map(item => ({
       id: item.candidate.id,
@@ -103,7 +153,8 @@ export async function resolveVisualForVerse(verse, options = {}) {
   };
 
   if (debugEnabled()) {
-    console.groupCollapsed(`[VersDay Visual] ${reference || '(sem referência)'}`);
+    console.groupCollapsed(`[VersDay Visual] ${reference || '(sem referência)'} · ${purpose}`);
+    console.log('Biblical context', intent.biblicalContext);
     console.log('Intent', intent);
     console.log('Queries', queries);
     console.table(diagnostics.ranked);
