@@ -32,7 +32,10 @@ A regra é simples:
 - composição precisa funcionar com texto;
 - focal point é separado para desktop e mobile;
 - repetição reduz score, mas nunca supera pertinência;
-- feedback negativo invalida a associação para aquela passagem.
+- feedback negativo invalida a associação para aquela passagem;
+- contexto bíblico curado é aplicado antes da intenção visual em passagens sensíveis;
+- os 5 melhores candidatos passam por análise de pixels para luminância, complexidade e safe area;
+- watermark, texto embutido, baixa resolução, publicidade e clichê religioso sem suporte literal são hard filters.
 
 ## GitHub Pages e segurança
 
@@ -60,6 +63,28 @@ O assistente bíblico segue a mesma regra:
 
 Sem esses endpoints, o VersDay continua funcional com o motor visual local, catálogo curado e fallback abstrato.
 
+### Backend seguro incluído no repositório
+
+O diretório `api/` já contém funções server-side para uma implantação serverless:
+
+- `api/visual-search.js` — consulta semanticamente o Unsplash e retorna vários candidatos normalizados;
+- `api/visual-select.js` — executa o download tracking exigido pelo Unsplash quando uma foto é escolhida;
+- `api/chat.js` — mantém a credencial do assistente bíblico fora do navegador;
+- `api/_cors.js` — restringe origens e centraliza validação de payload/CORS.
+
+Variáveis esperadas no ambiente server-side:
+
+```text
+UNSPLASH_ACCESS_KEY=...
+GROQ_API_KEY=...
+GROQ_MODEL=llama-3.3-70b-versatile
+ALLOWED_ORIGIN=https://fhenriquefcruz.github.io
+```
+
+Os valores reais nunca devem ir para `index.html`, `js/` ou para commits. Credenciais que já tenham sido publicadas historicamente precisam ser revogadas e rotacionadas nos provedores.
+
+Em uma implantação Vercel (`*.vercel.app`), os endpoints `/api/visual-search`, `/api/visual-select` e `/api/chat` são detectados automaticamente. No GitHub Pages, o VersDay continua sem segredos e usa o catálogo curado + fallback abstrato.
+
 ## Share cards
 
 O engine suporta:
@@ -69,7 +94,7 @@ O engine suporta:
 - Quadrado — 1080 × 1080
 - Open Graph — 1200 × 630
 
-O share visual é composto independentemente do background da interface.
+O share visual é selecionado e composto independentemente do background da interface. Story/Feed/Square usam finalidade vertical; Open Graph usa finalidade landscape. Se a fotografia não atingir os gates naquele formato, o share cai para composição abstrata premium.
 
 ## Testes
 
@@ -88,7 +113,10 @@ Os gates cobrem:
 - rejeição de imagens bonitas porém incoerentes;
 - controle de repetição;
 - fallback abstrato;
-- ausência de chaves privadas no cliente.
+- ausência de chaves privadas no cliente;
+- contexto bíblico curado;
+- hard filters técnicos e semânticos;
+- acervo premium com pelo menos 12 imagens classificadas.
 
 ## Debug visual
 

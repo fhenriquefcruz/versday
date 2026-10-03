@@ -2,7 +2,9 @@
 // Motor semântico visual do VersDay.
 // Não decide por palavra isolada: transforma a passagem em intenção visual estruturada.
 
-export const VISUAL_ENGINE_VERSION = '2.0.0';
+import { resolveBiblicalContext } from './biblical-context.js';
+
+export const VISUAL_ENGINE_VERSION = '2.1.0';
 
 const STYLE_SIGNATURE = [
   'editorial photography',
@@ -280,6 +282,8 @@ function detectLiteralSignals(text) {
     ['deserto', ['deserto']],
     ['montanha', ['monte', 'montes', 'montanha']],
     ['cidade', ['cidade', 'muralha', 'portas']],
+    ['ave', ['ave', 'aves', 'passaro', 'passaros', 'pássaro', 'pássaros']],
+    ['cruz', ['cruz', 'cruzes']],
     ['céu', ['ceu', 'ceus', 'estrelas', 'firmamento']]
   ];
   for (const [label, terms] of rules) {
@@ -299,12 +303,20 @@ function detectMetaphoricalUse(text, signal) {
   return includesAny(text, metaphorPatterns[signal] || []);
 }
 
+const STRONG_LITERAL_SIGNALS = new Set([
+  'pastagem', 'mar', 'semente', 'vinha', 'deserto', 'cidade', 'ave', 'cruz'
+]);
+
 function deriveMode(profile, text, literalSignals) {
   const literal = literalSignals.filter(signal => !detectMetaphoricalUse(text, signal));
-  if (profile.mode === 'literal' && literal.length) return 'literal';
-  if (literal.length && profile.mode !== 'conceptual') return 'hybrid';
-  if (CONCEPTUAL_THEMES.has(profile.primaryTheme) || profile.mode === 'conceptual') return 'conceptual';
-  return profile.mode || 'abstract';
+  if (!literal.length) {
+    if (CONCEPTUAL_THEMES.has(profile.primaryTheme) || profile.mode === 'conceptual') return 'conceptual';
+    return profile.mode || 'abstract';
+  }
+
+  if (literal.some(signal => STRONG_LITERAL_SIGNALS.has(signal))) return 'literal';
+  if (profile.mode === 'literal') return 'literal';
+  return 'hybrid';
 }
 
 function unique(values) {
@@ -315,6 +327,7 @@ export function analyzeVerse(verse = {}) {
   const rawTheme = normalize(verse.theme || '');
   const profile = THEME_PROFILES[rawTheme] || THEME_PROFILES.fe;
   const text = normalize(verse.text || '');
+  const context = resolveBiblicalContext(verse);
   const literalSignals = detectLiteralSignals(text);
   const mode = deriveMode(profile, text, literalSignals);
 
@@ -331,7 +344,8 @@ export function analyzeVerse(verse = {}) {
   const genre = BOOK_GENRES[normalize(verse.book)] || 'bíblico';
 
   const confidenceBase = verse.theme ? 0.84 : 0.68;
-  const confidence = Math.min(0.98, confidenceBase + (literalElements.length ? 0.05 : 0));
+  const contextBonus = context.source === 'curated-context' ? 0.04 : 0;
+  const confidence = Math.min(0.98, confidenceBase + contextBonus + (literalElements.length ? 0.05 : 0));
 
   return {
     engineVersion: VISUAL_ENGINE_VERSION,
@@ -340,7 +354,11 @@ export function analyzeVerse(verse = {}) {
     biblicalContext: {
       book: verse.book || '',
       chapter: verse.chapter || null,
-      literaryGenre: genre
+      literaryGenre: genre,
+      surroundingContext: context.text,
+      narrativeSituation: context.narrativeSituation,
+      characters: [...context.characters],
+      contextSource: context.source
     },
     semantic: {
       primaryTheme: profile.primaryTheme,
@@ -356,7 +374,9 @@ export function analyzeVerse(verse = {}) {
       metaphors: symbolicElements.filter(item => item.includes('metáfora'))
     },
     visualIntent: {
-      description: profile.visualIntent,
+      description: context.narrativeSituation
+        ? `${profile.visualIntent}. Contexto: ${context.narrativeSituation}.`
+        : profile.visualIntent,
       preferredScenes: [...profile.preferredScenes],
       acceptableScenes: [...profile.preferredScenes],
       undesirableScenes: [...profile.avoid],

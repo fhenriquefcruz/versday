@@ -1,5 +1,5 @@
 // Incrementar versão a cada deploy para forçar atualização do cache
-const CACHE_NAME = 'versday-v5-visual-semantic';
+const CACHE_NAME = 'versday-v6-visual-semantic-hardening';
 
 // Caminhos relativos — funciona tanto na raiz quanto em /versday/
 const ASSETS = [
@@ -11,11 +11,13 @@ const ASSETS = [
   './js/fallbackVerses.js',
   './js/semantic.js',
   './js/visualIntelligence.js',
+  './js/biblical-context.js',
   './js/visualCatalog.js',
   './js/visualSelector.js',
   './js/visualMemory.js',
   './js/visualProvider.js',
   './js/visualEngine.js',
+  './js/visual-analysis.js',
   './js/cache.js',
   './js/history.js',
   './js/favorites.js',
@@ -51,6 +53,9 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  // POSTs (chat, busca visual, tracking) sempre seguem direto para a rede.
+  if (event.request.method !== 'GET') return;
+
   // APIs externas sempre via rede — nunca cacheadas
   const url = event.request.url;
   if (
