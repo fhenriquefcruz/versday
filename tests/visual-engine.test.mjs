@@ -39,6 +39,20 @@ test('todas as passagens produzem intenção visual estruturada e queries ricas'
   }
 });
 
+test('termos literais não são detectados dentro de outras palavras', () => {
+  const intent = analyzeVerse({
+    text: 'Confia no Senhor de todo o teu coração e não te estribes no teu próprio entendimento.',
+    reference: 'pv 3:5-6',
+    book: 'pv',
+    chapter: 3,
+    verse: 5,
+    theme: 'confianca'
+  });
+
+  assert.ok(!intent.representation.literalElements.includes('água'));
+  assert.ok(!intent.representation.literalElements.includes('mar'));
+});
+
 test('luz metafórica não é convertida cegamente em elemento físico', () => {
   const intent = analyzeVerse({
     text: 'A luz resplandece nas trevas, e as trevas não prevaleceram contra ela.',
