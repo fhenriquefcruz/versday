@@ -1,97 +1,210 @@
 // js/visualCatalog.js
-// Catálogo pequeno e deliberadamente conservador.
-// Uma foto só entra aqui quando existe uso semântico claro.
-// Quando não houver encaixe forte, o motor usa visual abstrato editorial.
+// Acervo curado de segurança do VersDay.
+// Cada fotografia possui intenção semântica explícita, metadados de composição
+// e só participa do ranking quando tem relação real com a passagem.
 
-export const CURATED_VISUALS = [
-  {
-    id: 'pexels-pastoral-115141',
+function pexels(id, filename, meta = {}) {
+  return {
+    id: `pexels-${id}`,
     provider: 'Pexels',
     providerUrl: 'https://www.pexels.com/',
-    imageUrl: 'https://images.pexels.com/photos/115141/pexels-photo-115141.jpeg?auto=compress&cs=tinysrgb&w=1920',
-    tags: ['pastoreio', 'ovelhas', 'pastagem', 'campo', 'cuidado', 'quietude'],
-    moods: ['sereno', 'pastoral', 'protetor', 'quieto'],
-    representationModes: ['literal', 'hybrid'],
+    imageUrl: `https://images.pexels.com/photos/${id}/${filename}?auto=compress&cs=tinysrgb&w=2000`,
+    previewUrl: `https://images.pexels.com/photos/${id}/${filename}?auto=compress&cs=tinysrgb&w=900`,
+    width: 2000,
+    height: 1333,
+    qualityScore: 0.9,
+    compositionScore: 0.86,
+    identityScore: 0.9,
+    hasEmbeddedText: false,
+    hasWatermark: false,
+    isAdvertising: false,
+    nsfw: false,
+    safeTextAreas: ['center'],
+    focalPoint: { x: 0.5, y: 0.5 },
+    mobileFocalPoint: { x: 0.5, y: 0.5 },
+    negativeTags: [],
+    representationModes: ['conceptual'],
+    themes: [],
+    tags: [],
+    moods: [],
+    ...meta
+  };
+}
+
+export const CURATED_VISUALS = [
+  pexels('457881', 'pexels-photo-457881.jpeg', {
+    themes: ['paz', 'descanso'],
+    tags: ['paz', 'descanso', 'water', 'lake', 'stillness', 'reflection', 'quietude'],
+    moods: ['sereno', 'quieto', 'contemplativo'],
+    representationModes: ['literal', 'conceptual'],
     safeTextAreas: ['center', 'upper-left'],
     focalPoint: { x: 0.5, y: 0.48 },
     mobileFocalPoint: { x: 0.5, y: 0.5 },
-    qualityScore: 0.92,
-    compositionScore: 0.86,
-    identityScore: 0.9,
+    compositionScore: 0.91,
+    negativeTags: ['guerra', 'festa', 'multidão']
+  }),
+  pexels('115141', 'pexels-photo-115141.jpeg', {
+    themes: ['pastoreio'],
+    tags: ['pastoreio', 'sheep', 'ovelhas', 'pasture', 'pastagem', 'meadow', 'flock', 'cuidado'],
+    moods: ['pastoral', 'sereno', 'protetor', 'quieto'],
+    representationModes: ['literal', 'hybrid'],
+    safeTextAreas: ['upper-right', 'center'],
+    focalPoint: { x: 0.52, y: 0.56 },
+    mobileFocalPoint: { x: 0.5, y: 0.54 },
+    compositionScore: 0.9,
     negativeTags: ['cidade', 'festa', 'guerra']
-  },
-  {
-    id: 'pexels-road-41953',
-    provider: 'Pexels',
-    providerUrl: 'https://www.pexels.com/',
-    imageUrl: 'https://images.pexels.com/photos/41953/road-curve-asphalt-country-road-41953.jpeg?auto=compress&cs=tinysrgb&w=1920',
-    tags: ['caminho', 'estrada', 'direção', 'jornada', 'decisão', 'progresso'],
-    moods: ['contemplativo', 'direcional', 'progressivo', 'sereno'],
+  }),
+  pexels('41953', 'road-curve-asphalt-country-road-41953.jpeg', {
+    themes: ['caminho', 'confiança'],
+    tags: ['caminho', 'estrada', 'road', 'path', 'journey', 'direção', 'decisão', 'progresso'],
+    moods: ['direcional', 'progressivo', 'contemplativo', 'sereno'],
     representationModes: ['literal', 'hybrid', 'conceptual'],
-    safeTextAreas: ['upper-left', 'upper-right', 'center'],
-    focalPoint: { x: 0.52, y: 0.58 },
+    safeTextAreas: ['upper-left', 'upper-right'],
+    focalPoint: { x: 0.5, y: 0.58 },
     mobileFocalPoint: { x: 0.5, y: 0.56 },
-    qualityScore: 0.9,
+    compositionScore: 0.9,
+    negativeTags: ['festa', 'multidão']
+  }),
+  pexels('1292115', 'pexels-photo-1292115.jpeg', {
+    themes: ['luz', 'oração', 'fé'],
+    tags: ['luz', 'light', 'shadow', 'window', 'interior', 'silêncio', 'recolhimento'],
+    moods: ['contemplativo', 'silencioso', 'esperançoso', 'íntimo'],
+    representationModes: ['hybrid', 'conceptual'],
+    safeTextAreas: ['left', 'lower-left'],
+    focalPoint: { x: 0.62, y: 0.46 },
+    mobileFocalPoint: { x: 0.6, y: 0.48 },
+    compositionScore: 0.9,
+    negativeTags: ['festa', 'euforia', 'multidão']
+  }),
+  pexels('158163', 'clouds-cloudy-aggregation-nubes-158163.jpeg', {
+    themes: ['céu', 'esperança'],
+    tags: ['céu', 'sky', 'clouds', 'nuvens', 'vastness', 'amplitude', 'atmosfera'],
+    moods: ['amplo', 'solene', 'contemplativo', 'esperançoso'],
+    representationModes: ['literal', 'hybrid'],
+    safeTextAreas: ['center', 'lower-left', 'lower-right'],
+    focalPoint: { x: 0.5, y: 0.38 },
+    mobileFocalPoint: { x: 0.5, y: 0.44 },
     compositionScore: 0.88,
-    identityScore: 0.88,
-    negativeTags: ['festa', 'multidão', 'interior']
-  },
-  {
-    id: 'pexels-mountain-dawn-147411',
-    provider: 'Pexels',
-    providerUrl: 'https://www.pexels.com/',
-    imageUrl: 'https://images.pexels.com/photos/147411/italy-mountains-dawn-daybreak-147411.jpeg?auto=compress&cs=tinysrgb&w=1920',
-    tags: ['montanha', 'amanhecer', 'horizonte', 'adversidade', 'amplitude', 'esperança'],
-    moods: ['solene', 'esperançoso', 'contemplativo'],
+    negativeTags: ['íntimo', 'reconciliação']
+  }),
+  pexels('1112048', 'pexels-photo-1112048.jpeg', {
+    themes: ['água', 'paz'],
+    tags: ['água', 'water', 'river', 'rio', 'nature', 'flow', 'fluxo'],
+    moods: ['fluido', 'sereno', 'contemplativo'],
     representationModes: ['literal', 'hybrid'],
     safeTextAreas: ['upper-left', 'upper-right'],
     focalPoint: { x: 0.5, y: 0.55 },
-    mobileFocalPoint: { x: 0.52, y: 0.52 },
-    qualityScore: 0.93,
-    compositionScore: 0.84,
-    identityScore: 0.91,
-    negativeTags: ['intimidade', 'interior', 'reconciliação']
-  },
-  {
-    id: 'pexels-forest-mist-1191710',
-    provider: 'Pexels',
-    providerUrl: 'https://www.pexels.com/',
-    imageUrl: 'https://images.pexels.com/photos/1191710/forest-mist-morning-nature-1191710.jpeg?auto=compress&cs=tinysrgb&w=1920',
-    tags: ['névoa', 'floresta', 'silêncio', 'solitude', 'incerteza', 'quietude', 'caminho'],
-    moods: ['silencioso', 'contemplativo', 'sóbrio', 'quieto'],
-    representationModes: ['conceptual', 'hybrid', 'literal'],
-    safeTextAreas: ['center', 'lower-left'],
-    focalPoint: { x: 0.5, y: 0.46 },
-    mobileFocalPoint: { x: 0.5, y: 0.48 },
-    qualityScore: 0.92,
-    compositionScore: 0.9,
-    identityScore: 0.94,
-    negativeTags: ['alegria', 'festa', 'multidão']
-  },
-  {
-    id: 'pexels-clouds-158163',
-    provider: 'Pexels',
-    providerUrl: 'https://www.pexels.com/',
-    imageUrl: 'https://images.pexels.com/photos/158163/clouds-cloudy-aggregation-nubes-158163.jpeg?auto=compress&cs=tinysrgb&w=1920',
-    tags: ['céu', 'nuvens', 'tensão', 'amplitude', 'atmosfera', 'adversidade'],
-    moods: ['solene', 'dramático', 'contemplativo'],
-    representationModes: ['literal', 'hybrid'],
-    safeTextAreas: ['center', 'lower-left', 'lower-right'],
-    focalPoint: { x: 0.5, y: 0.42 },
-    mobileFocalPoint: { x: 0.5, y: 0.46 },
-    qualityScore: 0.88,
+    mobileFocalPoint: { x: 0.5, y: 0.52 },
+    compositionScore: 0.87,
+    negativeTags: ['resort', 'praia tropical', 'festa']
+  }),
+  pexels('844124', 'pexels-photo-844124.jpeg', {
+    themes: ['criação', 'cura'],
+    tags: ['criação', 'natureza', 'nature', 'forest', 'organic', 'green', 'renovação'],
+    moods: ['orgânico', 'renovador', 'contemplativo', 'sereno'],
+    representationModes: ['literal', 'conceptual'],
+    safeTextAreas: ['center', 'upper-right'],
+    focalPoint: { x: 0.5, y: 0.5 },
+    mobileFocalPoint: { x: 0.5, y: 0.5 },
     compositionScore: 0.86,
-    identityScore: 0.87,
-    negativeTags: ['alegria', 'acolhedor', 'íntimo']
-  }
+    negativeTags: ['cidade', 'publicidade']
+  }),
+  pexels('1191710', 'forest-mist-morning-nature-1191710.jpeg', {
+    themes: ['conforto', 'descanso', 'oração'],
+    tags: ['conforto', 'descanso', 'forest', 'mist', 'quiet', 'silêncio', 'solitude'],
+    moods: ['silencioso', 'acolhedor', 'contemplativo', 'quieto'],
+    representationModes: ['conceptual', 'hybrid'],
+    safeTextAreas: ['center', 'lower-left'],
+    focalPoint: { x: 0.5, y: 0.48 },
+    mobileFocalPoint: { x: 0.5, y: 0.48 },
+    compositionScore: 0.88,
+    negativeTags: ['alegria eufórica', 'festa', 'multidão']
+  }),
+  pexels('618848', 'pexels-photo-618848.jpeg', {
+    themes: ['força', 'coragem'],
+    tags: ['força', 'coragem', 'rock', 'waves', 'weather', 'resistência', 'adversidade'],
+    moods: ['firme', 'resiliente', 'sóbrio'],
+    representationModes: ['conceptual', 'hybrid'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    focalPoint: { x: 0.55, y: 0.58 },
+    mobileFocalPoint: { x: 0.54, y: 0.56 },
+    compositionScore: 0.84,
+    negativeTags: ['festa', 'comemoração', 'triunfalismo']
+  }),
+  pexels('1493215', 'pexels-photo-1493215.jpeg', {
+    themes: ['esperança', 'cura'],
+    tags: ['esperança', 'cura', 'growth', 'nature', 'light', 'renewal', 'renovação'],
+    moods: ['esperançoso', 'renovador', 'sereno'],
+    representationModes: ['conceptual', 'hybrid'],
+    safeTextAreas: ['upper-left', 'right'],
+    focalPoint: { x: 0.52, y: 0.55 },
+    mobileFocalPoint: { x: 0.5, y: 0.52 },
+    compositionScore: 0.84,
+    negativeTags: ['euforia', 'motivational wallpaper']
+  }),
+  pexels('344886', 'pexels-photo-344886.jpeg', {
+    themes: ['cura', 'esperança'],
+    tags: ['cura', 'organic', 'nature', 'renewal', 'soft light', 'restauração'],
+    moods: ['delicado', 'renovador', 'silencioso', 'sereno'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['left', 'upper-left'],
+    focalPoint: { x: 0.58, y: 0.52 },
+    mobileFocalPoint: { x: 0.56, y: 0.5 },
+    compositionScore: 0.83,
+    negativeTags: ['hospital genérico', 'antes e depois', 'euforia']
+  }),
+  pexels('417074', 'pexels-photo-417074.jpeg', {
+    themes: ['coragem', 'confiança'],
+    tags: ['coragem', 'confiança', 'landscape', 'vastness', 'weather', 'journey', 'adversidade'],
+    moods: ['firme', 'resiliente', 'contemplativo', 'encorajador'],
+    representationModes: ['conceptual', 'hybrid'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    focalPoint: { x: 0.5, y: 0.5 },
+    mobileFocalPoint: { x: 0.5, y: 0.5 },
+    compositionScore: 0.82,
+    negativeTags: ['festa', 'comemoração', 'praia tropical']
+  })
 ];
 
-export function getCuratedCandidates() {
-  return CURATED_VISUALS.map(item => ({
+function normalize(value = '') {
+  return String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function overlap(a = [], b = []) {
+  const right = new Set(b.map(normalize));
+  return a.reduce((score, item) => score + (right.has(normalize(item)) ? 1 : 0), 0);
+}
+
+export function getCuratedCandidates(intent = null, limit = 12) {
+  const cloned = CURATED_VISUALS.map(item => ({
     ...item,
+    themes: [...item.themes],
     tags: [...item.tags],
     moods: [...item.moods],
+    representationModes: [...item.representationModes],
     safeTextAreas: [...item.safeTextAreas],
     negativeTags: [...item.negativeTags]
   }));
+
+  if (!intent) return cloned.slice(0, limit);
+
+  const primary = intent.semantic?.primaryTheme || '';
+  const literal = intent.representation?.literalElements || [];
+  const symbolic = intent.representation?.symbolicElements || [];
+  const moods = intent.semantic?.emotionalTone || [];
+  const mode = intent.representation?.mode || 'conceptual';
+
+  return cloned
+    .map(candidate => ({
+      ...candidate,
+      relevanceHint:
+        (candidate.themes.some(theme => normalize(theme) === normalize(primary)) ? 5 : 0) +
+        overlap(candidate.tags, literal) * 3 +
+        overlap(candidate.tags, symbolic) * 1.5 +
+        overlap(candidate.moods, moods) * 1.25 +
+        (candidate.representationModes.includes(mode) ? 1.5 : 0)
+    }))
+    .filter(candidate => candidate.relevanceHint >= 4.5)
+    .sort((a, b) => b.relevanceHint - a.relevanceHint)
+    .slice(0, limit);
 }
