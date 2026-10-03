@@ -1,5 +1,5 @@
 // js/chat.js
-import { askGemini } from './gemini.js';
+import { askGemini, isChatAvailable } from './gemini.js';
 
 let chatHistory = [];
 let isLoading = false;
@@ -21,6 +21,13 @@ export function initChat() {
   if (!initialInput || !askBtn || !chatContainer || !chatMessages) {
     console.warn('[VersDay] Elementos do chat não encontrados.');
     return;
+  }
+
+  if (!isChatAvailable()) {
+    initialInput.disabled = true;
+    initialInput.placeholder = 'Assistente temporariamente indisponível';
+    askBtn.disabled = true;
+    askBtn.title = 'O assistente exige um endpoint server-side seguro.';
   }
 
   function addMessage(role, text) {
