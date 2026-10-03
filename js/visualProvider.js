@@ -1,52 +1,73 @@
 // js/visualProvider.js
-// O navegador NUNCA recebe chave de Unsplash/Pexels.
-// Para habilitar busca dinâmica, configure um endpoint seguro via:
-// <meta name="versday-visual-endpoint" content="https://.../api/visual-search">
-//
-// Contrato esperado do proxy:
-// POST { verseReference, intent, queries, limit }
-// -> { candidates: [{ id, provider, providerUrl, imageUrl, tags, moods,
-//       representationModes, safeTextAreas, focalPoint, mobileFocalPoint,
-//       qualityScore, compositionScore, identityScore, downloadLocation? }] }
+// Integração segura com provedores externos.
+// Nenhuma credencial privada vive no navegador.
 
-function getEndpoint() {
+function getMeta(name) {
   if (typeof document === 'undefined') return '';
-  return document
-    .querySelector('meta[name="versday-visual-endpoint"]')
-    ?.getAttribute('content')
-    ?.trim() || '';
+  return document.querySelector(`meta[name="${name}"]`)?.getAttribute('content')?.trim() || '';
+}
+
+function getSearchEndpoint() {
+  return getMeta('versday-visual-endpoint');
+}
+
+function getSelectEndpoint() {
+  const explicit = getMeta('versday-visual-select-endpoint');
+  if (explicit) return explicit;
+
+  const search = getSearchEndpoint();
+  if (!search) return '';
+  return search.replace(/\/visual-search(?:\?.*)?$/, '/visual-select');
 }
 
 function sanitizeCandidate(raw) {
   if (!raw || !raw.id || !raw.imageUrl) return null;
+
   return {
     id: String(raw.id),
     provider: String(raw.provider || 'External'),
-    providerUrl: String(raw.providerUrl || ''),
+    providerUrl: String(raw.providerUrl || raw.sourceLink || ''),
     imageUrl: String(raw.imageUrl),
+    previewUrl: String(raw.previewUrl || raw.imageUrl),
+    width: Number(raw.width || 0),
+    height: Number(raw.height || 0),
+    description: String(raw.description || ''),
+    alt: String(raw.alt || raw.description || ''),
     tags: Array.isArray(raw.tags) ? raw.tags.map(String) : [],
+    themes: Array.isArray(raw.themes) ? raw.themes.map(String) : [],
     moods: Array.isArray(raw.moods) ? raw.moods.map(String) : [],
     representationModes: Array.isArray(raw.representationModes)
       ? raw.representationModes.map(String)
-      : ['conceptual'],
-    safeTextAreas: Array.isArray(raw.safeTextAreas) ? raw.safeTextAreas.map(String) : ['center'],
-    focalPoint: raw.focalPoint || { x: 0.5, y: 0.5 },
-    mobileFocalPoint: raw.mobileFocalPoint || raw.focalPoint || { x: 0.5, y: 0.5 },
+      : [],
+    safeTextAreas: Array.isArray(raw.safeTextAreas) ? raw.safeTextAreas.map(String) : [],
+    focalPoint: raw.focalPoint || null,
+    mobileFocalPoint: raw.mobileFocalPoint || raw.focalPoint || null,
     qualityScore: Number(raw.qualityScore ?? 0.8),
-    compositionScore: Number(raw.compositionScore ?? 0.75),
+    compositionScore: Number(raw.compositionScore ?? 0.74),
     identityScore: Number(raw.identityScore ?? 0.78),
     negativeTags: Array.isArray(raw.negativeTags) ? raw.negativeTags.map(String) : [],
-    downloadLocation: raw.downloadLocation ? String(raw.downloadLocation) : null
+    providerSearchScore: Number(raw.providerSearchScore ?? 0),
+    query: String(raw.query || ''),
+    photographer: raw.photographer ? String(raw.photographer) : null,
+    photographerLink: raw.photographerLink ? String(raw.photographerLink) : null,
+    downloadLocation: raw.downloadLocation ? String(raw.downloadLocation) : null,
+    hasEmbeddedText: Boolean(raw.hasEmbeddedText),
+    hasWatermark: Boolean(raw.hasWatermark),
+    isAdvertising: Boolean(raw.isAdvertising),
+    nsfw: Boolean(raw.nsfw)
   };
 }
 
 export function isDynamicVisualSearchEnabled() {
-  return Boolean(getEndpoint());
+  return Boolean(getSearchEndpoint());
 }
 
-export async function fetchProviderCandidates(intent, queries, limit = 20) {
-  const endpoint = getEndpoint();
+export async function fetchProviderCandidates(intent, queries, limit = 20, purpose = 'background') {
+  const endpoint = getSearchEndpoint();
   if (!endpoint) return [];
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 6000);
 
   try {
     const response = await fetch(endpoint, {
@@ -54,40 +75,58 @@ export async function fetchProviderCandidates(intent, queries, limit = 20) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         verseReference: intent.verseReference,
-        intent,
-        queries,
-        limit: Math.min(Math.max(limit, 1), 30)
-      })
+        intent: {
+          semantic: intent.semantic,
+          representation: intent.representation,
+          visualIntent: intent.visualIntent,
+          photography: intent.photography,
+          biblicalContext: intent.biblicalContext
+        },
+        queries: queries.slice(0, 4),
+        purpose,
+        limit: Math.min(Math.max(limit, 5), 30)
+      }),
+      signal: controller.signal
     });
 
     if (!response.ok) throw new Error(`visual provider HTTP ${response.status}`);
     const payload = await response.json();
+
     return (payload.candidates || [])
       .map(sanitizeCandidate)
-      .filter(Boolean);
+      .filter(Boolean)
+      .map(candidate => ({
+        ...candidate,
+        searchIntentTheme: intent.semantic.primaryTheme
+      }));
   } catch (error) {
-    console.warn('[VersDay] Busca visual externa indisponível; usando fallback seguro.', error);
+    console.info(
+      '[VersDay] Busca visual externa indisponível; fallback premium será usado.',
+      error?.name || error
+    );
     return [];
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
 export async function notifyProviderSelection(candidate) {
-  const endpoint = getEndpoint();
-  if (!endpoint || !candidate?.downloadLocation) return;
+  if (!candidate?.downloadLocation) return;
 
-  // O proxy é responsável por cumprir download tracking do provedor sem
-  // expor credenciais ao navegador.
+  const endpoint = getSelectEndpoint();
+  if (!endpoint) return;
+
   try {
     await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        action: 'track-download',
         candidateId: candidate.id,
         downloadLocation: candidate.downloadLocation
-      })
+      }),
+      keepalive: true
     });
   } catch {
-    // Tracking não bloqueia a experiência visual.
+    // Tracking do provedor jamais bloqueia a experiência.
   }
 }
