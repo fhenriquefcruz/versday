@@ -33,3 +33,16 @@ test('hard filters eliminam watermark e baixa resolução', () => {
   assert.ok(scored.rejectionReasons.includes('WATERMARK'));
   assert.ok(scored.rejectionReasons.includes('LOW_RESOLUTION'));
 });
+
+
+test('clichê religioso contraditório é eliminado, mesmo com ótima qualidade', () => {
+  const trustIntent=analyzeVerseVisualIntent({text:'Confia no Senhor de todo o teu coração.',reference:'pv 3:5',book:'pv',chapter:3,verse:5,theme:'confianca'});
+  const scored=scoreCandidate({
+    id:'cliche',imageUrl:'https://example.com/cross.jpg',width:5000,height:3333,
+    themes:['confianca'],tags:['cross','sunset'],description:'large cross at sunset',
+    qualityScore:1,compositionScore:1,safeAreas:['center'],focalPoint:{x:.5,y:.5},curated:false,
+    providerSearchScore:.95,searchIntentTheme:'confianca'
+  },trustIntent);
+  assert.equal(scored.rejected,true);
+  assert.ok(scored.rejectionReasons.includes('RELIGIOUS_CLICHE'));
+});
