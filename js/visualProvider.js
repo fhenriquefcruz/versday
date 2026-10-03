@@ -1,3 +1,5 @@
+import { isBackendProviderReady } from './backendHealth.js';
+
 // js/visualProvider.js
 // Integração segura com provedores externos.
 // Nenhuma credencial privada vive no navegador.
@@ -70,6 +72,12 @@ export function isDynamicVisualSearchEnabled() {
 export async function fetchProviderCandidates(intent, queries, limit = 20, purpose = 'background') {
   const endpoint = getSearchEndpoint();
   if (!endpoint) return [];
+
+  const providerReady = await isBackendProviderReady('images');
+  if (providerReady === false) {
+    console.info('[VersDay] Provider visual não configurado; usando fallback premium.');
+    return [];
+  }
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 6000);
