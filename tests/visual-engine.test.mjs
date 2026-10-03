@@ -7,8 +7,8 @@ import {
   buildVisualQueries,
   buildAbstractVisual
 } from '../js/visualIntelligence.js';
-import { getCuratedCandidates } from '../js/visualCatalog.js';
-import { selectBestCandidate, scoreCandidate } from '../js/visualSelector.js';
+import { CURATED_VISUALS, getCuratedCandidates } from '../js/visualCatalog.js';
+import { hardFilterCandidate, selectBestCandidate, scoreCandidate } from '../js/visualSelector.js';
 
 test('benchmark possui pelo menos 100 passagens reais', () => {
   assert.ok(FALLBACK_VERSES.length >= 100, `benchmark insuficiente: ${FALLBACK_VERSES.length}`);
@@ -112,7 +112,6 @@ test('qualidade estética não mascara baixa coerência semântica', () => {
   const scored = scoreCandidate(beautifulButWrong, intent, []);
   assert.equal(scored.accepted, false);
   assert.ok(scored.rejectedReasons.includes('EMOTIONAL_MISMATCH'));
-  assert.ok(scored.rejectedReasons.includes('SEMANTIC_MISMATCH'));
 });
 
 test('memória de novidade reduz repetição sem superar semântica', () => {
@@ -132,4 +131,112 @@ test('memória de novidade reduz repetição sem superar semântica', () => {
 
   assert.ok(fresh.scores.final > repeated.scores.final);
   assert.equal(fresh.scores.semantic, repeated.scores.semantic);
+});
+
+
+test('acervo curado premium possui pelo menos 12 imagens classificadas', () => {
+  assert.ok(CURATED_VISUALS.length >= 12);
+  for (const candidate of CURATED_VISUALS) {
+    assert.ok(candidate.imageUrl);
+    assert.ok(candidate.themes.length >= 1);
+    assert.ok(candidate.tags.length >= 3);
+    assert.ok(candidate.moods.length >= 1);
+    assert.ok(candidate.safeTextAreas.length >= 1);
+    assert.ok(candidate.focalPoint);
+    assert.ok(candidate.mobileFocalPoint);
+  }
+});
+
+test('contexto bíblico curado entra na intenção antes da busca visual', () => {
+  const intent = analyzeVerse({
+    text: 'O Senhor é o meu pastor; nada me faltará.',
+    reference: 'sl 23:1',
+    book: 'sl',
+    chapter: 23,
+    verse: 1,
+    theme: 'pastor'
+  });
+
+  assert.equal(intent.biblicalContext.contextSource, 'curated-context');
+  assert.match(intent.biblicalContext.surroundingContext, /pastoral/i);
+  assert.ok(intent.biblicalContext.characters.length >= 1);
+});
+
+test('metáfora com elemento visual forte pode usar representação literal deliberada', () => {
+  const intent = analyzeVerse({
+    text: 'Eu sou a videira, vós, os ramos; quem permanece em mim dá muito fruto.',
+    reference: 'jo 15:5',
+    book: 'jo',
+    chapter: 15,
+    verse: 5,
+    theme: 'confianca'
+  });
+
+  assert.equal(intent.representation.mode, 'literal');
+  assert.ok(intent.representation.literalElements.includes('vinha'));
+});
+
+test('hard filters removem watermark, baixa resolução e clichê religioso automático', () => {
+  const intent = analyzeVerse({
+    text: 'Confia no Senhor de todo o teu coração.',
+    reference: 'pv 3:5',
+    book: 'pv',
+    chapter: 3,
+    verse: 5,
+    theme: 'confianca'
+  });
+
+  const technical = hardFilterCandidate({
+    id: 'bad-tech',
+    imageUrl: 'https://example.com/bad.jpg',
+    width: 640,
+    height: 480,
+    hasWatermark: true
+  }, intent);
+
+  assert.equal(technical.accepted, false);
+  assert.ok(technical.reasons.includes('WATERMARK'));
+  assert.ok(technical.reasons.includes('LOW_RESOLUTION'));
+
+  const cliche = hardFilterCandidate({
+    id: 'cross-cliche',
+    imageUrl: 'https://example.com/cross.jpg',
+    width: 2400,
+    height: 1600,
+    tags: ['cross', 'sunset'],
+    description: 'large cross at sunset'
+  }, intent);
+
+  assert.equal(cliche.accepted, false);
+  assert.ok(cliche.reasons.includes('RELIGIOUS_CLICHE'));
+});
+
+test('foto bonita e sem contradição explícita ainda falha quando é semanticamente irrelevante', () => {
+  const intent = analyzeVerse({
+    text: 'Se confessarmos os nossos pecados, ele é fiel e justo para nos perdoar.',
+    reference: '1jo 1:9',
+    book: '1jo',
+    chapter: 1,
+    verse: 9,
+    theme: 'perdao'
+  });
+
+  const scored = scoreCandidate({
+    id: 'beautiful-unrelated',
+    imageUrl: 'https://example.com/architecture.jpg',
+    width: 4000,
+    height: 2600,
+    tags: ['architecture', 'glass', 'city'],
+    moods: ['neutral'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['center'],
+    focalPoint: { x: 0.5, y: 0.5 },
+    mobileFocalPoint: { x: 0.5, y: 0.5 },
+    qualityScore: 1,
+    compositionScore: 1,
+    identityScore: 1
+  }, intent, []);
+
+  assert.equal(scored.accepted, false);
+  assert.ok(scored.rejectedReasons.includes('SEMANTIC_MISMATCH'));
 });
