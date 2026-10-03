@@ -45,8 +45,10 @@ function mockRes() {
 test('healthcheck responde sem expor valores de segredo', async () => {
   const oldUnsplash = process.env.UNSPLASH_ACCESS_KEY;
   const oldGroq = process.env.GROQ_API_KEY;
+  const oldVlm = process.env.VISUAL_VLM_ENABLED;
   process.env.UNSPLASH_ACCESS_KEY = 'configured-test-value';
   process.env.GROQ_API_KEY = 'configured-test-value';
+  delete process.env.VISUAL_VLM_ENABLED;
 
   try {
     const req = mockReq({ method: 'GET' });
@@ -59,6 +61,7 @@ test('healthcheck responde sem expor valores de segredo', async () => {
     assert.equal(res.payload.service, 'versday-api');
     assert.equal(res.payload.providers.imagesConfigured, true);
     assert.equal(res.payload.providers.chatConfigured, true);
+    assert.equal(res.payload.providers.vlmConfigured, false);
 
     const serialized = JSON.stringify(res.payload);
     assert.equal(serialized.includes('configured-test-value'), false);
@@ -69,6 +72,8 @@ test('healthcheck responde sem expor valores de segredo', async () => {
     else process.env.UNSPLASH_ACCESS_KEY = oldUnsplash;
     if (oldGroq === undefined) delete process.env.GROQ_API_KEY;
     else process.env.GROQ_API_KEY = oldGroq;
+    if (oldVlm === undefined) delete process.env.VISUAL_VLM_ENABLED;
+    else process.env.VISUAL_VLM_ENABLED = oldVlm;
   }
 });
 
