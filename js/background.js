@@ -1,5 +1,6 @@
 // js/background.js
 import { resolveVisualForVerse } from './visualEngine.js';
+import { invalidateCachedVisual } from './visualMemory.js';
 import { appState } from './state.js';
 
 let bgLayer1;
@@ -146,7 +147,12 @@ export async function setBackgroundImage(verse, options = {}) {
     const loaded = await preload(visual.imageUrl);
     if (requestId !== requestSequence) return selection;
     if (!loaded) {
-      // Força nova resolução: a foto quebrada não deve permanecer como "melhor ruim".
+      // Uma URL quebrada não pode permanecer presa no cache do versículo.
+      invalidateCachedVisual(
+        verse.reference,
+        String(options.purpose || 'background'),
+        visual.id
+      );
       return resolveAndApplyFallback(verse, selection);
     }
   }
