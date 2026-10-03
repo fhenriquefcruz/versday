@@ -67,7 +67,7 @@ test('pastoreio literal encontra fotografia pastoral coerente', () => {
   const { selected } = selectBestCandidate(candidates, intent, []);
 
   assert.ok(selected);
-  assert.equal(selected.candidate.id, 'pexels-pastoral-115141');
+  assert.equal(selected.candidate.id, 'pexels-115141');
   assert.ok(selected.scores.semantic >= 0.72);
 });
 
@@ -124,7 +124,7 @@ test('memória de novidade reduz repetição sem superar semântica', () => {
     theme: 'pastor'
   };
   const intent = analyzeVerse(verse);
-  const candidate = getCuratedCandidates().find(item => item.id === 'pexels-pastoral-115141');
+  const candidate = getCuratedCandidates().find(item => item.id === 'pexels-115141');
 
   const fresh = scoreCandidate(candidate, intent, []);
   const repeated = scoreCandidate(candidate, intent, [candidate.id]);
