@@ -7,7 +7,7 @@ const swUrl = new URL('../service-worker.js', import.meta.url);
 test('service worker usa network-first para assets locais', async () => {
   const source = await readFile(swUrl, 'utf8');
 
-  assert.match(source, /versday-v11-debug-panel/);
+  assert.match(source, /versday-v12-tablet-visuals/);
   assert.match(source, /fetch\(request, \{ cache: 'no-cache' \}\)/);
   assert.match(source, /const cached = await caches\.match\(request\)/);
   assert.match(source, /url\.origin !== self\.location\.origin/);
