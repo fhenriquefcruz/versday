@@ -83,13 +83,7 @@ ALLOWED_ORIGIN=https://fhenriquefcruz.github.io
 
 Os valores reais nunca devem ir para `index.html`, `js/` ou para commits. Credenciais que já tenham sido publicadas historicamente precisam ser revogadas e rotacionadas nos provedores.
 
-O repositório também contém os endpoints server-side opcionais em `api/`:
-
-- `/api/visual-search` — busca de até 30 candidatos no Unsplash;
-- `/api/visual-select` — download tracking exigido pelo provedor;
-- `/api/chat` — proxy seguro para o assistente bíblico.
-
-Em uma implantação Vercel (`*.vercel.app`), esses endpoints são detectados automaticamente. Configure apenas as variáveis de ambiente descritas em `.env.example`. No GitHub Pages, nenhuma chave é necessária e nenhuma credencial privada é enviada ao navegador.
+Em uma implantação Vercel (`*.vercel.app`), os endpoints `/api/visual-search`, `/api/visual-select` e `/api/chat` são detectados automaticamente. No GitHub Pages, o VersDay continua sem segredos e usa o catálogo curado + fallback abstrato.
 
 ## Share cards
 
