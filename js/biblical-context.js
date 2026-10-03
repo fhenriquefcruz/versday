@@ -1,6 +1,90 @@
 // Contexto bíblico resumido para passagens em que uma leitura isolada pode distorcer a intenção visual.
 // São resumos semânticos, não uma segunda tradução bíblica.
 
+const PASSAGE_CONTEXT_HINTS = [
+  {
+    book:'sl', chapter:121, fromVerse:1, toVerse:2,
+    summary:'Os versos iniciais formam uma pergunta e resposta: os montes entram no campo visual da peregrinação, mas o socorro é atribuído ao Criador, não à paisagem.',
+    narrativeSituation:'peregrino olha para os montes e desloca a confiança da paisagem para o Senhor',
+    characters:['peregrino','Senhor'],
+    suppressLiteral:['montanha']
+  },
+  {
+    book:'is', chapter:43, fromVerse:1, toVerse:3,
+    summary:'A promessa de presença vem antes e durante a travessia de águas, rios e fogo; esses elementos expressam adversidade enfrentada com companhia divina, não um cenário obrigatório.',
+    narrativeSituation:'Israel é encorajado a atravessar perigos sob promessa de presença e proteção',
+    characters:['Senhor','Israel'],
+    suppressLiteral:['água','fogo']
+  },
+  {
+    book:'sl', chapter:137, fromVerse:1, toVerse:4,
+    summary:'O rio pertence à cena histórica do exílio, enquanto o centro emocional é luto, memória de Sião e impossibilidade de cantar com leveza em terra estrangeira.',
+    narrativeSituation:'exilados choram e recordam Jerusalém sob coerção cultural',
+    characters:['exilados de Judá'],
+    suppressLiteral:['água']
+  },
+  {
+    book:'mt', chapter:8, fromVerse:23, toVerse:27,
+    summary:'Jesus e os discípulos estão numa embarcação durante uma tempestade real; medo, ondas e risco físico antecedem a calmaria.',
+    narrativeSituation:'travessia de barco ameaçada por tempestade literal antes da intervenção de Jesus',
+    characters:['Jesus','discípulos']
+  },
+  {
+    book:'mc', chapter:4, fromVerse:35, toVerse:41,
+    summary:'A travessia acontece ao entardecer; vento e ondas enchem o barco, os discípulos temem e só depois vem a calmaria.',
+    narrativeSituation:'tempestade literal ameaça a embarcação e expõe medo dos discípulos',
+    characters:['Jesus','discípulos']
+  },
+  {
+    book:'lc', chapter:8, fromVerse:22, toVerse:25,
+    summary:'Durante a travessia do lago, a tempestade é literal e perigosa; o foco narrativo combina ameaça concreta, medo e confiança.',
+    narrativeSituation:'embarcação em risco durante tempestade no lago',
+    characters:['Jesus','discípulos']
+  },
+  {
+    book:'lc', chapter:15, fromVerse:11, toVerse:24,
+    summary:'O retorno do filho acontece após ruptura, perda e decisão de voltar; a recepção do pai transforma vergonha e distância em reconciliação.',
+    narrativeSituation:'filho retorna fragilizado e é recebido pelo pai em reconciliação familiar',
+    characters:['pai','filho mais novo']
+  },
+  {
+    book:'jo', chapter:11, fromVerse:17, toVerse:27,
+    summary:'Marta encontra Jesus ainda dentro do luto pela morte de Lázaro; a afirmação sobre ressurreição nasce em uma conversa de dor e esperança, antes do túmulo.',
+    narrativeSituation:'diálogo de luto e esperança entre Jesus e Marta após a morte de Lázaro',
+    characters:['Jesus','Marta','Lázaro']
+  },
+  {
+    book:'jo', chapter:15, fromVerse:1, toVerse:8,
+    summary:'Videira, ramos e fruto formam uma metáfora contínua sobre permanência e dependência; o elemento botânico é deliberado, não decoração religiosa genérica.',
+    narrativeSituation:'Jesus ensina permanência e fruto por meio da metáfora orgânica da videira',
+    characters:['Jesus','discípulos']
+  },
+  {
+    book:'rm', chapter:8, fromVerse:18, toVerse:39,
+    summary:'O trecho mantém sofrimento presente, gemido, esperança e segurança no amor de Deus na mesma unidade; nenhuma imagem deve apagar a dor antecipando triunfo fácil.',
+    narrativeSituation:'ensino pastoral que atravessa sofrimento real até esperança e segurança',
+    characters:['Paulo','comunidade cristã']
+  },
+  {
+    book:'1co', chapter:15, fromVerse:50, toVerse:58,
+    summary:'Paulo conclui um argumento doutrinário sobre transformação, mortalidade e vitória sobre a morte; não é uma narrativa do túmulo vazio.',
+    narrativeSituation:'conclusão de ensino apostólico sobre ressurreição e transformação futura',
+    characters:['Paulo','comunidade de Corinto']
+  },
+  {
+    book:'mt', chapter:28, fromVerse:1, toVerse:10,
+    summary:'Mulheres chegam ao túmulo em contexto de luto e encontram o anúncio da ressurreição; a atmosfera passa de temor e perda para assombro e esperança.',
+    narrativeSituation:'visita ao túmulo vazio e anúncio da ressurreição às mulheres',
+    characters:['Jesus','mulheres','mensageiro']
+  },
+  {
+    book:'ap', chapter:21, fromVerse:1, toVerse:5,
+    summary:'A visão de nova criação vem depois de conflito e juízo e concentra consolação: lágrimas, morte e dor deixam de dominar a experiência.',
+    narrativeSituation:'visão de renovação final e fim do luto após sofrimento',
+    characters:['vidente','Deus','povo']
+  }
+];
+
 const CONTEXT_HINTS = [
   { book:'gn', chapter:22, summary:'Narrativa do teste de Abraão com Isaque no monte; tensão, obediência, perigo e provisão ocorrem em uma cena concreta, não como paisagem motivacional.', narrativeSituation:'pai e filho sob tensão extrema durante uma jornada sacrificial', characters:['Abraão','Isaque'], suppressLiteral:['montanha'] },
   { book:'ex', chapter:14, summary:'Narrativa de fuga em que Israel está encurralado entre o exército egípcio e o mar antes da travessia.', narrativeSituation:'ameaça militar e travessia literal do mar', characters:['Moisés','Israel','egípcios'] },
@@ -45,14 +129,57 @@ const CONTEXT_HINTS = [
 
 export function resolveBiblicalContext(verse={}) {
   const explicit = verse.context || verse.surroundingContext || '';
-  const match = CONTEXT_HINTS.find(item => item.book === verse.book && item.chapter === Number(verse.chapter));
+  const chapter = Number(verse.chapter);
+  const verseNumber = Number(verse.verse);
+
+  const passageMatch = PASSAGE_CONTEXT_HINTS.find(item =>
+    item.book === verse.book &&
+    item.chapter === chapter &&
+    Number.isFinite(verseNumber) &&
+    verseNumber >= item.fromVerse &&
+    verseNumber <= item.toVerse
+  );
+
+  const chapterMatch = CONTEXT_HINTS.find(item =>
+    item.book === verse.book &&
+    item.chapter === chapter
+  );
+
+  const match = passageMatch || chapterMatch;
+
   return {
     text: explicit || match?.summary || '',
-    narrativeSituation: verse.narrativeSituation || match?.narrativeSituation || null,
-    characters: verse.characters?.length ? verse.characters : (match?.characters || []),
-    suppressLiteral: Array.isArray(verse.suppressLiteral)
-      ? verse.suppressLiteral
-      : (match?.suppressLiteral || []),
-    source: explicit ? 'verse' : match ? 'curated-context' : 'genre-only'
+    narrativeSituation:
+      verse.narrativeSituation ||
+      match?.narrativeSituation ||
+      null,
+    characters:
+      verse.characters?.length
+        ? verse.characters
+        : (match?.characters || []),
+    suppressLiteral:
+      Array.isArray(verse.suppressLiteral)
+        ? verse.suppressLiteral
+        : (match?.suppressLiteral || []),
+    source:
+      explicit
+        ? 'verse'
+        : match
+          ? 'curated-context'
+          : 'genre-only',
+    granularity:
+      explicit
+        ? 'explicit'
+        : passageMatch
+          ? 'passage-range'
+          : chapterMatch
+            ? 'chapter'
+            : 'genre-only',
+    scope:
+      passageMatch
+        ? `${verse.book} ${chapter}:${passageMatch.fromVerse}-${passageMatch.toVerse}`
+        : chapterMatch
+          ? `${verse.book} ${chapter}`
+          : null
   };
 }
