@@ -37,3 +37,32 @@ test('workflow extrai flags do health com quoting shell seguro', async () => {
     /CHAT_CONFIGURED="\$\(node -p 'JSON\.parse\(require\("fs"\)\.readFileSync\("health\.json","utf8"\)\)\.providers\?\.chatConfigured === true'\)"/
   );
 });
+
+test('workflow nunca usa RTM como destino padrão do VersDay', async () => {
+  const workflow = await readFile(workflowUrl, 'utf8');
+
+  assert.doesNotMatch(workflow, /default:\s*rtm11/i);
+  assert.match(
+    workflow,
+    /Vercel account\/team slug dedicated to VersDay/
+  );
+  assert.match(
+    workflow,
+    /RTM is a separate project\. Use a Vercel account\/team dedicated to VersDay\./
+  );
+  assert.match(
+    workflow,
+    /\[ "\$NORMALIZED_SCOPE" = "rtm11" \]/
+  );
+});
+
+test('workflow exige scope VersDay explicitamente antes do deploy', async () => {
+  const workflow = await readFile(workflowUrl, 'utf8');
+
+  const validateIndex = workflow.indexOf('Validate VersDay Vercel scope');
+  const deployIndex = workflow.indexOf('Deploy production backend');
+
+  assert.ok(validateIndex >= 0);
+  assert.ok(deployIndex > validateIndex);
+  assert.match(workflow, /if \[ -z "\$VERCEL_SCOPE" \]/);
+});
