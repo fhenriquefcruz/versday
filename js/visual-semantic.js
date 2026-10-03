@@ -1,3 +1,5 @@
+import { resolveBiblicalContext } from './biblical-context.js';
+
 // VersDay Visual Semantic Intelligence v1
 // Interpreta a passagem antes de qualquer decisão visual.
 
@@ -254,6 +256,8 @@ function buildVisualIntentDescription(theme, mode, elements, profile) {
 
 export function analyzeVerseVisualIntent(verse, surroundingContext = {}) {
   const text = String(verse?.text || '').trim();
+  const resolvedContext = resolveBiblicalContext(verse || {});
+  const context = surroundingContext?.text ? surroundingContext : resolvedContext;
   const themeInfo = inferTheme(verse);
   const profile = THEME_PROFILES[themeInfo.theme] || THEME_PROFILES.fe;
   const literalElements = inferLiteralElements(text);
@@ -272,9 +276,10 @@ export function analyzeVerseVisualIntent(verse, surroundingContext = {}) {
       book: verse?.book || null,
       chapter: verse?.chapter || null,
       literaryGenre: genre,
-      surroundingContext: surroundingContext.text || verse?.context || '',
-      narrativeSituation: verse?.narrativeSituation || null,
-      characters: verse?.characters || []
+      surroundingContext: context.text || '',
+      narrativeSituation: context.narrativeSituation || verse?.narrativeSituation || null,
+      characters: context.characters || verse?.characters || [],
+      contextSource: context.source || 'runtime'
     },
     semantic: {
       primaryTheme: themeInfo.theme,
