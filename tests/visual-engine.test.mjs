@@ -211,6 +211,28 @@ test('hard filters removem watermark, baixa resolução e clichê religioso auto
   assert.ok(cliche.reasons.includes('RELIGIOUS_CLICHE'));
 });
 
+test('clichê religioso só é permitido quando o elemento é literal e explícito', () => {
+  const intent = analyzeVerse({
+    text: 'Tome a sua cruz e siga-me.',
+    reference: 'mt 16:24',
+    book: 'mt',
+    chapter: 16,
+    verse: 24,
+    theme: 'fe'
+  });
+
+  const literalCross = hardFilterCandidate({
+    id: 'literal-cross',
+    imageUrl: 'https://example.com/cross.jpg',
+    width: 2400,
+    height: 1600,
+    tags: ['cross', 'wood'],
+    description: 'wooden cross in restrained natural light'
+  }, intent);
+
+  assert.equal(literalCross.accepted, true);
+});
+
 test('foto bonita e sem contradição explícita ainda falha quando é semanticamente irrelevante', () => {
   const intent = analyzeVerse({
     text: 'Se confessarmos os nossos pecados, ele é fiel e justo para nos perdoar.',
