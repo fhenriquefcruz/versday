@@ -20,6 +20,22 @@ test('workflow Vercel mantém guardas de deploy e ativação automática', async
   assert.match(workflow, /git push origin HEAD:main/);
   assert.match(workflow, /steps\.health\.outputs\.images/);
   assert.match(workflow, /steps\.health\.outputs\.chat/);
+  assert.match(workflow, /steps\.health\.outputs\.vlm/);
+  assert.match(workflow, /enable_vlm:/);
+  assert.match(workflow, /default:\s*false/);
+  assert.match(
+    workflow,
+    /sync_env "GROQ_MODEL" "qwen\/qwen3\.8-27b"/
+  );
+  assert.match(
+    workflow,
+    /sync_env "GROQ_VISION_MODEL" "qwen\/qwen3\.8-27b"/
+  );
+  assert.match(
+    workflow,
+    /sync_env "VISUAL_VLM_ENABLED" "\$VISUAL_VLM_ENABLED"/
+  );
+  assert.doesNotMatch(workflow, /llama-3\.3-70b-versatile/);
 
   assert.doesNotMatch(workflow, /echo\s+"\$UNSPLASH_ACCESS_KEY"/);
   assert.doesNotMatch(workflow, /echo\s+"\$GROQ_API_KEY"/);
@@ -35,6 +51,10 @@ test('workflow extrai flags do health com quoting shell seguro', async () => {
   assert.match(
     workflow,
     /CHAT_CONFIGURED="\$\(node -p 'JSON\.parse\(require\("fs"\)\.readFileSync\("health\.json","utf8"\)\)\.providers\?\.chatConfigured === true'\)"/
+  );
+  assert.match(
+    workflow,
+    /VLM_CONFIGURED="\$\(node -p 'JSON\.parse\(require\("fs"\)\.readFileSync\("health\.json","utf8"\)\)\.providers\?\.vlmConfigured === true'\)"/
   );
 });
 
