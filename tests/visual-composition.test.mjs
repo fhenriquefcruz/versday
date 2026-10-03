@@ -4,7 +4,8 @@ import { readFile } from 'node:fs/promises';
 
 import {
   chooseSafeAreas,
-  scoreSafeRegions
+  scoreSafeRegions,
+  inferFocalPointFromRegions
 } from '../js/visual-analysis.js';
 import { deriveOverlayStrength } from '../js/visualEngine.js';
 
@@ -89,4 +90,42 @@ test('share e background propagam placement responsivo', async () => {
   for (const placement of ['left', 'right', 'upper', 'lower']) {
     assert.match(styles, new RegExp(`data-text-placement="${placement}"`));
   }
+});
+
+test('inferência de focal point preserva assunto fora do centro antes do crop', () => {
+  const focal = inferFocalPointFromRegions([
+    { name: 'upper-left', x: 1/6, y: 1/6, saliencyScore: 0.12 },
+    { name: 'upper', x: 0.5, y: 1/6, saliencyScore: 0.15 },
+    { name: 'upper-right', x: 5/6, y: 1/6, saliencyScore: 0.22 },
+    { name: 'left', x: 1/6, y: 0.5, saliencyScore: 0.18 },
+    { name: 'center', x: 0.5, y: 0.5, saliencyScore: 0.31 },
+    { name: 'right', x: 5/6, y: 0.5, saliencyScore: 0.91 },
+    { name: 'lower-left', x: 1/6, y: 5/6, saliencyScore: 0.16 },
+    { name: 'lower', x: 0.5, y: 5/6, saliencyScore: 0.14 },
+    { name: 'lower-right', x: 5/6, y: 5/6, saliencyScore: 0.24 }
+  ]);
+
+  assert.ok(focal.x > 0.8);
+  assert.ok(focal.y > 0.45 && focal.y < 0.55);
+});
+
+test('empate de saliência prefere região mais central e estável', () => {
+  const focal = inferFocalPointFromRegions([
+    { name: 'left', x: 1/6, y: 0.5, saliencyScore: 0.6 },
+    { name: 'center', x: 0.5, y: 0.5, saliencyScore: 0.6 },
+    { name: 'right', x: 5/6, y: 0.5, saliencyScore: 0.6 }
+  ]);
+
+  assert.deepEqual(focal, { x: 0.5, y: 0.5 });
+});
+
+test('análise de provider registra origem do focal sem apagar focal manual', async () => {
+  const source = await readFile(
+    new URL('../js/visual-analysis.js', import.meta.url),
+    'utf8'
+  );
+
+  assert.match(source, /candidate\.focalPoint \|\| estimateSourceFocalPoint\(img\)/);
+  assert.match(source, /focalSource: candidate\.focalPoint \? 'provided' : 'source-saliency'/);
+  assert.match(source, /mobileFocalPoint:\s*derivedMobileFocal/);
 });
