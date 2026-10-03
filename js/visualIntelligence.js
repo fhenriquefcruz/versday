@@ -467,7 +467,13 @@ export function analyzeVerse(verse = {}) {
   const profile = THEME_PROFILES[rawTheme] || THEME_PROFILES.fe;
   const text = normalize(verse.text || '');
   const context = resolveBiblicalContext(verse);
-  const literalSignals = detectLiteralSignals(text);
+  const detectedSignals = detectLiteralSignals(text);
+  const suppressedSignals = new Set(
+    (context.suppressLiteral || []).map(normalize)
+  );
+  const literalSignals = detectedSignals.filter(
+    signal => !suppressedSignals.has(normalize(signal))
+  );
   const mode = deriveMode(profile, text, literalSignals);
 
   const literalElements = unique([
@@ -477,7 +483,12 @@ export function analyzeVerse(verse = {}) {
 
   const symbolicElements = unique([
     ...(profile.symbolicElements || []),
-    ...literalSignals.filter(signal => detectMetaphoricalUse(text, signal)).map(signal => `${signal} como metáfora`)
+    ...literalSignals
+      .filter(signal => detectMetaphoricalUse(text, signal))
+      .map(signal => `${signal} como metáfora`),
+    ...detectedSignals
+      .filter(signal => suppressedSignals.has(normalize(signal)))
+      .map(signal => `${signal} como imagem contextual`)
   ]);
 
   const genre = BOOK_GENRES[normalize(verse.book)] || 'bíblico';
@@ -497,6 +508,7 @@ export function analyzeVerse(verse = {}) {
       surroundingContext: context.text,
       narrativeSituation: context.narrativeSituation,
       characters: [...context.characters],
+      suppressedLiteralElements: [...(context.suppressLiteral || [])],
       contextSource: context.source
     },
     semantic: {
