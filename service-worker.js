@@ -1,5 +1,5 @@
 // Incrementar versão a cada deploy para forçar atualização do cache
-const CACHE_NAME = 'versday-v4';
+const CACHE_NAME = 'versday-v5-visual-semantic';
 
 // Caminhos relativos — funciona tanto na raiz quanto em /versday/
 const ASSETS = [
@@ -10,6 +10,12 @@ const ASSETS = [
   './js/api.js',
   './js/fallbackVerses.js',
   './js/semantic.js',
+  './js/visualIntelligence.js',
+  './js/visualCatalog.js',
+  './js/visualSelector.js',
+  './js/visualMemory.js',
+  './js/visualProvider.js',
+  './js/visualEngine.js',
   './js/cache.js',
   './js/history.js',
   './js/favorites.js',
