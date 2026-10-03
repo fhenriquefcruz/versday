@@ -33,7 +33,7 @@ A regra é simples:
 - focal point é separado para desktop e mobile;
 - repetição reduz score, mas nunca supera pertinência;
 - feedback negativo invalida a associação para aquela passagem e impede a mesma imagem de reaparecer em outras passagens do mesmo tema;
-- contexto bíblico curado é aplicado antes da intenção visual em passagens sensíveis;
+- contexto bíblico curado é aplicado antes da intenção visual em passagens sensíveis, com granularidade de capítulo ou faixa imediata de versículos quando necessário;
 - os 5 melhores candidatos passam por análise de pixels para luminância, complexidade e safe area;
 - watermark, texto embutido, baixa resolução, publicidade e clichê religioso sem suporte literal são hard filters.
 
