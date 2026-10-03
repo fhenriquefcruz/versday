@@ -695,3 +695,135 @@ body.light #sendChatBtn { color: #fff8f0; }
   outline-offset: 3px;
   border-radius: 4px;
 }
+
+
+/* ============================================================
+   VISUAL SEMANTIC ENGINE v2
+   ============================================================ */
+:root {
+  --visual-overlay-alpha: 0.24;
+}
+
+.bg-layer {
+  background-position: var(--focal-desktop, 50% 50%);
+}
+
+.bg-layer.bg-abstract {
+  background-size: cover;
+  filter: saturate(0.86) contrast(1.03);
+}
+
+body::after {
+  background:
+    linear-gradient(180deg, rgba(4,8,12,0.08), rgba(4,8,12,var(--visual-overlay-alpha))),
+    radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.36) 100%);
+}
+
+body[data-visual-mode="abstract"]::after {
+  background:
+    radial-gradient(circle at 30% 24%, rgba(255,255,255,0.035), transparent 28%),
+    linear-gradient(180deg, rgba(4,8,12,0.02), rgba(4,8,12,0.20));
+}
+
+.visual-feedback {
+  margin: 8px auto 0;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+}
+
+.visual-feedback[hidden] {
+  display: none !important;
+}
+
+.visual-feedback span {
+  margin-right: 2px;
+}
+
+.visual-feedback button {
+  appearance: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  background: transparent;
+  opacity: 0.5;
+  cursor: pointer;
+  font-size: 0.82rem;
+  transition: opacity var(--transition), transform var(--transition), background var(--transition), border-color var(--transition);
+}
+
+.visual-feedback button:hover,
+.visual-feedback button:focus-visible {
+  opacity: 0.92;
+  transform: translateY(-1px);
+  background: var(--bg-btn);
+  border-color: var(--border);
+  outline: none;
+}
+
+.visual-feedback button.is-active {
+  opacity: 1;
+  background: var(--accent-dim);
+  border-color: var(--border-focus);
+}
+
+/* O layout pode respeitar a região segura da fotografia em telas amplas. */
+@media (min-width: 900px) {
+  body[data-text-placement="upper-left"],
+  body[data-text-placement="lower-left"] {
+    justify-content: flex-start;
+  }
+
+  body[data-text-placement="upper-right"],
+  body[data-text-placement="lower-right"] {
+    justify-content: flex-end;
+  }
+
+  body[data-text-placement="upper-left"],
+  body[data-text-placement="upper-right"] {
+    align-items: flex-start;
+  }
+
+  body[data-text-placement="lower-left"],
+  body[data-text-placement="lower-right"] {
+    align-items: flex-end;
+  }
+
+  body[data-text-placement="upper-left"] .verse-container,
+  body[data-text-placement="lower-left"] .verse-container {
+    margin-left: clamp(18px, 5vw, 72px);
+  }
+
+  body[data-text-placement="upper-right"] .verse-container,
+  body[data-text-placement="lower-right"] .verse-container {
+    margin-right: clamp(18px, 5vw, 72px);
+  }
+}
+
+@media (max-width: 640px) {
+  .bg-layer {
+    background-position: var(--focal-mobile, 50% 50%);
+  }
+
+  body {
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .visual-feedback {
+    margin-top: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-layer {
+    transition-duration: 0.01ms;
+  }
+}
