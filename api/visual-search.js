@@ -88,7 +88,7 @@ export default async function handler(req, res) {
     const requestedLimit = Math.max(5, Math.min(Number(body.limit) || MAX_RESULTS, MAX_RESULTS));
     const perQuery = Math.max(5, Math.ceil(requestedLimit / queries.length));
     const purpose = String(body.purpose || 'background');
-    const orientation = purpose === 'share-portrait' ? 'portrait' : 'landscape';
+    const orientation = (purpose === 'share-portrait' || purpose === 'background-mobile') ? 'portrait' : 'landscape';
     const settled = await Promise.allSettled(
       queries.map(query => searchUnsplash(query, accessKey, perQuery, orientation))
     );
