@@ -1,5 +1,6 @@
 // js/chat.js
 import { askGemini } from './gemini.js';
+import { getApiBase } from './visual-provider.js';
 
 let chatHistory = [];
 let isLoading = false;
@@ -21,6 +22,14 @@ export function initChat() {
   if (!initialInput || !askBtn || !chatContainer || !chatMessages) {
     console.warn('[VersDay] Elementos do chat não encontrados.');
     return;
+  }
+
+  if (getApiBase() === null) {
+    initialInput.disabled = true;
+    askBtn.disabled = true;
+    initialInput.placeholder = 'Assistente disponível quando o backend seguro estiver conectado';
+    const label = document.querySelector('.research-label');
+    if (label) label.title = 'As credenciais privadas não são mais executadas no navegador.';
   }
 
   function addMessage(role, text) {
