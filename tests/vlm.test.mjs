@@ -398,9 +398,9 @@ test('engine aplica VLM somente depois da análise de pixels e antes da seleçã
     'utf8'
   );
 
-  const pixelIndex = source.indexOf('analyzeShortlist');
-  const vlmIndex = source.indexOf('validateVisualFinalists');
-  const finalSelectIndex = source.lastIndexOf('selectBestCandidate');
+  const pixelIndex = source.indexOf('await analyzeShortlist(');
+  const vlmIndex = source.indexOf('await validateVisualFinalists(');
+  const finalSelectIndex = source.lastIndexOf('selectBestCandidate(');
 
   assert.ok(pixelIndex >= 0);
   assert.ok(vlmIndex > pixelIndex);
