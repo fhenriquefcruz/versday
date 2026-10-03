@@ -60,7 +60,7 @@ test('candidato coerente pode passar sem depender de keyword isolada', () => {
     technicalAnalysis:{ complexity:0.32 }
   }, intent, []);
 
-  assert.ok(scored.scores.semantic >= 0.72);
+  assert.ok(scored.scores.semantic >= 0.72, JSON.stringify({ semantic:intent.semantic, representation:intent.representation, scores:scored.scores, rejected:scored.rejectedReasons }));
   assert.ok(scored.scores.final >= 0.74);
   assert.equal(scored.accepted, true);
 });
