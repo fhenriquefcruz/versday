@@ -1,21 +1,28 @@
 // js/gemini.js
-// Cliente seguro para o assistente bíblico.
-// Nenhuma credencial é enviada ao navegador.
-// Configure um endpoint seguro em:
-// <meta name="versday-chat-endpoint" content="https://.../api/chat">
+// Cliente seguro para o assistente bíblico. Nenhuma credencial é enviada ao navegador.
 
-const SYSTEM_INSTRUCTION = `Você é um amigo que entende muito da Bíblia e adora explicar as coisas de um jeito simples e gostoso de ler. Ajude as pessoas a entenderem as Escrituras como se estivessem conversando sobre a vida.
-
-Seja caloroso, paciente e use linguagem natural e fluida. Evite cabeçalhos como "Contexto histórico:" ou "Análise:". Responda como quem conta uma história ou dá um conselho.
-
-Para perguntas profundas (contexto histórico, grego, hebraico), inclua os detalhes de modo leve e integrado. Cite versículos de forma natural. Seja positivo, edificante e nunca arrogante. Responda sempre em português brasileiro.`;
+function metaContent(name) {
+  if (typeof document === 'undefined') return '';
+  return document.querySelector('meta[name="' + name + '"]')?.getAttribute('content')?.trim() || '';
+}
 
 function getChatEndpoint() {
-  if (typeof document === 'undefined') return '';
-  return document
-    .querySelector('meta[name="versday-chat-endpoint"]')
-    ?.getAttribute('content')
-    ?.trim() || '';
+  const explicit = metaContent('versday-chat-endpoint');
+  if (explicit) return explicit;
+
+  const metaBase = metaContent('versday-api-base');
+  const configBase = typeof window !== 'undefined' && window.VERSDAY_CONFIG?.apiBase
+    ? String(window.VERSDAY_CONFIG.apiBase).trim()
+    : '';
+  const base = (metaBase || configBase).replace(/\/$/, '');
+
+  if (base) return base + '/api/chat';
+
+  if (typeof location !== 'undefined' && !/\.github\.io$/i.test(location.hostname)) {
+    return '/api/chat';
+  }
+
+  return '';
 }
 
 export function isChatAvailable() {
@@ -25,31 +32,43 @@ export function isChatAvailable() {
 export async function askGemini(question, conversationHistory = []) {
   const endpoint = getChatEndpoint();
   if (!endpoint) {
-    throw new Error('Assistente bíblico indisponível nesta versão estática.');
+    throw new Error('Assistente bíblico indisponível nesta hospedagem estática.');
   }
 
-  const messages = [
-    { role: 'system', content: SYSTEM_INSTRUCTION },
-    ...conversationHistory.map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'assistant',
-      content: msg.content
-    })),
-    { role: 'user', content: question }
-  ];
+  const history = conversationHistory
+    .slice(-12)
+    .map(item => ({
+      role:item.role === 'model' ? 'assistant' : item.role,
+      content:String(item.content || '')
+    }))
+    .filter(item => item.content.trim());
+
+  // chat.js adiciona a pergunta ao histórico antes de chamar esta função.
+  // Evita enviar a mesma mensagem duas vezes ao backend.
+  if (
+    history.length &&
+    history[history.length - 1].role === 'user' &&
+    history[history.length - 1].content.trim() === String(question || '').trim()
+  ) {
+    history.pop();
+  }
 
   const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages })
+    method:'POST',
+    headers:{ 'Content-Type':'application/json' },
+    body:JSON.stringify({
+      question:String(question || '').trim(),
+      history
+    })
   });
 
   if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.error?.message || `HTTP ${response.status}`);
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || 'HTTP ' + response.status);
   }
 
   const data = await response.json();
-  let answer = data.answer || data.choices?.[0]?.message?.content || '';
+  let answer = String(data.answer || '');
 
   answer = answer.replace(/^#{1,6}\s+/gm, '');
   answer = answer.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
