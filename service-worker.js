@@ -1,7 +1,7 @@
 // Service Worker do VersDay.
 // Assets locais usam network-first para que um deploy novo nunca fique preso
 // atrás de um cache antigo. O cache permanece apenas como fallback offline.
-const CACHE_NAME = 'versday-v10-observability';
+const CACHE_NAME = 'versday-v11-debug-panel';
 
 // Caminhos relativos — funciona tanto na raiz quanto em /versday/
 const ASSETS = [
@@ -19,6 +19,7 @@ const ASSETS = [
   './js/visualSelector.js',
   './js/visualMemory.js',
   './js/visualTelemetry.js',
+  './js/visualDebugPanel.js',
   './js/visualProvider.js',
   './js/visualEngine.js',
   './js/visual-analysis.js',
