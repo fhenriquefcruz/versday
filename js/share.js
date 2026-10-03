@@ -1,11 +1,12 @@
-// js/share.js — Design premium, sem aspecto fosco, fonte conceitual (Cormorant Garamond)
+// js/share.js — Share Engine independente do background da experiência.
 import { appState } from './state.js';
+import { resolveVisualForVerse } from './visualEngine.js';
 
 export const SHARE_FORMATS = Object.freeze({
-  story: { width: 1080, height: 1920 },
-  feed: { width: 1080, height: 1350 },
-  square: { width: 1080, height: 1080 },
-  og: { width: 1200, height: 630 }
+  story:{ width:1080, height:1920, safeTop:190, safeBottom:290, purpose:'share-portrait' },
+  feed:{ width:1080, height:1350, safeTop:110, safeBottom:130, purpose:'share-portrait' },
+  square:{ width:1080, height:1080, safeTop:90, safeBottom:100, purpose:'share-square' },
+  og:{ width:1200, height:630, safeTop:56, safeBottom:60, purpose:'share-og' }
 });
 
 const BOOK_NAMES = {
@@ -30,11 +31,12 @@ function getBookName(abbrev) {
 }
 
 function wrapText(ctx, text, maxWidth) {
-  const words = text.split(' ');
+  const words = String(text || '').split(/\s+/);
   const lines = [];
   let current = '';
+
   for (const word of words) {
-    const test = current ? `${current} ${word}` : word;
+    const test = current ? current + ' ' + word : word;
     if (ctx.measureText(test).width > maxWidth && current) {
       lines.push(current);
       current = word;
@@ -42,282 +44,351 @@ function wrapText(ctx, text, maxWidth) {
       current = test;
     }
   }
+
   if (current) lines.push(current);
   return lines;
 }
 
 function roundRect(ctx, x, y, w, h, r) {
-  r = Math.min(r, w/2, h/2);
+  r = Math.min(r, w / 2, h / 2);
   ctx.beginPath();
-  ctx.moveTo(x+r, y);
-  ctx.lineTo(x+w-r, y);
-  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-  ctx.lineTo(x+w, y+h-r);
-  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-  ctx.lineTo(x+r, y+h);
-  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-  ctx.lineTo(x, y+r);
-  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
   ctx.closePath();
+}
+
+function loadImage(url) {
+  if (!url) return Promise.resolve(null);
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img.naturalWidth ? img : null);
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+function drawAbstract(ctx, width, height, visual, intent) {
+  const palette = visual?.palette ||
+    intent?.photography?.paletteHints ||
+    ['#0b131a','#243843','#6d6656','#d2bd91'];
+
+  const linear = ctx.createLinearGradient(0, 0, width, height);
+  linear.addColorStop(0, palette[0] || '#0b131a');
+  linear.addColorStop(0.52, palette[1] || '#243843');
+  linear.addColorStop(1, palette[0] || '#0b131a');
+  ctx.fillStyle = linear;
+  ctx.fillRect(0, 0, width, height);
+
+  const glow = ctx.createRadialGradient(
+    width * 0.25,
+    height * 0.22,
+    0,
+    width * 0.25,
+    height * 0.22,
+    Math.max(width, height) * 0.62
+  );
+  glow.addColorStop(0, 'rgba(228,179,99,0.18)');
+  glow.addColorStop(1, 'rgba(228,179,99,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, width, height);
+
+  const secondary = ctx.createRadialGradient(
+    width * 0.82,
+    height * 0.76,
+    0,
+    width * 0.82,
+    height * 0.76,
+    Math.max(width, height) * 0.52
+  );
+  secondary.addColorStop(0, 'rgba(255,255,255,0.045)');
+  secondary.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = secondary;
+  ctx.fillRect(0, 0, width, height);
+}
+
+function drawPhotoCover(ctx, img, width, height, focal) {
+  const scale = Math.max(width / img.naturalWidth, height / img.naturalHeight);
+  const drawW = img.naturalWidth * scale;
+  const drawH = img.naturalHeight * scale;
+  const overflowX = Math.max(0, drawW - width);
+  const overflowY = Math.max(0, drawH - height);
+  const fx = Math.max(0, Math.min(1, Number(focal?.x ?? 0.5)));
+  const fy = Math.max(0, Math.min(1, Number(focal?.y ?? 0.5)));
+  const ox = -overflowX * fx;
+  const oy = -overflowY * fy;
+  ctx.drawImage(img, ox, oy, drawW, drawH);
+}
+
+function drawAdaptiveScrim(ctx, width, height, strength) {
+  const alpha = Math.max(0.18, Math.min(0.48, Number(strength || 0.24) + 0.08));
+  const vertical = ctx.createLinearGradient(0, 0, 0, height);
+  vertical.addColorStop(0, 'rgba(0,0,0,' + (alpha * 0.58).toFixed(3) + ')');
+  vertical.addColorStop(0.5, 'rgba(0,0,0,' + alpha.toFixed(3) + ')');
+  vertical.addColorStop(1, 'rgba(0,0,0,' + (alpha * 0.9).toFixed(3) + ')');
+  ctx.fillStyle = vertical;
+  ctx.fillRect(0, 0, width, height);
+
+  const vignette = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, Math.max(width, height) * 0.72);
+  vignette.addColorStop(0, 'rgba(0,0,0,0.02)');
+  vignette.addColorStop(1, 'rgba(0,0,0,0.30)');
+  ctx.fillStyle = vignette;
+  ctx.fillRect(0, 0, width, height);
+}
+
+function fontForVerse(ctx, verseText, target, maxWidth, availableHeight) {
+  let size;
+  const length = verseText.length;
+
+  if (target.purpose === 'share-og') {
+    size = length > 180 ? 44 : length > 110 ? 52 : 62;
+  } else if (target.purpose === 'share-square') {
+    size = length > 220 ? 54 : length > 150 ? 62 : length > 90 ? 72 : 80;
+  } else {
+    size = length > 240 ? 58 : length > 180 ? 66 : length > 120 ? 74 : 84;
+  }
+
+  while (size >= 38) {
+    ctx.font = '400 ' + size + 'px "Cormorant Garamond", Georgia, serif';
+    const lines = wrapText(ctx, verseText, maxWidth);
+    const lineHeight = size * 1.42;
+    if (lines.length * lineHeight <= availableHeight) {
+      return { size, lines, lineHeight };
+    }
+    size -= 3;
+  }
+
+  ctx.font = '400 38px "Cormorant Garamond", Georgia, serif';
+  return {
+    size:38,
+    lines:wrapText(ctx, verseText, maxWidth),
+    lineHeight:54
+  };
+}
+
+async function resolveShareVisual(verse, target) {
+  try {
+    return await resolveVisualForVerse(verse, { purpose:target.purpose });
+  } catch {
+    return {
+      intent:appState.currentVisualIntent || null,
+      visual:{ mode:'abstract', palette:appState.currentVisual?.palette || null, overlayStrength:0.18 }
+    };
+  }
 }
 
 export async function generateShareImage(format = 'story') {
   if (!appState.currentVerse) return null;
+
   const verse = appState.currentVerse;
-  const fullBook = getBookName(verse.book);
-  const refText = `${fullBook} ${verse.chapter}:${verse.verse}`;
   const target = SHARE_FORMATS[format] || SHARE_FORMATS.story;
-  const W = target.width, H = target.height;
+  const W = target.width;
+  const H = target.height;
+  const refText = getBookName(verse.book) + ' ' + verse.chapter + ':' + verse.verse;
+
+  const selection = await resolveShareVisual(verse, target);
+  const visual = selection.visual;
+  const intent = selection.intent || appState.currentVisualIntent;
+
   const canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
+  canvas.width = W;
+  canvas.height = H;
   const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
   ctx.imageSmoothingQuality = 'high';
 
-  // 1. Fundo independente: foto validada OU composição abstrata.
-  const visual = appState.currentVisual;
   let photoDrawn = false;
+  if (visual?.mode === 'photo' && visual.imageUrl) {
+    const img = await loadImage(visual.imageUrl);
+    if (img) {
+      const sourceRatio = img.naturalWidth / img.naturalHeight;
+      const portraitTarget = target.purpose === 'share-portrait';
 
-  if (visual?.mode === 'photo' && appState.currentBackgroundImageUrl) {
-    const bgImg = new Image();
-    bgImg.crossOrigin = 'Anonymous';
-    await new Promise(resolve => {
-      bgImg.onload = resolve;
-      bgImg.onerror = resolve;
-      bgImg.src = appState.currentBackgroundImageUrl;
-    });
-
-    if (bgImg.complete && bgImg.naturalWidth > 0) {
-      const scale = Math.max(W / bgImg.naturalWidth, H / bgImg.naturalHeight);
-      const drawW = bgImg.naturalWidth * scale;
-      const drawH = bgImg.naturalHeight * scale;
-      const focal = format === 'story'
-        ? (visual.mobileFocalPoint || visual.focalPoint || { x: 0.5, y: 0.5 })
-        : (visual.focalPoint || { x: 0.5, y: 0.5 });
-      const overflowX = Math.max(0, drawW - W);
-      const overflowY = Math.max(0, drawH - H);
-      const ox = -overflowX * Math.max(0, Math.min(1, Number(focal.x ?? 0.5)));
-      const oy = -overflowY * Math.max(0, Math.min(1, Number(focal.y ?? 0.5)));
-      ctx.drawImage(bgImg, ox, oy, drawW, drawH);
-      photoDrawn = true;
+      // Uma foto landscape extrema não é sacrificada para caber em Story/Feed.
+      if (!(portraitTarget && sourceRatio > 1.58)) {
+        const focal = portraitTarget
+          ? (visual.mobileFocalPoint || visual.focalPoint || {x:0.5,y:0.5})
+          : (visual.focalPoint || {x:0.5,y:0.5});
+        drawPhotoCover(ctx, img, W, H, focal);
+        photoDrawn = true;
+      }
     }
   }
 
-  if (!photoDrawn) {
-    const palette = visual?.palette ||
-      appState.currentVisualIntent?.photography?.paletteHints ||
-      ['#0b131a', '#243843', '#6d6656', '#d2bd91'];
+  if (!photoDrawn) drawAbstract(ctx, W, H, visual, intent);
+  drawAdaptiveScrim(ctx, W, H, photoDrawn ? visual?.overlayStrength : 0.16);
 
-    const gradient = ctx.createLinearGradient(0, 0, W, H);
-    gradient.addColorStop(0, palette[0]);
-    gradient.addColorStop(0.52, palette[1]);
-    gradient.addColorStop(1, palette[0]);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, W, H);
+  const sideMargin = target.purpose === 'share-og' ? 92 : 88;
+  const maxTextWidth = W - sideMargin * 2;
+  const contentTop = target.safeTop;
+  const contentBottom = H - target.safeBottom;
+  const refBlockHeight = target.purpose === 'share-og' ? 92 : 130;
+  const logoBlockHeight = target.purpose === 'share-og' ? 58 : 92;
+  const availableTextHeight = contentBottom - contentTop - refBlockHeight - logoBlockHeight;
 
-    const glow = ctx.createRadialGradient(W * 0.28, H * 0.25, 0, W * 0.28, H * 0.25, Math.max(W, H) * 0.58);
-    glow.addColorStop(0, 'rgba(228,179,99,0.18)');
-    glow.addColorStop(1, 'rgba(228,179,99,0)');
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, W, H);
-  }
+  const typography = fontForVerse(ctx, verse.text, target, maxTextWidth, availableTextHeight);
+  const totalTextHeight = typography.lines.length * typography.lineHeight;
+  const contentCenter = contentTop + availableTextHeight * 0.48;
+  const startY = Math.max(
+    contentTop + typography.size,
+    contentCenter - totalTextHeight / 2 + typography.size * 0.52
+  );
 
-  // 2. Vinheta suave (nada fosco, apenas um leve escurecimento nas bordas)
-  const vignette = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, W*0.8);
-  vignette.addColorStop(0, 'rgba(0,0,0,0.12)');
-  vignette.addColorStop(1, 'rgba(0,0,0,0.55)');
-  ctx.fillStyle = vignette;
-  ctx.fillRect(0, 0, W, H);
-
-  // 3. Aspas de abertura (elegantes e discretas)
-  ctx.save();
-  ctx.font = 'italic 320px "Cormorant Garamond", "Georgia", serif';
-  ctx.fillStyle = 'rgba(228,179,99,0.12)';
-  ctx.fillText('“', 70, H*0.42);
-  ctx.restore();
-
-  // 4. Texto do versículo com glow e fonte premium
-  const textLen = verse.text.length;
-  const scaleFactor = Math.min(W / 1080, H / 1080);
-  let fontSize = (textLen > 240 ? 56 : textLen > 180 ? 64 : textLen > 120 ? 72 : 82) * Math.max(0.72, Math.min(1.15, scaleFactor));
-  if (format === 'og') fontSize *= 0.72;
   ctx.save();
   ctx.textAlign = 'center';
-  ctx.font = `400 ${fontSize}px "Cormorant Garamond", "Georgia", serif`;
+  ctx.font = '400 ' + typography.size + 'px "Cormorant Garamond", Georgia, serif';
   ctx.fillStyle = '#FFFCF5';
-  ctx.shadowColor = 'rgba(0,0,0,0.85)';
-  ctx.shadowBlur = 28;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 4;
-
-  const maxWidth = W - 180;
-  const lines = wrapText(ctx, verse.text, maxWidth);
-  const lineHeight = fontSize * 1.55;
-  const totalHeight = lines.length * lineHeight;
-  let startY = (H - totalHeight) / 2 + fontSize * 0.2;
-
-  lines.forEach((line, i) => {
-    ctx.fillText(line, W/2, startY + i*lineHeight);
+  ctx.shadowColor = 'rgba(0,0,0,0.78)';
+  ctx.shadowBlur = 20;
+  ctx.shadowOffsetY = 3;
+  typography.lines.forEach((line, index) => {
+    ctx.fillText(line, W / 2, startY + index * typography.lineHeight);
   });
   ctx.restore();
 
-  // 5. Aspas de fechamento
-  const lastY = startY + (lines.length-1)*lineHeight;
-  ctx.save();
-  ctx.font = 'italic 320px "Cormorant Garamond", "Georgia", serif';
-  ctx.fillStyle = 'rgba(228,179,99,0.12)';
-  ctx.fillText('”', W-100, lastY + 110);
-  ctx.restore();
+  const lastTextY = startY + (typography.lines.length - 1) * typography.lineHeight;
+  const refFont = target.purpose === 'share-og' ? 30 : 38;
+  const refY = Math.min(contentBottom - logoBlockHeight, lastTextY + typography.lineHeight + 42);
 
-  // 6. Pílula de referência refinada
-  const refY = lastY + lineHeight + 70;
   ctx.save();
-  ctx.font = '500 42px "Inter", sans-serif';
+  ctx.font = '600 ' + refFont + 'px Inter, sans-serif';
   ctx.textAlign = 'center';
-  const refWidth = ctx.measureText(refText).width;
-  const pillW = refWidth + 100;
-  const pillH = 80;
-  const pillX = (W - pillW)/2;
-  const pillY = refY - pillH + 18;
+  const measured = ctx.measureText(refText).width;
+  const pillW = Math.min(W - sideMargin * 2, measured + 88);
+  const pillH = target.purpose === 'share-og' ? 64 : 74;
+  const pillX = (W - pillW) / 2;
+  const pillY = refY - pillH + 16;
 
-  ctx.fillStyle = 'rgba(0,0,0,0.65)';
-  roundRect(ctx, pillX, pillY, pillW, pillH, 40);
+  ctx.fillStyle = 'rgba(7,10,14,0.58)';
+  roundRect(ctx, pillX, pillY, pillW, pillH, pillH / 2);
   ctx.fill();
-  ctx.strokeStyle = '#E4B363';
-  ctx.lineWidth = 1.8;
-  roundRect(ctx, pillX, pillY, pillW, pillH, 40);
+  ctx.strokeStyle = 'rgba(228,179,99,0.86)';
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, pillX, pillY, pillW, pillH, pillH / 2);
   ctx.stroke();
 
   ctx.fillStyle = '#E4B363';
-  ctx.shadowBlur = 8;
-  ctx.fillText(refText, W/2, refY);
+  ctx.fillText(refText, W / 2, refY);
   ctx.restore();
 
-  // 7. Logotipo conceitual "VERS DAY"
+  const logoY = H - Math.max(38, target.safeBottom * 0.34);
   ctx.save();
   ctx.textAlign = 'center';
-  // Linhas decorativas laterais
+  ctx.font = '500 ' + (target.purpose === 'share-og' ? 20 : 24) + 'px Inter, sans-serif';
+  ctx.fillStyle = 'rgba(255,252,245,0.76)';
+  ctx.fillText('V E R S   D A Y', W / 2, logoY);
   ctx.beginPath();
-  ctx.moveTo(W/2 - 70, H-135);
-  ctx.lineTo(W/2 - 20, H-135);
-  ctx.strokeStyle = '#E4B363';
-  ctx.lineWidth = 1.2;
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(W/2 + 20, H-135);
-  ctx.lineTo(W/2 + 70, H-135);
-  ctx.stroke();
-  // Texto
-  ctx.font = '300 26px "Inter", sans-serif';
-  ctx.fillStyle = 'rgba(236,232,224,0.7)';
-  ctx.letterSpacing = '6px';
-  ctx.fillText('V E R S   D A Y', W/2, H-115);
-  // Ponto central dourado
-  ctx.beginPath();
-  ctx.arc(W/2, H-105, 3, 0, 2*Math.PI);
+  ctx.arc(W / 2, logoY + 18, 2.5, 0, Math.PI * 2);
   ctx.fillStyle = '#E4B363';
   ctx.fill();
   ctx.restore();
 
-  // Exporta PNG de altíssima qualidade (sem compressão)
   return canvas.toDataURL('image/png');
 }
 
-// Toast e funções de compartilhamento (idênticas ao original)
 function showToast(msg) {
-  let t = document.getElementById('vd-toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'vd-toast';
-    t.style.cssText = `
-      position:fixed; bottom:32px; left:50%;
-      transform:translateX(-50%) translateY(16px);
-      background:rgba(16,22,32,0.96);
-      color:#ECE8E0;
-      padding:13px 26px;
-      border-radius:100px;
-      font:500 0.88rem/1 'Inter',sans-serif;
-      letter-spacing:.02em;
-      border:1px solid rgba(228,179,99,0.35);
-      box-shadow:0 8px 32px rgba(0,0,0,0.45);
-      z-index:9999;
-      opacity:0;
-      transition:opacity .22s ease, transform .22s ease;
-      pointer-events:none;
-      white-space:nowrap;
-      max-width:90vw;
-      text-align:center;
-    `;
-    document.body.appendChild(t);
+  let toast = document.getElementById('vd-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'vd-toast';
+    toast.style.cssText = [
+      'position:fixed','bottom:32px','left:50%','transform:translateX(-50%) translateY(16px)',
+      'background:rgba(16,22,32,0.96)','color:#ECE8E0','padding:13px 26px',
+      'border-radius:100px','font:500 0.88rem/1 Inter,sans-serif',
+      'border:1px solid rgba(228,179,99,0.35)','box-shadow:0 8px 32px rgba(0,0,0,0.45)',
+      'z-index:9999','opacity:0','transition:opacity .22s ease,transform .22s ease',
+      'pointer-events:none','white-space:nowrap','max-width:90vw','text-align:center'
+    ].join(';');
+    document.body.appendChild(toast);
   }
-  t.textContent = msg;
-  t.style.opacity = '1';
-  t.style.transform = 'translateX(-50%) translateY(0)';
-  clearTimeout(t._tid);
-  t._tid = setTimeout(() => {
-    t.style.opacity = '0';
-    t.style.transform = 'translateX(-50%) translateY(16px)';
+
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toast._tid);
+  toast._tid = setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(16px)';
   }, 3200);
 }
 
 async function blobFromDataUrl(dataUrl) {
-  const res = await fetch(dataUrl);
-  return res.blob();
+  const response = await fetch(dataUrl);
+  return response.blob();
 }
 
 function forceDownload(dataUrl, filename) {
-  const a = document.createElement('a');
-  a.href = dataUrl;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  const anchor = document.createElement('a');
+  anchor.href = dataUrl;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
 }
 
 export async function shareWhatsApp() {
-  showToast('⏳ Gerando imagem premium...');
-  const dataUrl = await generateShareImage('story');
-  if (!dataUrl) { showToast('❌ Erro ao gerar imagem.'); return; }
+  showToast('⏳ Gerando card VersDay...');
+  const dataUrl = await generateShareImage('square');
+  if (!dataUrl) {
+    showToast('❌ Erro ao gerar imagem.');
+    return;
+  }
+
   const blob = await blobFromDataUrl(dataUrl);
-  const file = new File([blob], 'versday_whatsapp.png', { type: 'image/png' });
-  if (navigator.canShare?.({ files: [file] })) {
+  const file = new File([blob], 'versday_whatsapp.png', { type:'image/png' });
+
+  if (navigator.canShare?.({ files:[file] })) {
     try {
       await navigator.share({
-        files: [file],
-        title: 'VersDay',
-        text: appState.currentVerse
-          ? `"${appState.currentVerse.text}" — ${getBookName(appState.currentVerse.book)} ${appState.currentVerse.chapter}:${appState.currentVerse.verse}`
+        files:[file],
+        title:'VersDay',
+        text:appState.currentVerse
+          ? '"' + appState.currentVerse.text + '" — ' + getBookName(appState.currentVerse.book) + ' ' + appState.currentVerse.chapter + ':' + appState.currentVerse.verse
           : ''
       });
       return;
-    } catch (e) {
-      if (e.name === 'AbortError') return;
+    } catch (error) {
+      if (error.name === 'AbortError') return;
     }
   }
+
   forceDownload(dataUrl, 'versday_whatsapp.png');
   showToast('📥 Imagem salva!');
 }
 
 export async function shareInstagram() {
-  showToast('✨ Gerando imagem 9:16 para Instagram...');
-  const dataUrl = await generateShareImage();
-  if (!dataUrl) { showToast('❌ Erro ao gerar imagem.'); return; }
+  showToast('✨ Gerando Story 9:16...');
+  const dataUrl = await generateShareImage('story');
+  if (!dataUrl) {
+    showToast('❌ Erro ao gerar imagem.');
+    return;
+  }
+
   forceDownload(dataUrl, 'versday_instagram_story.png');
-  showToast('📸 Imagem salva! Publique no Story ou Reels.');
+  showToast('📸 Story salvo!');
 }
 
 export function copyVerseText() {
   if (!appState.currentVerse) return;
-  const v = appState.currentVerse;
-  const text = `"${v.text}" — ${getBookName(v.book)} ${v.chapter}:${v.verse} (ARA)`;
+  const verse = appState.currentVerse;
+  const text = '"' + verse.text + '" — ' + getBookName(verse.book) + ' ' + verse.chapter + ':' + verse.verse + ' (ARA)';
+
   navigator.clipboard.writeText(text)
     .then(() => showToast('📋 Versículo copiado!'))
     .catch(() => {
-      const el = document.createElement('textarea');
-      el.value = text;
-      document.body.appendChild(el);
-      el.select();
+      const element = document.createElement('textarea');
+      element.value = text;
+      document.body.appendChild(element);
+      element.select();
       document.execCommand('copy');
-      document.body.removeChild(el);
+      document.body.removeChild(element);
       showToast('📋 Versículo copiado!');
     });
 }
