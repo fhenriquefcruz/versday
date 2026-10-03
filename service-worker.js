@@ -1,5 +1,5 @@
 // Incrementar versão a cada deploy para forçar atualização do cache
-const CACHE_NAME = 'versday-v6-visual-semantic-hardening';
+const CACHE_NAME = 'versday-v7-backend-health';
 
 // Caminhos relativos — funciona tanto na raiz quanto em /versday/
 const ASSETS = [
@@ -10,6 +10,7 @@ const ASSETS = [
   './js/api.js',
   './js/fallbackVerses.js',
   './js/semantic.js',
+  './js/backendHealth.js',
   './js/visualIntelligence.js',
   './js/biblical-context.js',
   './js/visualCatalog.js',
@@ -56,9 +57,13 @@ self.addEventListener('fetch', event => {
   // POSTs (chat, busca visual, tracking) sempre seguem direto para a rede.
   if (event.request.method !== 'GET') return;
 
-  // APIs externas sempre via rede — nunca cacheadas
+  // APIs sempre via rede — nunca cacheadas, inclusive healthchecks GET.
   const url = event.request.url;
+  let parsedUrl = null;
+  try { parsedUrl = new URL(url); } catch {}
+
   if (
+    parsedUrl?.pathname?.startsWith('/api/') ||
     url.includes('bible-api.com') ||
     url.includes('api.groq.com') ||
     url.includes('googleapis.com') ||
