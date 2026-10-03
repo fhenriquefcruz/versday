@@ -176,28 +176,40 @@ export default async function handler(req, res) {
       String(body.purpose || 'background').slice(0, 80)
     );
 
-    const response = await fetch(GROQ_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model:
-          process.env.GROQ_VISION_MODEL ||
-          DEFAULT_VISION_MODEL,
-        messages: [
-          {
-            role: 'user',
-            content: buildMessageContent(prompt, candidates)
-          }
-        ],
-        temperature: 0.1,
-        reasoning_effort: 'none',
-        max_completion_tokens: 900,
-        response_format: { type: 'json_object' }
-      })
-    });
+    const controller = new AbortController();
+    const providerTimeout = setTimeout(
+      () => controller.abort(),
+      4_500
+    );
+
+    let response;
+    try {
+      response = await fetch(GROQ_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model:
+            process.env.GROQ_VISION_MODEL ||
+            DEFAULT_VISION_MODEL,
+          messages: [
+            {
+              role: 'user',
+              content: buildMessageContent(prompt, candidates)
+            }
+          ],
+          temperature: 0.1,
+          reasoning_effort: 'none',
+          max_completion_tokens: 900,
+          response_format: { type: 'json_object' }
+        }),
+        signal: controller.signal
+      });
+    } finally {
+      clearTimeout(providerTimeout);
+    }
 
     if (!response.ok) {
       console.error(
