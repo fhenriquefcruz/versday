@@ -9,6 +9,7 @@ const ASSETS = [
   './js/api.js',
   './js/fallbackVerses.js',
   './js/semantic.js',
+  './js/biblical-context.js',
   './js/visual-semantic.js',
   './js/visual-library.js',
   './js/visual-memory.js',
