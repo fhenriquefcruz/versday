@@ -56,5 +56,5 @@ test('visual engine version invalidates pre-compliance cached visuals', async ()
     'utf8'
   );
 
-  assert.match(source, /VISUAL_ENGINE_VERSION = '2\.3\.0'/);
+  assert.match(source, /VISUAL_ENGINE_VERSION = '2\\.4\\.0'/);
 });
