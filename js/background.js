@@ -104,6 +104,8 @@ export async function setBackgroundImage(verse, options = {}) {
 
   document.body.dataset.visualMode = visual.mode;
   document.body.dataset.textPlacement = visual.textPlacement || 'center';
+  document.body.dataset.mobileTextPlacement =
+    visual.mobileTextPlacement || visual.textPlacement || 'center';
   document.documentElement.style.setProperty(
     '--visual-overlay-alpha',
     String(visual.overlayStrength ?? 0.22)
@@ -143,6 +145,8 @@ async function resolveAndApplyFallback(verse, failedSelection) {
   appState.currentVisualIntent = intent;
   appState.currentBackgroundImageUrl = '';
   document.body.dataset.visualMode = 'abstract';
+  document.body.dataset.textPlacement = 'center';
+  document.body.dataset.mobileTextPlacement = 'center';
   updateCredit(fallback);
 
   return { ...failedSelection, visual: fallback };
