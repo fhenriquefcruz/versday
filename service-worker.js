@@ -1,7 +1,6 @@
-// Incrementar versão a cada deploy para forçar atualização do cache
-const CACHE_NAME = 'versday-v5-visual-semantic';
+// service-worker.js
+const CACHE_NAME = 'versday-v6-visual-semantic';
 
-// Caminhos relativos — funciona tanto na raiz quanto em /versday/
 const ASSETS = [
   './',
   './index.html',
@@ -11,8 +10,10 @@ const ASSETS = [
   './js/fallbackVerses.js',
   './js/semantic.js',
   './js/visualIntelligence.js',
+  './js/biblicalContext.js',
   './js/visualCatalog.js',
   './js/visualSelector.js',
+  './js/visualAnalysis.js',
   './js/visualMemory.js',
   './js/visualProvider.js',
   './js/visualEngine.js',
@@ -32,10 +33,7 @@ const ASSETS = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        // addAll falha se qualquer arquivo não existir — usa add individual com tratamento
-        return Promise.allSettled(ASSETS.map(url => cache.add(url)));
-      })
+      .then(cache => Promise.allSettled(ASSETS.map(url => cache.add(url))))
       .then(() => self.skipWaiting())
   );
 });
@@ -44,16 +42,19 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
       ))
       .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', event => {
-  // APIs externas sempre via rede — nunca cacheadas
+  // Mutations e endpoints server-side ficam sempre sob responsabilidade da rede.
+  if (event.request.method !== 'GET') return;
+
   const url = event.request.url;
   if (
+    url.includes('/api/') ||
     url.includes('bible-api.com') ||
     url.includes('api.groq.com') ||
     url.includes('googleapis.com') ||
@@ -62,20 +63,22 @@ self.addEventListener('fetch', event => {
     url.includes('fonts.gstatic.com') ||
     url.includes('fonts.googleapis.com')
   ) {
-    return; // deixa o browser lidar normalmente
+    return;
   }
 
   event.respondWith(
     caches.match(event.request)
       .then(cached => cached || fetch(event.request)
         .then(response => {
-          // Só cacheia respostas válidas de assets locais
-          if (response.ok && event.request.method === 'GET') {
-            caches.open(CACHE_NAME).then(c => c.put(event.request, response.clone()));
+          if (response.ok) {
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
           }
           return response;
         })
       )
-      .catch(() => caches.match('./index.html'))
+      .catch(() => {
+        if (event.request.mode === 'navigate') return caches.match('./index.html');
+        return Response.error();
+      })
   );
 });
