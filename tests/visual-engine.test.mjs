@@ -334,30 +334,56 @@ test('novas fotos curadas conseguem superar o limiar apenas com alinhamento sem�
       theme: 'gratidao',
       text: 'Em tudo dai graças.',
       reference: '1ts 5:18',
+      book: '1ts',
+      chapter: 5,
       expectedId: 'pexels-9511828'
+    },
+    {
+      theme: 'alegria',
+      text: 'Alegrai-vos sempre no Senhor.',
+      reference: 'fp 4:4',
+      book: 'fp',
+      chapter: 4,
+      expectedId: 'pexels-4262003'
     },
     {
       theme: 'relacionamento',
       text: 'Levai as cargas uns dos outros.',
       reference: 'gl 6:2',
+      book: 'gl',
+      chapter: 6,
+      expectedId: 'pexels-5055239'
+    },
+    {
+      theme: 'reconciliacao',
+      text: 'Levantou-se e foi para seu pai.',
+      reference: 'lc 15:20',
+      book: 'lc',
+      chapter: 15,
       expectedId: 'pexels-5055239'
     },
     {
       theme: 'sofrimento',
       text: 'Os sofrimentos do tempo presente não podem ser comparados com a glória a ser revelada.',
       reference: 'rm 8:18',
+      book: 'rm',
+      chapter: 8,
       expectedId: 'pexels-6670100'
     },
     {
       theme: 'lamento',
       text: 'Junto aos rios da Babilônia nos assentamos e choramos.',
       reference: 'sl 137:1',
+      book: 'sl',
+      chapter: 137,
       expectedId: 'pexels-5028920'
     },
     {
       theme: 'justica',
       text: 'Não façais acepção de pessoas.',
       reference: 'tg 2:1',
+      book: 'tg',
+      chapter: 2,
       expectedId: 'pexels-6994855'
     }
   ];
@@ -366,8 +392,8 @@ test('novas fotos curadas conseguem superar o limiar apenas com alinhamento sem�
     const intent = analyzeVerse({
       text: item.text,
       reference: item.reference,
-      book: item.reference.split(' ')[0],
-      chapter: Number(item.reference.match(/\d+/)?.[0] || 1),
+      book: item.book || item.reference.split(' ')[0],
+      chapter: item.chapter || 1,
       verse: 1,
       theme: item.theme
     });
