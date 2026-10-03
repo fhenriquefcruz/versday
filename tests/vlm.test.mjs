@@ -499,3 +499,37 @@ test('chat e workflow não usam modelo Groq descontinuado', async () => {
   assert.match(chatSource, /qwen\/qwen3\.8-27b/);
   assert.match(workflowSource, /qwen\/qwen3\.8-27b/);
 });
+
+test('externo não avaliado fica inelegível quando VLM está ativo', () => {
+  const intent = analyzeVerse({
+    text: 'Confia no Senhor de todo o teu coração.',
+    reference: 'pv 3:5',
+    book: 'pv',
+    chapter: 3,
+    verse: 5,
+    theme: 'confianca'
+  });
+
+  const filtered = hardFilterCandidate({
+    id: 'external-fourth',
+    imageUrl: 'https://images.unsplash.com/photo-4',
+    width: 2400,
+    height: 1600,
+    vlmRejected: true,
+    vlmRejectionReason: 'VLM_NOT_VALIDATED'
+  }, intent);
+
+  assert.equal(filtered.accepted, false);
+  assert.ok(filtered.reasons.includes('VLM_NOT_VALIDATED'));
+});
+
+test('curadoria manual não é convertida em VLM_NOT_VALIDATED', async () => {
+  const source = await readFile(
+    new URL('../js/visualEngine.js', import.meta.url),
+    'utf8'
+  );
+
+  assert.match(source, /const isCurated =\s*Number\(candidate\.curationConfidence \?\? 0\) >= 1/);
+  assert.match(source, /if \(!isCurated\) \{[\s\S]*VLM_NOT_VALIDATED/);
+  assert.match(source, /return candidate;/);
+});
