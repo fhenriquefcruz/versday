@@ -99,11 +99,26 @@ export async function generateShareImage(formatName='story'){
     drawAbstract(ctx,W,H,selection?.palette || shareIntent?.photography?.paletteHints);
   }
 
-  drawAdaptiveScrim(ctx,W,H,selection?.textPlacement || 'center',selection?.overlayStrength ?? .36);
+  const responsivePlacement = formatName === 'og'
+    ? (selection?.textPlacement || 'center')
+    : (selection?.mobileTextPlacement || selection?.textPlacement || 'center');
+
+  drawAdaptiveScrim(
+    ctx,
+    W,
+    H,
+    responsivePlacement,
+    selection?.overlayStrength ?? .36
+  );
 
   ctx.save(); ctx.textAlign='center'; ctx.font=`600 ${Math.round(W*.022)}px Inter, sans-serif`; ctx.letterSpacing=`${Math.round(W*.005)}px`; ctx.fillStyle='rgba(255,255,255,.72)'; ctx.fillText('V E R S  D A Y',W/2,H-format.safeBottom*.34); ctx.restore();
 
-  const anchor=textAnchor(selection,W,H,format);
+  const anchor=textAnchor(
+    { ...selection, textPlacement: responsivePlacement },
+    W,
+    H,
+    format
+  );
   const ref=`${getBookName(verse.book)} ${verse.chapter}:${verse.verse}`;
   let fontSize=Math.round(W*(verse.text.length>220?.050:verse.text.length>150?.058:verse.text.length>90?.067:.077));
   ctx.textAlign=anchor.align; ctx.textBaseline='middle';
