@@ -178,13 +178,13 @@ export function scoreCandidate(candidate, intent, recentIds = []) {
 
   // Coerência semântica permanece independente de beleza/qualidade técnica.
   const semanticScore = Math.min(1,
-    primaryMatch * 0.25 +
+    primaryMatch * 0.28 +
     literalMatch * 0.18 +
     symbolicMatch * 0.10 +
     emotionalMatch * 0.08 +
     modeMatch * 0.08 +
     sceneMatch * 0.16 +
-    providerRelevance * 0.10 +
+    providerRelevance * 0.07 +
     searchAlignment * 0.05
   );
 
