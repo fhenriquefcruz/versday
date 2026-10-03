@@ -62,9 +62,11 @@ export async function analyzeCandidateVisual(candidate){
     ...candidate,
     width:candidate.width || img.naturalWidth,
     height:candidate.height || img.naturalHeight,
-    safeTextAreas:candidate.safeTextAreas?.length ? candidate.safeTextAreas : safeAreas,
+    safeTextAreas:safeAreas.length ? safeAreas : (candidate.safeTextAreas || ['center']),
     focalPoint:candidate.focalPoint || {x:saliency.x,y:saliency.y},
-    compositionScore: typeof candidate.compositionScore==='number' ? Math.max(candidate.compositionScore,compositionScore) : compositionScore,
+    compositionScore: typeof candidate.compositionScore==='number'
+      ? clamp(candidate.compositionScore*.45 + compositionScore*.55)
+      : compositionScore,
     technicalAnalysis:{averageLuminance:avg,complexity:globalContrast,bestSafeArea:regions[0]?.name || 'center',bestSafeScore:bestSafe}
   };
 }
