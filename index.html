@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
   <meta name="theme-color" content="#0d1117">
   <meta name="description" content="Versículo do Dia — experiência contemplativa com compartilhamento social.">
+  <!-- Endpoints opcionais e seguros. Nunca inserir chaves de API no HTML/JS. -->
+  <meta name="versday-visual-endpoint" content="">
+  <meta name="versday-chat-endpoint" content="">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Vers Day">
@@ -94,6 +97,12 @@
       Desenvolvido com 🤍 por <strong>Fábio Cruz</strong>
     </footer>
     <div id="unsplash-credit" class="unsplash-credit"></div>
+
+    <div id="visualFeedback" class="visual-feedback" hidden aria-label="Avaliar coerência da imagem">
+      <span>Esta imagem combinou?</span>
+      <button type="button" data-visual-feedback="up" aria-label="A imagem combinou" title="Combinou">👍</button>
+      <button type="button" data-visual-feedback="down" aria-label="A imagem não combinou" title="Não combinou">👎</button>
+    </div>
 
   </div>
 
