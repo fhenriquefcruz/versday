@@ -6,7 +6,8 @@ import {
   saveVisualFeedback,
   getFeedback,
   setCachedVisual,
-  getCachedVisual
+  getCachedVisual,
+  invalidateCachedVisual
 } from '../js/visualMemory.js';
 
 function createStorage() {
@@ -117,5 +118,57 @@ test('feedback antigo sem tema continua válido para a referência original', ()
   assert.equal(
     resolveVisualFeedback(feedback, '1co 13:4', 'legacy-image', 'amor'),
     null
+  );
+});
+
+test('invalidação explícita do cache remove somente o visual esperado', () => {
+  const hadLocalStorage = Object.hasOwn(globalThis, 'localStorage');
+  const oldLocalStorage = globalThis.localStorage;
+  globalThis.localStorage = createStorage();
+
+  try {
+    const intent = { semantic: { primaryTheme: 'paz' } };
+
+    setCachedVisual(
+      'sl 4:8',
+      intent,
+      { id: 'photo-a', mode: 'photo' },
+      'background'
+    );
+    setCachedVisual(
+      'sl 4:8',
+      intent,
+      { id: 'photo-share', mode: 'photo' },
+      'share-portrait'
+    );
+
+    assert.equal(
+      invalidateCachedVisual('sl 4:8', 'background', 'wrong-id'),
+      false
+    );
+    assert.ok(getCachedVisual('sl 4:8', 'background'));
+
+    assert.equal(
+      invalidateCachedVisual('sl 4:8', 'background', 'photo-a'),
+      true
+    );
+    assert.equal(getCachedVisual('sl 4:8', 'background'), null);
+    assert.ok(getCachedVisual('sl 4:8', 'share-portrait'));
+  } finally {
+    if (hadLocalStorage) globalThis.localStorage = oldLocalStorage;
+    else delete globalThis.localStorage;
+  }
+});
+
+test('background invalida foto quebrada antes do fallback abstrato', async () => {
+  const source = await import('node:fs/promises')
+    .then(({ readFile }) =>
+      readFile(new URL('../js/background.js', import.meta.url), 'utf8')
+    );
+
+  assert.match(source, /invalidateCachedVisual\(/);
+  assert.match(
+    source,
+    /if \(!loaded\)[\s\S]*invalidateCachedVisual[\s\S]*resolveAndApplyFallback/
   );
 });

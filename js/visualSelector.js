@@ -31,6 +31,47 @@ const GLOBAL_SENSITIVE_BLOCK_TERMS = [
   'sangue explícito'
 ];
 
+const EMBEDDED_TEXT_METADATA_TERMS = [
+  'text overlay',
+  'quote poster',
+  'poster with text',
+  'typography',
+  'lettering',
+  'written words',
+  'words on wall',
+  'words on image',
+  'billboard',
+  'signage',
+  'menu board',
+  'newspaper headline',
+  'magazine cover',
+  'book cover',
+  'captioned image'
+];
+
+const BRANDING_AD_METADATA_TERMS = [
+  'brand logo',
+  'company logo',
+  'logo',
+  'trademark',
+  'advertisement',
+  'advertising',
+  'ad campaign',
+  'sponsored content',
+  'product packaging',
+  'commercial product',
+  'branded product',
+  'promotional banner'
+];
+
+const GENERIC_STOCK_METADATA_TERMS = [
+  'stock photo',
+  'business team posing',
+  'corporate handshake',
+  'thumbs up portrait',
+  'customer service headset'
+];
+
 const THEMATIC_CLICHE_BLOCKS = Object.freeze({
   morte: [
     'cemetery',
@@ -109,6 +150,14 @@ function candidateText(candidate = {}) {
     candidate.description,
     candidate.alt,
     candidate.query,
+    ...(candidate.tags || [])
+  ].filter(Boolean).join(' '));
+}
+
+function candidateMetadataText(candidate = {}) {
+  return normalize([
+    candidate.description,
+    candidate.alt,
     ...(candidate.tags || [])
   ].filter(Boolean).join(' '));
 }
@@ -242,6 +291,25 @@ function hasConflict(candidate, intent) {
     .some(concept => concept.length >= 4 && candidateText.includes(concept));
 }
 
+function metadataQualityConflicts(candidate) {
+  const text = candidateMetadataText(candidate);
+  const conflicts = [];
+
+  if (containsAny(text, EMBEDDED_TEXT_METADATA_TERMS)) {
+    conflicts.push('EMBEDDED_TEXT_METADATA');
+  }
+
+  if (containsAny(text, BRANDING_AD_METADATA_TERMS)) {
+    conflicts.push('BRANDING_OR_ADVERTISING_METADATA');
+  }
+
+  if (containsAny(text, GENERIC_STOCK_METADATA_TERMS)) {
+    conflicts.push('GENERIC_STOCK_CLICHE');
+  }
+
+  return conflicts;
+}
+
 function sensitiveVisualConflict(candidate, intent) {
   const text = candidateText(candidate);
 
@@ -297,6 +365,8 @@ export function hardFilterCandidate(candidate, intent) {
   if (candidate?.hasWatermark) reasons.push('WATERMARK');
   if (candidate?.isAdvertising) reasons.push('ADVERTISING');
   if (candidate?.nsfw) reasons.push('UNSAFE_CONTENT');
+
+  reasons.push(...metadataQualityConflicts(candidate));
 
   if ((candidate?.width || 0) > 0 && candidate.width < 1000) reasons.push('LOW_RESOLUTION');
   if ((candidate?.height || 0) > 0 && candidate.height < 700) reasons.push('LOW_RESOLUTION');
