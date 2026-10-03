@@ -27,7 +27,12 @@ function distance(a = { x: 0.5, y: 0.5 }, b = { x: 0.5, y: 0.5 }) {
   return Math.hypot(Number(a.x) - Number(b.x), Number(a.y) - Number(b.y));
 }
 
-async function loadBitmap(url, timeoutMs = 3500) {
+export const VISUAL_PIXEL_TIMEOUT_MS = 2500;
+
+async function loadBitmap(
+  url,
+  timeoutMs = VISUAL_PIXEL_TIMEOUT_MS
+) {
   if (!url || typeof Image === 'undefined') return null;
 
   return await new Promise(resolve => {
@@ -440,11 +445,9 @@ export async function analyzeCandidateVisual(candidate) {
 }
 
 export async function analyzeShortlist(candidates, limit = 5) {
-  const out = [];
-
-  for (const candidate of candidates.slice(0, limit)) {
-    out.push(await analyzeCandidateVisual(candidate));
-  }
-
-  return out;
+  return await Promise.all(
+    candidates
+      .slice(0, limit)
+      .map(candidate => analyzeCandidateVisual(candidate))
+  );
 }
