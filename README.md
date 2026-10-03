@@ -63,6 +63,26 @@ O assistente bíblico segue a mesma regra:
 
 Sem esses endpoints, o VersDay continua funcional com o motor visual local, catálogo curado e fallback abstrato.
 
+### Backend seguro incluído no repositório
+
+O diretório `api/` já contém funções server-side para uma implantação serverless:
+
+- `api/visual-search.js` — consulta semanticamente o Unsplash e retorna vários candidatos normalizados;
+- `api/visual-select.js` — executa o download tracking exigido pelo Unsplash quando uma foto é escolhida;
+- `api/chat.js` — mantém a credencial do assistente bíblico fora do navegador;
+- `api/_cors.js` — restringe origens e centraliza validação de payload/CORS.
+
+Variáveis esperadas no ambiente server-side:
+
+```text
+UNSPLASH_ACCESS_KEY=...
+GROQ_API_KEY=...
+GROQ_MODEL=llama-3.3-70b-versatile
+ALLOWED_ORIGIN=https://fhenriquefcruz.github.io
+```
+
+Os valores reais nunca devem ir para `index.html`, `js/` ou para commits. Credenciais que já tenham sido publicadas historicamente precisam ser revogadas e rotacionadas nos provedores.
+
 O repositório também contém os endpoints server-side opcionais em `api/`:
 
 - `/api/visual-search` — busca de até 30 candidatos no Unsplash;
