@@ -54,16 +54,68 @@ function drawAdaptiveScrim(ctx,W,H,placement='center',strength=.36){
   g.addColorStop(0,`rgba(0,0,0,${Math.min(.75,strength+.28)})`); g.addColorStop(.58,`rgba(0,0,0,${strength*.45})`); g.addColorStop(1,'rgba(0,0,0,.08)'); ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
 }
 
-function textAnchor(selection,W,H,format){
+export function getShareAttributionLabel(selection) {
+  if (
+    selection?.mode === 'photo' &&
+    String(selection.provider || '').toLowerCase() === 'unsplash'
+  ) {
+    const photographer = String(
+      selection.photographer || 'Fotógrafo do Unsplash'
+    );
+    return `Foto: ${photographer} · Unsplash`;
+  }
+  return '';
+}
+
+export function buildShareFooterLayout(format, W, H, selection = null) {
+  const safeBoundary = H - format.safeBottom;
+  const brandFontSize = Math.max(18, Math.round(W * 0.022));
+  const creditFontSize = Math.max(14, Math.round(W * 0.0125));
+  const brandY = safeBoundary - Math.max(24, Math.round(W * 0.022));
+  const attribution = getShareAttributionLabel(selection);
+  const creditY = attribution
+    ? brandY - Math.max(28, Math.round(brandFontSize * 1.45))
+    : null;
+  const footerTop = creditY ?? brandY;
+  const contentBottom = footerTop - Math.max(42, Math.round(W * 0.04));
+
+  return {
+    safeBoundary,
+    brandY,
+    brandFontSize,
+    attribution,
+    creditY,
+    creditFontSize,
+    contentBottom
+  };
+}
+
+function drawShareFooter(ctx, W, footer) {
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(255,255,255,.72)';
+  ctx.font = `600 ${footer.brandFontSize}px Inter, sans-serif`;
+  ctx.fillText('V E R S  D A Y', W / 2, footer.brandY);
+
+  if (footer.attribution && footer.creditY) {
+    ctx.fillStyle = 'rgba(255,255,255,.62)';
+    ctx.font = `500 ${footer.creditFontSize}px Inter, sans-serif`;
+    ctx.fillText(footer.attribution, W / 2, footer.creditY);
+  }
+
+  ctx.restore();
+}
+
+function textAnchor(selection,W,H,format,contentBottom){
   const p=selection?.textPlacement || 'center';
-  const safeTop=format.safeTop, safeBottom=format.safeBottom;
-  const yMin=safeTop+80, yMax=H-safeBottom-160;
+  const yMin=format.safeTop+70;
+  const yMax=Math.max(yMin+120,contentBottom-40);
   let x=W/2,y=(yMin+yMax)/2,align='center',maxWidth=W*.78;
   if(p.includes('left')){x=W*.12;align='left';maxWidth=W*.68;}
   if(p.includes('right')){x=W*.88;align='right';maxWidth=W*.68;}
-  if(p.includes('upper')) y=yMin+120;
-  if(p.includes('lower')) y=yMax-100;
-  return {x,y,align,maxWidth};
+  if(p.includes('upper')) y=Math.min(yMax,yMin+120);
+  if(p.includes('lower')) y=Math.max(yMin,yMax-80);
+  return {x,y,align,maxWidth,yMin,yMax};
 }
 
 export async function generateShareImage(formatName='story'){
@@ -111,25 +163,57 @@ export async function generateShareImage(formatName='story'){
     selection?.overlayStrength ?? .36
   );
 
-  ctx.save(); ctx.textAlign='center'; ctx.font=`600 ${Math.round(W*.022)}px Inter, sans-serif`; ctx.letterSpacing=`${Math.round(W*.005)}px`; ctx.fillStyle='rgba(255,255,255,.72)'; ctx.fillText('V E R S  D A Y',W/2,H-format.safeBottom*.34); ctx.restore();
+  const footer = buildShareFooterLayout(
+    format,
+    W,
+    H,
+    selection
+  );
 
   const anchor=textAnchor(
     { ...selection, textPlacement: responsivePlacement },
     W,
     H,
-    format
+    format,
+    footer.contentBottom
   );
   const ref=`${getBookName(verse.book)} ${verse.chapter}:${verse.verse}`;
   let fontSize=Math.round(W*(verse.text.length>220?.050:verse.text.length>150?.058:verse.text.length>90?.067:.077));
   ctx.textAlign=anchor.align; ctx.textBaseline='middle';
-  let lines=[]; for(let i=0;i<5;i++){ctx.font=`500 ${fontSize}px "Cormorant Garamond", Georgia, serif`;lines=wrapText(ctx,verse.text,anchor.maxWidth);const lineH=fontSize*1.28;if(lines.length*lineH < H*.5) break;fontSize-=6;}
-  const lineHeight=fontSize*1.32; const total=lines.length*lineHeight; let startY=anchor.y-total/2+lineHeight/2;
-  startY=clamp(startY,format.safeTop+lineHeight,H-format.safeBottom-total+lineHeight/2);
+  let lines=[];
+  for(let i=0;i<10;i++){
+    ctx.font=`500 ${fontSize}px "Cormorant Garamond", Georgia, serif`;
+    lines=wrapText(ctx,verse.text,anchor.maxWidth);
+    const lineH=fontSize*1.28;
+    const referenceReserve=fontSize*1.18;
+    const availableHeight=Math.max(
+      lineH*2,
+      footer.contentBottom-(format.safeTop+70)
+    );
+    if(lines.length*lineH+referenceReserve <= availableHeight) break;
+    fontSize=Math.max(Math.round(W*.040),fontSize-5);
+  }
+  const lineHeight=fontSize*1.32;
+  const total=lines.length*lineHeight;
+  let startY=anchor.y-total/2+lineHeight/2;
+  const maxStartY=
+    footer.contentBottom-
+    (lines.length-.05)*lineHeight;
+  startY=clamp(
+    startY,
+    format.safeTop+lineHeight,
+    Math.max(format.safeTop+lineHeight,maxStartY)
+  );
 
   ctx.save(); ctx.fillStyle='#fffaf2'; ctx.shadowColor='rgba(0,0,0,.72)'; ctx.shadowBlur=Math.round(fontSize*.22); ctx.shadowOffsetY=3; ctx.font=`500 ${fontSize}px "Cormorant Garamond", Georgia, serif`; lines.forEach((line,i)=>ctx.fillText(line,anchor.x,startY+i*lineHeight)); ctx.restore();
 
-  const refY=startY+(lines.length-1)*lineHeight+lineHeight*.95;
+  const refY=Math.min(
+    footer.contentBottom,
+    startY+(lines.length-1)*lineHeight+lineHeight*.95
+  );
   ctx.save(); ctx.textAlign=anchor.align; ctx.font=`600 ${Math.round(fontSize*.42)}px Inter, sans-serif`; const refW=ctx.measureText(ref).width; const padX=Math.round(fontSize*.38),pillH=Math.round(fontSize*.62); let px=anchor.align==='center'?anchor.x-refW/2-padX:anchor.align==='left'?anchor.x-padX:anchor.x-refW-padX; roundRect(ctx,px,refY-pillH/2,refW+padX*2,pillH,pillH/2); ctx.fillStyle='rgba(8,12,18,.64)';ctx.fill();ctx.strokeStyle='rgba(228,179,99,.75)';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#e7bd78';ctx.fillText(ref,anchor.x,refY+1);ctx.restore();
+
+  drawShareFooter(ctx,W,footer);
 
   return canvas.toDataURL('image/png');
 }
