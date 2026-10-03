@@ -9,6 +9,7 @@
   <meta name="versday-visual-endpoint" content="">
   <meta name="versday-visual-select-endpoint" content="">
   <meta name="versday-chat-endpoint" content="">
+  <meta name="versday-health-endpoint" content="">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Vers Day">
@@ -118,23 +119,3 @@
 
   <div id="historyModal" class="modal" role="dialog" aria-modal="true" aria-label="Histórico">
     <div class="modal-content">
-      <span class="close" role="button" tabindex="0" aria-label="Fechar">&times;</span>
-      <h2>📜 Histórico <small style="font-size:.75rem;opacity:.6;font-weight:400">(últimos 50)</small></h2>
-      <div id="historyList"></div>
-    </div>
-  </div>
-
-  <script type="module" src="./js/main.js"></script>
-
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js')
-          .then(r => console.log('[VersDay] SW registrado:', r.scope))
-          .catch(e => console.warn('[VersDay] SW falhou:', e));
-      });
-    }
-  </script>
-
-</body>
-</html>
