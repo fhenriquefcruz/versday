@@ -70,6 +70,7 @@ O diretório `api/` já contém funções server-side para uma implantação ser
 - `api/visual-search.js` — consulta semanticamente o Unsplash e retorna vários candidatos normalizados;
 - `api/visual-select.js` — executa o download tracking exigido pelo Unsplash quando uma foto é escolhida;
 - `api/chat.js` — mantém a credencial do assistente bíblico fora do navegador;
+- `api/health.js` — informa somente quais providers estão configurados, sem revelar segredos;
 - `api/_cors.js` — restringe origens e centraliza validação de payload/CORS.
 
 Variáveis esperadas no ambiente server-side:
@@ -87,26 +88,31 @@ Em uma implantação Vercel (`*.vercel.app`), os endpoints `/api/visual-search`,
 
 ### Bootstrap do backend Vercel
 
-O workflow manual `.github/workflows/deploy-vercel-api.yml` cria ou reutiliza o projeto `versday-api`, faz o deploy de produção e valida automaticamente `/api/health`.
+O workflow manual `.github/workflows/deploy-vercel-api.yml` cria ou reutiliza o projeto `versday-api`, sincroniza configuração, publica em produção, valida `/api/health` e atualiza automaticamente os endpoints do GitHub Pages.
 
-Para habilitá-lo, cadastre no GitHub apenas:
-
-```text
-VERCEL_TOKEN=...
-```
-
-Depois execute o workflow **Deploy VersDay API to Vercel** em `Actions → Run workflow`.
-
-O deploy usa a Vercel CLI pinada e não copia credenciais antigas do frontend. Após a primeira publicação, cadastre no ambiente **Production** do projeto Vercel as chaves novas/rotacionadas:
+Cadastre como GitHub Secrets:
 
 ```text
-UNSPLASH_ACCESS_KEY=...
-GROQ_API_KEY=...
-GROQ_MODEL=llama-3.3-70b-versatile
-ALLOWED_ORIGIN=https://fhenriquefcruz.github.io
+VERCEL_TOKEN=...            # obrigatório para o deploy
+UNSPLASH_ACCESS_KEY=...     # chave nova/rotacionada; opcional se já existir no Vercel
+GROQ_API_KEY=...            # chave nova/rotacionada; opcional se já existir no Vercel
 ```
 
-O endpoint `/api/health` informa apenas se os providers estão configurados, nunca seus valores.
+Depois execute **Deploy VersDay API to Vercel** em `Actions → Run workflow`.
+
+O workflow:
+
+1. cria ou reutiliza `versday-api`;
+2. preserva valores Vercel existentes quando um provider secret não é fornecido;
+3. sincroniza `GROQ_MODEL` e `ALLOWED_ORIGIN`;
+4. faz o deploy de produção;
+5. valida o healthcheck;
+6. lê `imagesConfigured` e `chatConfigured`;
+7. ativa no `index.html` somente os providers confirmados;
+8. troca o `CACHE_NAME` do Service Worker apenas quando a configuração mudou;
+9. publica essa configuração na `main`, disparando o Pages normalmente.
+
+O frontend também consulta o healthcheck: chat e busca externa não são habilitados quando o provider correspondente ainda não está pronto. O endpoint `/api/health` nunca devolve os valores das credenciais.
 
 ## Share cards
 
