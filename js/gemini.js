@@ -12,10 +12,16 @@ Para perguntas profundas (contexto histórico, grego, hebraico), inclua os detal
 
 function getChatEndpoint() {
   if (typeof document === 'undefined') return '';
-  return document
+  const configured = document
     .querySelector('meta[name="versday-chat-endpoint"]')
     ?.getAttribute('content')
     ?.trim() || '';
+
+  if (configured) return configured;
+  if (typeof location !== 'undefined' && /\.vercel\.app$/i.test(location.hostname)) {
+    return '/api/chat';
+  }
+  return '';
 }
 
 export function isChatAvailable() {
