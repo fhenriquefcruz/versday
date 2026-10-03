@@ -271,6 +271,7 @@ export function scoreCandidate(candidate, intent, recentIds = []) {
         identity: Number(candidate?.identityScore ?? 0),
         responsive: responsiveScore(candidate || {}, intent),
         novelty: recentIds.includes(candidate?.id) ? 0.25 : 1,
+        curation: Number(candidate?.curationConfidence ?? 0),
         final: 0
       },
       rejectedReasons: hard.reasons,
@@ -294,8 +295,12 @@ export function scoreCandidate(candidate, intent, recentIds = []) {
   const providerRelevance = Math.max(0, Math.min(1, Number(candidate.providerSearchScore ?? 0)));
   const searchAlignment =
     normalize(candidate.searchIntentTheme || '') === primary ? 1 : 0;
+  const curationConfidence = primaryMatch
+    ? Math.max(0, Math.min(1, Number(candidate.curationConfidence ?? 0)))
+    : 0;
 
-  // Coerência semântica permanece independente de beleza/qualidade técnica.
+  // Curadoria só ajuda quando o tema primário foi explicitamente marcado.
+  // Ela jamais resgata uma fotografia de tema diferente.
   const semanticScore = Math.min(1,
     primaryMatch * 0.28 +
     literalMatch * 0.18 +
@@ -304,7 +309,8 @@ export function scoreCandidate(candidate, intent, recentIds = []) {
     modeMatch * 0.08 +
     sceneMatch * 0.16 +
     providerRelevance * 0.07 +
-    searchAlignment * 0.05
+    searchAlignment * 0.05 +
+    curationConfidence * 0.20
   );
 
   const qualityScore = Math.max(0, Math.min(1, Number(candidate.qualityScore ?? 0.8)));
@@ -339,6 +345,7 @@ export function scoreCandidate(candidate, intent, recentIds = []) {
       identity: Number(identityScore.toFixed(3)),
       responsive: Number(responsive.toFixed(3)),
       novelty: Number(noveltyScore.toFixed(3)),
+      curation: Number(curationConfidence.toFixed(3)),
       final: Number(finalScore.toFixed(3))
     },
     rejectedReasons: [...new Set(rejectedReasons)],
