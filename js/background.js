@@ -6,6 +6,7 @@ let bgLayer1;
 let bgLayer2;
 let activeLayer = 1;
 let currentVisualId = '';
+let requestSequence = 0;
 
 function focalToCss(point = { x: 0.5, y: 0.5 }) {
   const x = Math.max(0, Math.min(1, Number(point.x ?? 0.5))) * 100;
@@ -70,13 +71,16 @@ export function initBackgroundLayers() {
 export async function setBackgroundImage(verse, options = {}) {
   if (!bgLayer1 || !bgLayer2) initBackgroundLayers();
 
+  const requestId = ++requestSequence;
   const selection = await resolveVisualForVerse(verse, options);
+  if (requestId !== requestSequence) return selection;
   const { visual, intent, diagnostics } = selection;
 
   if (!visual || (visual.id === currentVisualId && !options.force)) return selection;
 
   if (visual.mode === 'photo') {
     const loaded = await preload(visual.imageUrl);
+    if (requestId !== requestSequence) return selection;
     if (!loaded) {
       // Força nova resolução: a foto quebrada não deve permanecer como "melhor ruim".
       return resolveAndApplyFallback(verse, selection);
