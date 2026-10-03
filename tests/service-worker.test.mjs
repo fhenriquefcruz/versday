@@ -7,7 +7,7 @@ const swUrl = new URL('../service-worker.js', import.meta.url);
 test('service worker usa network-first para assets locais', async () => {
   const source = await readFile(swUrl, 'utf8');
 
-  assert.match(source, /versday-v10-observability/);
+  assert.match(source, /versday-v11-debug-panel/);
   assert.match(source, /fetch\(request, \{ cache: 'no-cache' \}\)/);
   assert.match(source, /const cached = await caches\.match\(request\)/);
   assert.match(source, /url\.origin !== self\.location\.origin/);
@@ -37,4 +37,5 @@ test('service worker mantém fallback offline do app shell', async () => {
   assert.match(source, /'\.\/js\/visual-analysis\.js'/);
   assert.match(source, /'\.\/js\/visualEngine\.js'/);
   assert.match(source, /'\.\/js\/visualTelemetry\.js'/);
+  assert.match(source, /'\.\/js\/visualDebugPanel\.js'/);
 });
