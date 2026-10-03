@@ -9,9 +9,11 @@ export const VISUAL_THRESHOLDS = Object.freeze({
   composition: 0.70
 });
 
-const RELIGIOUS_CLICHES = [
-  'cross', 'cruz', 'open bible', 'bible open', 'biblia aberta', 'bíblia aberta',
-  'church', 'igreja', 'praying hands', 'hands praying', 'maos em oracao', 'mãos em oração'
+const RELIGIOUS_CLICHE_GROUPS = [
+  { label: 'cross', terms: ['cross', 'crucifix', 'cruz', 'cruzes'] },
+  { label: 'bible', terms: ['open bible', 'bible open', 'biblia aberta', 'bíblia aberta', 'escrituras abertas'] },
+  { label: 'church', terms: ['church', 'church building', 'church interior', 'igreja', 'templo cristao'] },
+  { label: 'prayer-hands', terms: ['praying hands', 'hands praying', 'maos em oracao', 'mãos em oração'] }
 ];
 
 function normalize(value = '') {
@@ -86,13 +88,27 @@ function religiousClicheConflict(candidate, intent) {
     ...(candidate.tags || [])
   ].join(' '));
 
-  const literal = normalize((intent.representation?.literalElements || []).join(' '));
-  for (const cliche of RELIGIOUS_CLICHES) {
-    const needle = normalize(cliche);
-    if (!candidateText.includes(needle)) continue;
-    if (literal.includes(needle)) continue;
-    return true;
+  const intentText = normalize([
+    intent.passageText,
+    intent.biblicalContext?.surroundingContext,
+    intent.biblicalContext?.narrativeSituation,
+    ...(intent.representation?.literalElements || []),
+    ...(intent.representation?.symbolicElements || []),
+    ...(intent.visualIntent?.preferredScenes || [])
+  ].filter(Boolean).join(' '));
+
+  for (const group of RELIGIOUS_CLICHE_GROUPS) {
+    const appearsInCandidate = group.terms.some(term =>
+      candidateText.includes(normalize(term))
+    );
+    if (!appearsInCandidate) continue;
+
+    const explicitlyJustified = group.terms.some(term =>
+      intentText.includes(normalize(term))
+    );
+    if (!explicitlyJustified) return true;
   }
+
   return false;
 }
 
