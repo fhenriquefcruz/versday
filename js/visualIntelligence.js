@@ -511,8 +511,18 @@ export function analyzeVerse(verse = {}) {
   const genre = BOOK_GENRES[rawBook] || BOOK_GENRES[normalize(rawBook)] || 'bíblico';
 
   const confidenceBase = verse.theme ? 0.84 : 0.68;
-  const contextBonus = context.source === 'curated-context' ? 0.04 : 0;
-  const confidence = Math.min(0.98, confidenceBase + contextBonus + (literalElements.length ? 0.05 : 0));
+  const contextBonus =
+    context.granularity === 'passage-range'
+      ? 0.06
+      : context.source === 'curated-context'
+        ? 0.04
+        : 0;
+  const confidence = Math.min(
+    0.98,
+    confidenceBase +
+      contextBonus +
+      (literalElements.length ? 0.05 : 0)
+  );
 
   return {
     engineVersion: VISUAL_ENGINE_VERSION,
@@ -526,7 +536,9 @@ export function analyzeVerse(verse = {}) {
       narrativeSituation: context.narrativeSituation,
       characters: [...context.characters],
       suppressedLiteralElements: [...(context.suppressLiteral || [])],
-      contextSource: context.source
+      contextSource: context.source,
+      contextGranularity: context.granularity || 'genre-only',
+      contextScope: context.scope || null
     },
     semantic: {
       primaryTheme: profile.primaryTheme,
