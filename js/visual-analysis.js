@@ -367,8 +367,15 @@ export async function analyzeCandidateVisual(candidate) {
 
   const inferredFocal = candidate.focalPoint || estimateSourceFocalPoint(img);
   const derivedFocal = inferredFocal || { x: 0.5, y: 0.5 };
+  const derivedTabletFocal =
+    candidate.tabletFocalPoint ||
+    candidate.mobileFocalPoint ||
+    candidate.focalPoint ||
+    inferredFocal ||
+    { x: 0.5, y: 0.5 };
   const derivedMobileFocal =
     candidate.mobileFocalPoint ||
+    candidate.tabletFocalPoint ||
     candidate.focalPoint ||
     inferredFocal ||
     { x: 0.5, y: 0.5 };
@@ -381,6 +388,17 @@ export async function analyzeCandidateVisual(candidate) {
     candidate.curationConfidence ? candidate.safeTextAreas : []
   );
 
+  const tablet = analyzeFrame(
+    img,
+    72,
+    96,
+    derivedTabletFocal,
+    candidate.tabletSafeTextAreas ||
+      (candidate.curationConfidence
+        ? candidate.safeTextAreas
+        : [])
+  );
+
   const mobile = analyzeFrame(
     img,
     54,
@@ -389,30 +407,59 @@ export async function analyzeCandidateVisual(candidate) {
     candidate.mobileSafeTextAreas || []
   );
 
-  if (!desktop && !mobile) return candidate;
+  if (!desktop && !tablet && !mobile) return candidate;
 
   const desktopSafe =
     desktop?.safeTextAreas?.length
       ? desktop.safeTextAreas
       : (candidate.safeTextAreas || ['center']);
 
+  const tabletSafe =
+    tablet?.safeTextAreas?.length
+      ? tablet.safeTextAreas
+      : (
+          candidate.tabletSafeTextAreas ||
+          candidate.safeTextAreas ||
+          desktopSafe
+        );
+
   const mobileSafe =
     mobile?.safeTextAreas?.length
       ? mobile.safeTextAreas
-      : (candidate.mobileSafeTextAreas || desktopSafe);
+      : (
+          candidate.mobileSafeTextAreas ||
+          tabletSafe ||
+          desktopSafe
+        );
 
-  const measuredComposition =
-    desktop && mobile
-      ? desktop.compositionScore * 0.58 + mobile.compositionScore * 0.42
-      : (desktop?.compositionScore || mobile?.compositionScore || 0.76);
+  const compositionFrames = [
+    [desktop, 0.45],
+    [tablet, 0.25],
+    [mobile, 0.30]
+  ].filter(([frame]) => Boolean(frame));
+
+  const compositionWeight = compositionFrames.reduce(
+    (sum, [, weight]) => sum + weight,
+    0
+  );
+
+  const measuredComposition = compositionFrames.length
+    ? compositionFrames.reduce(
+        (sum, [frame, weight]) =>
+          sum + frame.compositionScore * weight,
+        0
+      ) / compositionWeight
+    : 0.76;
 
   return {
     ...candidate,
     width: candidate.width || img.naturalWidth,
     height: candidate.height || img.naturalHeight,
     safeTextAreas: desktopSafe,
+    tabletSafeTextAreas: tabletSafe,
     mobileSafeTextAreas: mobileSafe,
     focalPoint: derivedFocal,
+    tabletFocalPoint: derivedTabletFocal,
     mobileFocalPoint: derivedMobileFocal,
     compositionScore:
       typeof candidate.compositionScore === 'number'
@@ -430,6 +477,14 @@ export async function analyzeCandidateVisual(candidate) {
             complexity: desktop.complexity,
             bestSafeArea: desktop.bestSafeArea,
             bestSafeScore: desktop.bestSafeScore
+          }
+        : null,
+      tablet: tablet
+        ? {
+            averageLuminance: tablet.averageLuminance,
+            complexity: tablet.complexity,
+            bestSafeArea: tablet.bestSafeArea,
+            bestSafeScore: tablet.bestSafeScore
           }
         : null,
       mobile: mobile
