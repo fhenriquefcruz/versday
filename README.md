@@ -78,7 +78,9 @@ Variáveis esperadas no ambiente server-side:
 ```text
 UNSPLASH_ACCESS_KEY=...
 GROQ_API_KEY=...
-GROQ_MODEL=llama-3.3-70b-versatile
+GROQ_MODEL=qwen/qwen3.8-27b
+GROQ_VISION_MODEL=qwen/qwen3.8-27b
+VISUAL_VLM_ENABLED=false
 ALLOWED_ORIGIN=https://fhenriquefcruz.github.io
 ```
 
@@ -98,7 +100,7 @@ UNSPLASH_ACCESS_KEY=...     # chave nova/rotacionada; opcional se já existir no
 GROQ_API_KEY=...            # chave nova/rotacionada; opcional se já existir no Vercel
 ```
 
-Depois execute **Deploy VersDay API to Vercel** em `Actions → Run workflow` e informe um **scope Vercel dedicado ao VersDay**.
+Depois execute **Deploy VersDay API to Vercel** em `Actions → Run workflow`, informe um **scope Vercel dedicado ao VersDay** e mantenha `enable_vlm=false` até desejar ativar a validação multimodal.
 
 > O VersDay deve ter projeto/conta/equipe próprios no Vercel. Não use o scope da RTM: RTM é outro projeto e permanece totalmente separado.
 
@@ -115,6 +117,35 @@ O workflow:
 9. publica essa configuração na `main`, disparando o Pages normalmente.
 
 O frontend também consulta o healthcheck: chat e busca externa não são habilitados quando o provider correspondente ainda não está pronto. O endpoint `/api/health` nunca devolve os valores das credenciais.
+
+### Validação multimodal opcional
+
+O VersDay possui um último gate multimodal **desligado por padrão**.
+
+Fluxo quando habilitado:
+
+```
+24 candidatos externos
+→ ranking local
+→ top 5 com análise de pixels
+→ novo ranking local
+→ até 3 finalistas externos/não-curados
+→ VLM
+→ seleção final
+```
+
+Regras:
+
+- fotos do catálogo manualmente curado não geram chamada VLM;
+- o VLM só é usado quando o líder local é externo/não-curado;
+- máximo de 3 imagens por validação;
+- timeout curto e comportamento fail-open: indisponibilidade do VLM nunca quebra o VersDay;
+- reprovação multimodal adiciona `VLM_REJECTED` e é eliminatória;
+- o VLM não aumenta artificialmente o score de beleza ou semântica — ele funciona como gate de contradição/compatibilidade;
+- modelo padrão atual: `qwen/qwen3.8-27b`;
+- ativação: `VISUAL_VLM_ENABLED=true` ou `enable_vlm=true` no workflow de deploy.
+
+A intenção é usar visão computacional somente onde ela agrega valor, depois de filtros baratos, controlando custo e latência.
 
 ### Conformidade dos provedores de imagem
 
