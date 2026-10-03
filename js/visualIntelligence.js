@@ -263,33 +263,25 @@ function normalize(value = '') {
     .toLowerCase();
 }
 
-function escapeRegExp(value) {
-  return String(value).replace(/[.*+?^\${}()|[\]\\]/g, '\\function includesAny(text, terms) {
-  return terms.some(term => text.includes(normalize(term)));
-}');
+function semanticPhrase(value) {
+  return normalize(value)
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function containsSemanticTerm(text, term) {
-  const normalizedText = normalize(text);
-  const normalizedTerm = normalize(term).trim();
-  if (!normalizedTerm) return false;
+  const normalizedText = semanticPhrase(text);
+  const normalizedTerm = semanticPhrase(term);
+  if (!normalizedText || !normalizedTerm) return false;
 
-  // Termos semânticos precisam existir como palavra/frase real.
-  // Isso evita falsos positivos como "rio" dentro de "próprio"
-  // ou "mar" dentro de "amar".
-  const pattern = normalizedTerm
-    .split(/\s+/)
-    .map(escapeRegExp)
-    .join('\\s+');
-
-  return new RegExp('(?:^|[^a-z0-9])' + pattern + '(?=$|[^a-z0-9])', 'i')
-    .test(normalizedText);
+  // Palavra/frase inteira: evita "rio" em "próprio" e "mar" em "amar".
+  return (' ' + normalizedText + ' ').includes(' ' + normalizedTerm + ' ');
 }
 
 function includesAny(text, terms) {
   return terms.some(term => containsSemanticTerm(text, term));
 }
-
 function detectLiteralSignals(text) {
   const signals = [];
   const rules = [
