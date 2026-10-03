@@ -1,8 +1,9 @@
 // js/chat.js
-import { askGemini, isChatAvailable } from './gemini.js';
+import { askGemini, isChatAvailable, checkChatAvailability } from './gemini.js';
 
 let chatHistory = [];
 let isLoading = false;
+let chatAvailable = false;
 
 function escapeHtml(str) {
   return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m]));
@@ -23,11 +24,36 @@ export function initChat() {
     return;
   }
 
+  const defaultPlaceholder = initialInput.placeholder;
+
+  function applyAvailability(available, checking = false) {
+    chatAvailable = Boolean(available);
+
+    const disabled = checking || !chatAvailable;
+    initialInput.disabled = disabled;
+    askBtn.disabled = disabled;
+    if (chatInput) chatInput.disabled = disabled;
+    if (sendBtn) sendBtn.disabled = disabled;
+
+    if (checking) {
+      initialInput.placeholder = 'Verificando assistente...';
+      askBtn.title = 'Verificando o backend seguro do VersDay.';
+    } else if (chatAvailable) {
+      initialInput.placeholder = defaultPlaceholder;
+      askBtn.title = '';
+    } else {
+      initialInput.placeholder = 'Assistente temporariamente indisponível';
+      askBtn.title = 'O provider do assistente ainda não está disponível no backend seguro.';
+    }
+  }
+
   if (!isChatAvailable()) {
-    initialInput.disabled = true;
-    initialInput.placeholder = 'Assistente temporariamente indisponível';
-    askBtn.disabled = true;
-    askBtn.title = 'O assistente exige um endpoint server-side seguro.';
+    applyAvailability(false);
+  } else {
+    applyAvailability(false, true);
+    checkChatAvailability()
+      .then(available => applyAvailability(available))
+      .catch(() => applyAvailability(false));
   }
 
   function addMessage(role, text) {
@@ -43,15 +69,20 @@ export function initChat() {
   function setLoading(state) {
     isLoading = state;
     if (chatLoading) chatLoading.style.display = state ? 'block' : 'none';
-    if (askBtn)  askBtn.disabled  = state;
-    if (sendBtn) sendBtn.disabled = state;
-    if (chatInput) chatInput.disabled = state;
+
+    const disabled = state || !chatAvailable;
+    if (askBtn) askBtn.disabled = disabled;
+    if (sendBtn) sendBtn.disabled = disabled;
+    if (chatInput) chatInput.disabled = disabled;
+    if (initialInput) initialInput.disabled = disabled;
   }
 
   async function sendFirstQuestion() {
-    if (isLoading) return;
+    if (isLoading || !chatAvailable) return;
     const question = initialInput.value.trim();
     if (!question) { initialInput.focus(); return; }
+
+    const priorHistory = [...chatHistory];
 
     if (promptDiv) promptDiv.style.display = 'none';
     chatContainer.style.display = 'block';
@@ -60,22 +91,25 @@ export function initChat() {
     setLoading(true);
 
     try {
-      const answer = await askGemini(question, chatHistory);
+      const answer = await askGemini(question, priorHistory);
       addMessage('system', answer);
       chatHistory.push({ role: 'model', content: answer });
     } catch (err) {
       console.error('[VersDay] Chat erro:', err);
       addMessage('system', `❌ ${err.message || 'Erro na comunicação. Tente novamente.'}`);
+      if (err?.status === 503) applyAvailability(false);
     } finally {
       setLoading(false);
-      if (chatInput) chatInput.focus();
+      if (chatAvailable && chatInput) chatInput.focus();
     }
   }
 
   async function sendMessage() {
-    if (isLoading || !chatInput) return;
+    if (isLoading || !chatAvailable || !chatInput) return;
     const question = chatInput.value.trim();
     if (!question) return;
+
+    const priorHistory = [...chatHistory];
 
     chatInput.value = '';
     addMessage('user', question);
@@ -83,12 +117,13 @@ export function initChat() {
     setLoading(true);
 
     try {
-      const answer = await askGemini(question, chatHistory);
+      const answer = await askGemini(question, priorHistory);
       addMessage('system', answer);
       chatHistory.push({ role: 'model', content: answer });
     } catch (err) {
       console.error('[VersDay] Chat erro:', err);
       addMessage('system', `❌ ${err.message || 'Erro na comunicação. Tente novamente.'}`);
+      if (err?.status === 503) applyAvailability(false);
     } finally {
       setLoading(false);
     }
