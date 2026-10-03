@@ -85,11 +85,29 @@ test('share e background propagam placement responsivo', async () => {
 
   assert.match(share, /mobileTextPlacement/);
   assert.match(share, /responsivePlacement/);
+  assert.match(background, /dataset\.tabletTextPlacement/);
   assert.match(background, /dataset\.mobileTextPlacement/);
+  assert.match(background, /--focal-tablet/);
 
   for (const placement of ['left', 'right', 'upper', 'lower']) {
-    assert.match(styles, new RegExp(`data-text-placement="${placement}"`));
+    assert.match(
+      styles,
+      new RegExp(`data-text-placement="${placement}"`)
+    );
+    assert.match(
+      styles,
+      new RegExp(`data-tablet-text-placement="${placement}"`)
+    );
   }
+
+  assert.match(
+    styles,
+    /@media \(min-width: 641px\) and \(max-width: 899px\)/
+  );
+  assert.match(
+    styles,
+    /background-position: var\(--focal-tablet/
+  );
 });
 
 test('inferência de focal point preserva assunto fora do centro antes do crop', () => {
@@ -127,5 +145,26 @@ test('análise de provider registra origem do focal sem apagar focal manual', as
 
   assert.match(source, /candidate\.focalPoint \|\| estimateSourceFocalPoint\(img\)/);
   assert.match(source, /focalSource: candidate\.focalPoint \? 'provided' : 'source-saliency'/);
+  assert.match(source, /tabletFocalPoint:\s*derivedTabletFocal/);
   assert.match(source, /mobileFocalPoint:\s*derivedMobileFocal/);
+  assert.match(source, /tabletSafeTextAreas:\s*tabletSafe/);
+  assert.match(source, /\[tablet, 0\.25\]/);
+});
+
+test('catálogo curado entrega contrato tablet antes da análise de pixels', async () => {
+  const { CURATED_VISUALS } = await import('../js/visualCatalog.js');
+
+  for (const candidate of CURATED_VISUALS) {
+    assert.ok(candidate.focalPoint, `desktop focal ausente: ${candidate.id}`);
+    assert.ok(candidate.tabletFocalPoint, `tablet focal ausente: ${candidate.id}`);
+    assert.ok(candidate.mobileFocalPoint, `mobile focal ausente: ${candidate.id}`);
+    assert.ok(
+      candidate.tabletSafeTextAreas?.length,
+      `tablet safe areas ausentes: ${candidate.id}`
+    );
+    assert.ok(
+      candidate.mobileSafeTextAreas?.length,
+      `mobile safe areas ausentes: ${candidate.id}`
+    );
+  }
 });
