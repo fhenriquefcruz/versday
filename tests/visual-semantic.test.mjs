@@ -49,3 +49,11 @@ for (const item of cases) {
     assert.ok(queries.every(q => !/^(faith|hope|love|prayer)$/i.test(q)));
   });
 }
+
+
+test('contexto pastoral é resolvido antes da intenção visual', () => {
+  const intent = analyzeVerseVisualIntent({text:'O Senhor é o meu pastor; nada me faltará.',reference:'sl 23:1',book:'sl',chapter:23,verse:1,theme:'pastor'});
+  assert.equal(intent.biblicalContext.contextSource,'curated-context');
+  assert.match(intent.biblicalContext.surroundingContext,/pastoral/i);
+  assert.ok(intent.biblicalContext.characters.length >= 1);
+});
