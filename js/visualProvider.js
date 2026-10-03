@@ -7,13 +7,18 @@ function getMeta(name) {
   return document.querySelector(`meta[name="${name}"]`)?.getAttribute('content')?.trim() || '';
 }
 
+function isVercelRuntime() {
+  return typeof location !== 'undefined' && /\.vercel\.app$/i.test(location.hostname);
+}
+
 function getSearchEndpoint() {
-  return getMeta('versday-visual-endpoint');
+  return getMeta('versday-visual-endpoint') || (isVercelRuntime() ? '/api/visual-search' : '');
 }
 
 function getSelectEndpoint() {
   const explicit = getMeta('versday-visual-select-endpoint');
   if (explicit) return explicit;
+  if (isVercelRuntime()) return '/api/visual-select';
 
   const search = getSearchEndpoint();
   if (!search) return '';
