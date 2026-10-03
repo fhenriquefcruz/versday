@@ -3,9 +3,9 @@
 // Não é a fonte principal: entra apenas quando a coerência é forte.
 // Quando não houver encaixe, o motor prefere composição abstrata.
 
-function pexels(id, path, meta) {
+function pexels(id, path, meta, stableId = null) {
   return {
-    id:'pexels-' + id,
+    id:stableId || ('pexels-' + id),
     provider:'Pexels',
     providerUrl:'https://www.pexels.com/',
     imageUrl:'https://images.pexels.com/photos/' + id + '/' + path + '?auto=compress&cs=tinysrgb&w=2000',
@@ -43,9 +43,9 @@ export const CURATED_VISUALS = [
     mobileFocalPoint:{x:0.5,y:0.54},
     compositionScore:0.9,
     negativeTags:['cidade','festa','guerra']
-  }),
+  }, 'pexels-pastoral-115141'),
   pexels('41953','road-curve-asphalt-country-road-41953.jpeg', {
-    tags:['caminho','confiança','estrada','direção','jornada','path','road','trail','journey'],
+    tags:['caminho','estrada','direção','jornada','path','road','trail','journey'],
     moods:['progressivo','reflexivo','sereno','contemplativo'],
     representationModes:['literal','hybrid','conceptual'],
     safeTextAreas:['upper-left','upper-right'],
@@ -135,7 +135,7 @@ export const CURATED_VISUALS = [
     negativeTags:['festa','publicidade']
   }),
   pexels('417074','pexels-photo-417074.jpeg', {
-    tags:['coragem','confiança','landscape','vastness','weather','journey','adversidade'],
+    tags:['coragem','landscape','vastness','weather','journey','adversidade'],
     moods:['firme','resiliente','contemplativo'],
     representationModes:['conceptual','hybrid'],
     safeTextAreas:['upper-left','upper-right'],
