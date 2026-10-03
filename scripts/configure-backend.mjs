@@ -77,7 +77,7 @@ export function configureBackendContent(indexHtml, serviceWorker, options) {
 
   const changed = nextIndex !== indexHtml;
   const cacheName = changed
-    ? `versday-v8-backend-${cacheTag}`
+    ? `versday-runtime-${cacheTag}`
     : currentCache;
 
   const nextServiceWorker = changed

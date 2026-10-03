@@ -169,6 +169,34 @@ A intenção é usar visão computacional somente onde ela agrega valor, depois 
 
 As regras devem ser revalidadas antes de trocar de fornecedor ou ativar nova API.
 
+## Performance e observabilidade visual
+
+O motor visual mede o custo de cada decisão sem enviar telemetria para nenhum servidor.
+
+Os registros ficam apenas em `sessionStorage`, limitados às 30 decisões mais recentes, e contêm somente dados técnicos:
+
+- código de decisão;
+- quantidade de candidatos;
+- fonte da seleção;
+- tempos de aquisição, análise de pixels, VLM, ranking e total;
+- quantidade de finalistas avaliados/rejeitados pelo VLM;
+- motivo dominante de rejeição.
+
+Não são persistidos texto do versículo, URLs de imagem, prompts completos ou credenciais.
+
+Budgets atuais do cliente:
+
+- busca externa: **até 4,5 s**;
+- carregamento para análise de pixels: **até 2,5 s por imagem**, com até 5 imagens processadas em paralelo;
+- VLM opcional: **até 5 s** no cliente e 4,5 s no backend;
+- análise de pixels não é mais sequencial.
+
+Com `?visualDebug=1`, o console mostra também `decision`, `timings` e o resumo da sessão (média e p95).
+
+```bash
+npm run test:performance
+```
+
 ## Share cards
 
 O engine suporta:
@@ -189,6 +217,7 @@ O benchmark usa o próprio acervo curado do VersDay, hoje com 150+ passagens, so
 ```bash
 npm test
 npm run benchmark:visual
+npm run test:performance
 ```
 
 O gate agregado exige **approval rate mínimo de 95%**. Uma passagem só é aprovada quando produz intenção/queries válidas e termina em uma destas saídas:

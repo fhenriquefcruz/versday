@@ -21,9 +21,73 @@ import {
   validateVisualFinalists
 } from './visualProvider.js';
 import { isBackendProviderReady } from './backendHealth.js';
+import {
+  recordVisualTelemetry,
+  summarizeVisualTelemetry
+} from './visualTelemetry.js';
 
 function clampVisual(value, min = 0, max = 1) {
   return Math.max(min, Math.min(max, value));
+}
+
+function nowMs() {
+  return typeof performance !== 'undefined' &&
+    typeof performance.now === 'function'
+    ? performance.now()
+    : Date.now();
+}
+
+function elapsedMs(start) {
+  return Number(Math.max(0, nowMs() - start).toFixed(1));
+}
+
+function dominantRejectReason(ranked = []) {
+  const counts = new Map();
+
+  for (const item of ranked) {
+    for (const reason of item.rejectedReasons || []) {
+      counts.set(reason, (counts.get(reason) || 0) + 1);
+    }
+  }
+
+  return [...counts.entries()]
+    .sort((a, b) => {
+      if (b[1] !== a[1]) return b[1] - a[1];
+      return a[0].localeCompare(b[0]);
+    })[0]?.[0] || null;
+}
+
+export function deriveVisualDecision({
+  selected = null,
+  ranked = [],
+  candidateCount = 0,
+  vlm = {}
+} = {}) {
+  if (selected) {
+    return {
+      code: 'PHOTO_ACCEPTED',
+      dominantRejectReason: null
+    };
+  }
+
+  if (!candidateCount) {
+    return {
+      code: 'ABSTRACT_NO_CANDIDATES',
+      dominantRejectReason: 'NO_CANDIDATES'
+    };
+  }
+
+  const dominant = dominantRejectReason(ranked);
+  const vlmDriven = ['VLM_REJECTED', 'VLM_NOT_VALIDATED']
+    .includes(dominant);
+
+  return {
+    code:
+      vlm?.enabled && vlmDriven
+        ? 'ABSTRACT_VLM_GATE'
+        : 'ABSTRACT_NO_ACCEPTED_CANDIDATE',
+    dominantRejectReason: dominant
+  };
 }
 
 export function deriveOverlayStrength(candidate = {}, scoring = {}) {
@@ -103,6 +167,14 @@ export async function cachedVisualNeedsVlmRefresh(visual) {
 }
 
 export async function resolveVisualForVerse(verse, options = {}) {
+  const resolutionStarted = nowMs();
+  const timings = {
+    acquisitionMs: 0,
+    pixelAnalysisMs: 0,
+    vlmMs: 0,
+    finalRankingMs: 0,
+    totalMs: 0
+  };
   const force = Boolean(options.force || options.forceRefresh);
   const purpose = String(options.purpose || 'background');
   const reference = verse?.reference || '';
@@ -118,15 +190,26 @@ export async function resolveVisualForVerse(verse, options = {}) {
       if (cached.visual.mode === 'photo') {
         await notifyProviderSelection(cached.visual);
       }
+
+      timings.totalMs = elapsedMs(resolutionStarted);
+      const diagnostics = {
+        source: 'cache',
+        purpose,
+        engineVersion: VISUAL_ENGINE_VERSION,
+        decision: {
+          code: 'CACHE_HIT',
+          dominantRejectReason: null
+        },
+        timings
+      };
+
+      recordVisualTelemetry(reference, diagnostics);
+
       return {
         intent: cached.intent,
         queries: buildVisualQueries(cached.intent),
         visual: cached.visual,
-        diagnostics: {
-          source: 'cache',
-          purpose,
-          engineVersion: VISUAL_ENGINE_VERSION
-        }
+        diagnostics
       };
     }
   }
@@ -137,10 +220,12 @@ export async function resolveVisualForVerse(verse, options = {}) {
 
   // O provedor seguro é opcional. Sem backend, o GitHub Pages permanece
   // funcional com acervo curado e fallback abstrato.
+  const acquisitionStarted = nowMs();
   const [providerCandidates, curatedCandidates] = await Promise.all([
     fetchProviderCandidates(intent, queries, 24, purpose),
     Promise.resolve(getCuratedCandidates(intent, 12))
   ]);
+  timings.acquisitionMs = elapsedMs(acquisitionStarted);
 
   let candidates = [...providerCandidates, ...curatedCandidates]
     .filter(candidate =>
@@ -175,7 +260,9 @@ export async function resolveVisualForVerse(verse, options = {}) {
     .slice(0, 5)
     .map(item => item.candidate);
 
+  const pixelStarted = nowMs();
   const analyzed = await analyzeShortlist(shortlist, 5);
+  timings.pixelAnalysisMs = elapsedMs(pixelStarted);
   if (analyzed.length) {
     const byId = new Map(analyzed.map(candidate => [candidate.id, candidate]));
     candidates = candidates.map(candidate => byId.get(candidate.id) || candidate);
@@ -211,11 +298,13 @@ export async function resolveVisualForVerse(verse, options = {}) {
         Number(candidate.curationConfidence ?? 0) < 1
       );
 
+    const vlmStarted = nowMs();
     const validation = await validateVisualFinalists(
       intent,
       vlmCandidates,
       purpose
     );
+    timings.vlmMs = elapsedMs(vlmStarted);
 
     vlmDiagnostics = {
       enabled: Boolean(validation.enabled),
@@ -266,11 +355,13 @@ export async function resolveVisualForVerse(verse, options = {}) {
     }
   }
 
+  const finalRankingStarted = nowMs();
   const { selected, ranked } = selectBestCandidate(
     candidates,
     intent,
     recentUsage
   );
+  timings.finalRankingMs = elapsedMs(finalRankingStarted);
 
   let visual;
   if (selected) {
@@ -286,6 +377,14 @@ export async function resolveVisualForVerse(verse, options = {}) {
   setCachedVisual(reference, intent, visual, purpose);
   rememberVisualUsage(reference, visual, intent, purpose);
 
+  const decision = deriveVisualDecision({
+    selected,
+    ranked,
+    candidateCount: candidates.length,
+    vlm: vlmDiagnostics
+  });
+  timings.totalMs = elapsedMs(resolutionStarted);
+
   const diagnostics = {
     source: selected ? selected.candidate.provider || 'catalog' : 'abstract-fallback',
     purpose,
@@ -296,6 +395,8 @@ export async function resolveVisualForVerse(verse, options = {}) {
     curatedCandidateCount: curatedCandidates.length,
     analyzedCandidateCount: analyzed.length,
     vlm: vlmDiagnostics,
+    decision,
+    timings,
     acceptedCandidateId: selected?.candidate?.id || null,
     ranked: ranked.slice(0, 5).map(item => ({
       id: item.candidate.id,
@@ -307,13 +408,18 @@ export async function resolveVisualForVerse(verse, options = {}) {
     }))
   };
 
+  recordVisualTelemetry(reference, diagnostics);
+
   if (debugEnabled()) {
     console.groupCollapsed(`[VersDay Visual] ${reference || '(sem referência)'} · ${purpose}`);
     console.log('Biblical context', intent.biblicalContext);
     console.log('Intent', intent);
     console.log('Queries', queries);
     console.table(diagnostics.ranked);
+    console.log('Decision', diagnostics.decision);
+    console.log('Timings', diagnostics.timings);
     console.log('Selected visual', visual);
+    console.log('Session telemetry', summarizeVisualTelemetry());
     console.groupEnd();
   }
 

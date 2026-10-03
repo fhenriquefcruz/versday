@@ -55,9 +55,9 @@ test('ativador conecta providers prontos e força nova versão do cache PWA', as
   );
   assert.match(
     result.serviceWorker,
-    /const CACHE_NAME = 'versday-v8-backend-run-123';/
+    /const CACHE_NAME = 'versday-runtime-run-123';/
   );
-  assert.equal(result.cacheName, 'versday-v8-backend-run-123');
+  assert.equal(result.cacheName, 'versday-runtime-run-123');
   assert.equal(result.changed, true);
 });
 
