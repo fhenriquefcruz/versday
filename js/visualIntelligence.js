@@ -263,8 +263,31 @@ function normalize(value = '') {
     .toLowerCase();
 }
 
-function includesAny(text, terms) {
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^\${}()|[\]\\]/g, '\\function includesAny(text, terms) {
   return terms.some(term => text.includes(normalize(term)));
+}');
+}
+
+function containsSemanticTerm(text, term) {
+  const normalizedText = normalize(text);
+  const normalizedTerm = normalize(term).trim();
+  if (!normalizedTerm) return false;
+
+  // Termos semânticos precisam existir como palavra/frase real.
+  // Isso evita falsos positivos como "rio" dentro de "próprio"
+  // ou "mar" dentro de "amar".
+  const pattern = normalizedTerm
+    .split(/\s+/)
+    .map(escapeRegExp)
+    .join('\\s+');
+
+  return new RegExp('(?:^|[^a-z0-9])' + pattern + '(?=$|[^a-z0-9])', 'i')
+    .test(normalizedText);
+}
+
+function includesAny(text, terms) {
+  return terms.some(term => containsSemanticTerm(text, term));
 }
 
 function detectLiteralSignals(text) {
