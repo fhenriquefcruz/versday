@@ -143,7 +143,10 @@ test('acervo curado premium possui pelo menos 18 imagens classificadas', () => {
     assert.ok(candidate.moods.length >= 1);
     assert.ok(candidate.safeTextAreas.length >= 1);
     assert.ok(candidate.focalPoint);
+    assert.ok(candidate.tabletFocalPoint);
     assert.ok(candidate.mobileFocalPoint);
+    assert.ok(candidate.tabletSafeTextAreas.length >= 1);
+    assert.ok(candidate.mobileSafeTextAreas.length >= 1);
   }
 });
 
