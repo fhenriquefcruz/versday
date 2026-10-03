@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "test:visual": "node --test tests/visual-engine.test.mjs",
-    "benchmark:visual": "node --test tests/visual-benchmark.test.mjs"
+    "benchmark:visual": "node --test tests/visual-benchmark.test.mjs",
+    "test:performance": "node --test tests/visual-observability.test.mjs"
   },
   "engines": {
     "node": ">=20"
