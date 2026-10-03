@@ -7,6 +7,13 @@ let bgLayer1, bgLayer2;
 let activeLayer = 1;
 let currentVisualKey = '';
 let requestSequence = 0;
+let resizeBound = false;
+let lastViewportPurpose = '';
+
+function getBackgroundPurpose() {
+  if (typeof window === 'undefined') return 'background-desktop';
+  return window.innerWidth < 700 ? 'background-mobile' : 'background-desktop';
+}
 
 export function initBackgroundLayers() {
   if (document.querySelector('.bg-layer-1')) return;
@@ -18,6 +25,22 @@ export function initBackgroundLayers() {
   document.body.prepend(l1);
   bgLayer1 = l1;
   bgLayer2 = l2;
+  lastViewportPurpose = getBackgroundPurpose();
+
+  if (!resizeBound && typeof window !== 'undefined') {
+    resizeBound = true;
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const nextPurpose = getBackgroundPurpose();
+        if (nextPurpose !== lastViewportPurpose && appState.currentVerse) {
+          lastViewportPurpose = nextPurpose;
+          setBackgroundImage(appState.currentVerse, { forceRefresh:false, purpose:nextPurpose });
+        }
+      }, 220);
+    }, { passive:true });
+  }
 }
 
 function preloadImage(url, timeoutMs=6000) {
@@ -143,7 +166,9 @@ export async function setBackgroundImage(verse, options={}) {
   if (!bgLayer1 || !bgLayer2) initBackgroundLayers();
   const seq = ++requestSequence;
   try {
-    const selection = await resolveVisualForVerse(verse,options);
+    const purpose = options.purpose || getBackgroundPurpose();
+    lastViewportPurpose = purpose;
+    const selection = await resolveVisualForVerse(verse,{...options,purpose});
     await applySelection(selection,verse,seq);
   } catch (error) {
     console.error('[VersDay Visual] Falha na seleção visual:',error);
