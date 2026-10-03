@@ -4,6 +4,9 @@ import { isBackendProviderReady } from './backendHealth.js';
 // Integração segura com provedores externos.
 // Nenhuma credencial privada vive no navegador.
 
+export const VISUAL_PROVIDER_TIMEOUT_MS = 4500;
+export const VLM_CLIENT_TIMEOUT_MS = 5000;
+
 function getMeta(name) {
   if (typeof document === 'undefined') return '';
   return document.querySelector(`meta[name="${name}"]`)?.getAttribute('content')?.trim() || '';
@@ -94,7 +97,10 @@ export async function fetchProviderCandidates(intent, queries, limit = 20, purpo
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 6000);
+  const timeout = setTimeout(
+    () => controller.abort(),
+    VISUAL_PROVIDER_TIMEOUT_MS
+  );
 
   try {
     const response = await fetch(endpoint, {
@@ -194,7 +200,10 @@ export async function validateVisualFinalists(
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5000);
+  const timeout = setTimeout(
+    () => controller.abort(),
+    VLM_CLIENT_TIMEOUT_MS
+  );
 
   try {
     const response = await fetch(endpoint, {
