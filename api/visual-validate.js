@@ -102,9 +102,13 @@ function buildPrompt(intent, candidates, verseReference, purpose) {
     `Biblical context: ${biblicalContext.surroundingContext || ''}`,
     `Narrative situation: ${biblicalContext.narrativeSituation || ''}`,
     '',
-    'Return one decision for every candidate in the same order.',
+    'Return exactly one JSON object with this root shape: {"decisions":[...]}',
+    'Each decision must contain: id, semanticCompatibility, emotionalCompatibility, contradiction, unsafeOrCliche, reason.',
+    'Return one decision for every candidate in the same order and preserve the candidate id exactly.',
     'semanticCompatibility and emotionalCompatibility must be numbers from 0 to 1.',
-    'reason must be short and concrete.'
+    'contradiction and unsafeOrCliche must be booleans.',
+    'reason must be short and concrete.',
+    'Do not include markdown or prose outside the JSON object.'
   ].join('\n');
 }
 
