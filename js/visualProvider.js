@@ -1,93 +1,159 @@
 // js/visualProvider.js
-// O navegador NUNCA recebe chave de Unsplash/Pexels.
-// Para habilitar busca dinâmica, configure um endpoint seguro via:
-// <meta name="versday-visual-endpoint" content="https://.../api/visual-search">
-//
-// Contrato esperado do proxy:
-// POST { verseReference, intent, queries, limit }
-// -> { candidates: [{ id, provider, providerUrl, imageUrl, tags, moods,
-//       representationModes, safeTextAreas, focalPoint, mobileFocalPoint,
-//       qualityScore, compositionScore, identityScore, downloadLocation? }] }
+// Provider abstraction. Nenhuma credencial privada vive no navegador.
 
-function getEndpoint() {
+function metaContent(name) {
   if (typeof document === 'undefined') return '';
-  return document
-    .querySelector('meta[name="versday-visual-endpoint"]')
-    ?.getAttribute('content')
-    ?.trim() || '';
+  return document.querySelector('meta[name="' + name + '"]')?.getAttribute('content')?.trim() || '';
 }
 
-function sanitizeCandidate(raw) {
+function apiBase() {
+  const configured = metaContent('versday-api-base');
+  if (configured) return configured.replace(/\/$/, '');
+
+  if (typeof window !== 'undefined' && window.VERSDAY_CONFIG?.apiBase) {
+    return String(window.VERSDAY_CONFIG.apiBase).replace(/\/$/, '');
+  }
+
+  if (typeof location !== 'undefined' && !/\.github\.io$/i.test(location.hostname)) {
+    return '';
+  }
+
+  return null;
+}
+
+function visualSearchEndpoint() {
+  const explicit = metaContent('versday-visual-endpoint');
+  if (explicit) return explicit;
+
+  const base = apiBase();
+  return base === null ? '' : base + '/api/visual-search';
+}
+
+function visualTrackEndpoint() {
+  const explicit = metaContent('versday-visual-track-endpoint');
+  if (explicit) return explicit;
+
+  const base = apiBase();
+  if (base !== null) return base + '/api/visual-select';
+
+  const search = visualSearchEndpoint();
+  return search ? search.replace(/\/visual-search(?:\?.*)?$/, '/visual-select') : '';
+}
+
+function numeric(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function sanitizeCandidate(raw, intent) {
   if (!raw || !raw.id || !raw.imageUrl) return null;
+
+  const width = numeric(raw.width, 0);
+  const height = numeric(raw.height, 0);
+  const pixels = width * height;
+  const inferredQuality = pixels >= 4_000_000 ? 0.93 : pixels >= 2_000_000 ? 0.87 : pixels >= 921_600 ? 0.76 : 0.68;
+
   return {
-    id: String(raw.id),
-    provider: String(raw.provider || 'External'),
-    providerUrl: String(raw.providerUrl || ''),
-    imageUrl: String(raw.imageUrl),
-    tags: Array.isArray(raw.tags) ? raw.tags.map(String) : [],
-    moods: Array.isArray(raw.moods) ? raw.moods.map(String) : [],
-    representationModes: Array.isArray(raw.representationModes)
+    id:String(raw.id),
+    provider:String(raw.provider || raw.providerName || 'External'),
+    providerUrl:String(raw.providerUrl || raw.providerPage || raw.sourceLink || ''),
+    imageUrl:String(raw.imageUrl),
+    previewUrl:String(raw.previewUrl || raw.imageUrl),
+    width,
+    height,
+    color:raw.color || null,
+    description:String(raw.description || raw.alt || ''),
+    alt:String(raw.alt || raw.description || ''),
+    photographer:raw.photographer ? String(raw.photographer) : null,
+    photographerLink:raw.photographerLink ? String(raw.photographerLink) : null,
+    sourceLink:raw.sourceLink ? String(raw.sourceLink) : null,
+    tags:Array.isArray(raw.tags) ? raw.tags.map(String) : [],
+    themes:Array.isArray(raw.themes) ? raw.themes.map(String) : [],
+    moods:Array.isArray(raw.moods) ? raw.moods.map(String) : [],
+    queryMoods:[...(intent.semantic?.emotionalTone || [])],
+    searchIntentTheme:intent.semantic?.primaryTheme || '',
+    representationModes:Array.isArray(raw.representationModes)
       ? raw.representationModes.map(String)
-      : ['conceptual'],
-    safeTextAreas: Array.isArray(raw.safeTextAreas) ? raw.safeTextAreas.map(String) : ['center'],
-    focalPoint: raw.focalPoint || { x: 0.5, y: 0.5 },
-    mobileFocalPoint: raw.mobileFocalPoint || raw.focalPoint || { x: 0.5, y: 0.5 },
-    qualityScore: Number(raw.qualityScore ?? 0.8),
-    compositionScore: Number(raw.compositionScore ?? 0.75),
-    identityScore: Number(raw.identityScore ?? 0.78),
-    negativeTags: Array.isArray(raw.negativeTags) ? raw.negativeTags.map(String) : [],
-    downloadLocation: raw.downloadLocation ? String(raw.downloadLocation) : null
+      : [intent.representation?.mode || 'conceptual'],
+    safeTextAreas:Array.isArray(raw.safeTextAreas) ? raw.safeTextAreas.map(String) : [],
+    focalPoint:raw.focalPoint || null,
+    mobileFocalPoint:raw.mobileFocalPoint || raw.focalPoint || null,
+    qualityScore:numeric(raw.qualityScore, inferredQuality),
+    compositionScore:numeric(raw.compositionScore, 0.68),
+    identityScore:numeric(raw.identityScore, 0.82),
+    negativeTags:Array.isArray(raw.negativeTags) ? raw.negativeTags.map(String) : [],
+    providerSearchScore:numeric(raw.providerSearchScore, 0.82),
+    query:String(raw.query || ''),
+    downloadLocation:raw.downloadLocation ? String(raw.downloadLocation) : null,
+    hasEmbeddedText:Boolean(raw.hasEmbeddedText),
+    hasWatermark:Boolean(raw.hasWatermark),
+    isAdvertising:Boolean(raw.isAdvertising),
+    nsfw:Boolean(raw.nsfw),
+    curated:false
   };
 }
 
 export function isDynamicVisualSearchEnabled() {
-  return Boolean(getEndpoint());
+  return Boolean(visualSearchEndpoint());
 }
 
-export async function fetchProviderCandidates(intent, queries, limit = 20) {
-  const endpoint = getEndpoint();
+export async function fetchProviderCandidates(intent, queries, limit = 20, purpose = 'background') {
+  const endpoint = visualSearchEndpoint();
   if (!endpoint) return [];
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 6500);
 
   try {
     const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        verseReference: intent.verseReference,
-        intent,
-        queries,
-        limit: Math.min(Math.max(limit, 1), 30)
-      })
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body:JSON.stringify({
+        verseReference:intent.verseReference,
+        intent:{
+          semantic:intent.semantic,
+          representation:intent.representation,
+          visualIntent:intent.visualIntent,
+          photography:intent.photography,
+          biblicalContext:intent.biblicalContext
+        },
+        queries:queries.slice(0,4),
+        purpose,
+        limit:Math.min(Math.max(limit, 5), 30)
+      }),
+      signal:controller.signal
     });
 
-    if (!response.ok) throw new Error(`visual provider HTTP ${response.status}`);
+    if (!response.ok) throw new Error('visual provider HTTP ' + response.status);
+
     const payload = await response.json();
     return (payload.candidates || [])
-      .map(sanitizeCandidate)
+      .map(raw => sanitizeCandidate(raw, intent))
       .filter(Boolean);
   } catch (error) {
-    console.warn('[VersDay] Busca visual externa indisponível; usando fallback seguro.', error);
+    console.info('[VersDay Visual] Busca externa indisponível; usando fallback premium.', error?.name || error);
     return [];
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
 export async function notifyProviderSelection(candidate) {
-  const endpoint = getEndpoint();
-  if (!endpoint || !candidate?.downloadLocation) return;
+  if (!candidate?.downloadLocation || String(candidate.provider || '').toLowerCase() !== 'unsplash') return;
+  const endpoint = visualTrackEndpoint();
+  if (!endpoint) return;
 
-  // O proxy é responsável por cumprir download tracking do provedor sem
-  // expor credenciais ao navegador.
   try {
     await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'track-download',
-        candidateId: candidate.id,
-        downloadLocation: candidate.downloadLocation
-      })
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body:JSON.stringify({
+        candidateId:candidate.id,
+        downloadLocation:candidate.downloadLocation
+      }),
+      keepalive:true
     });
   } catch {
-    // Tracking não bloqueia a experiência visual.
+    // Tracking não bloqueia a experiência.
   }
 }
