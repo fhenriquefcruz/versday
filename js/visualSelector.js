@@ -16,6 +16,76 @@ const RELIGIOUS_CLICHE_GROUPS = [
   { label: 'prayer-hands', terms: ['praying hands', 'hands praying', 'maos em oracao', 'mãos em oração'] }
 ];
 
+const GLOBAL_SENSITIVE_BLOCK_TERMS = [
+  'gore',
+  'graphic blood',
+  'bloody corpse',
+  'dead body',
+  'corpse',
+  'cadaver',
+  'cadáver',
+  'decapitation',
+  'severed body',
+  'mutilated',
+  'ferida aberta',
+  'sangue explícito'
+];
+
+const THEMATIC_CLICHE_BLOCKS = Object.freeze({
+  morte: [
+    'cemetery',
+    'graveyard',
+    'coffin stock photo',
+    'funeral stock photo',
+    'skull'
+  ],
+  ressurreicao: [
+    'angel costume',
+    'white robe actor',
+    'divine rays',
+    'heaven rays',
+    'fantasy angel',
+    'religious ai'
+  ],
+  justica: [
+    'gavel',
+    'scales of justice',
+    'courtroom stock photo',
+    'judge hammer'
+  ],
+  guerra: [
+    'weapon close up',
+    'gun close up',
+    'rifle portrait',
+    'heroic soldier',
+    'military propaganda',
+    'heroic explosion'
+  ],
+  profecia: [
+    'crystal ball',
+    'fortune teller',
+    'mystic fantasy',
+    'fantasy apocalypse'
+  ],
+  lamento: [
+    'crying model',
+    'staged crying',
+    'cemetery',
+    'graveyard'
+  ],
+  julgamento: [
+    'hell fire',
+    'demon',
+    'devil',
+    'gavel',
+    'courtroom stock photo'
+  ],
+  reconciliacao: [
+    'posed hug',
+    'stock couple reunion'
+  ]
+});
+
 function normalize(value = '') {
   return String(value)
     .normalize('NFD')
@@ -32,6 +102,19 @@ function tokenize(value = '') {
   return normalize(value)
     .split(/[^a-z0-9]+/)
     .filter(token => token.length >= 3);
+}
+
+function candidateText(candidate = {}) {
+  return normalize([
+    candidate.description,
+    candidate.alt,
+    candidate.query,
+    ...(candidate.tags || [])
+  ].filter(Boolean).join(' '));
+}
+
+function containsAny(text, terms = []) {
+  return terms.some(term => text.includes(normalize(term)));
 }
 
 function overlapScore(aValues, bValues) {
@@ -81,6 +164,22 @@ function hasConflict(candidate, intent) {
     .some(concept => concept.length >= 4 && candidateText.includes(concept));
 }
 
+function sensitiveVisualConflict(candidate, intent) {
+  const text = candidateText(candidate);
+
+  if (containsAny(text, GLOBAL_SENSITIVE_BLOCK_TERMS)) {
+    return 'GRAPHIC_OR_EXPLOITATIVE';
+  }
+
+  const theme = normalize(intent.semantic?.primaryTheme || '');
+  const blocked = THEMATIC_CLICHE_BLOCKS[theme] || [];
+  if (containsAny(text, blocked)) {
+    return 'THEMATIC_CLICHE';
+  }
+
+  return null;
+}
+
 function religiousClicheConflict(candidate, intent) {
   const candidateText = normalize([
     candidate.description,
@@ -125,6 +224,10 @@ export function hardFilterCandidate(candidate, intent) {
   if ((candidate?.height || 0) > 0 && candidate.height < 700) reasons.push('LOW_RESOLUTION');
 
   if (hasConflict(candidate, intent)) reasons.push('EMOTIONAL_MISMATCH');
+
+  const sensitiveConflict = sensitiveVisualConflict(candidate, intent);
+  if (sensitiveConflict) reasons.push(sensitiveConflict);
+
   if (religiousClicheConflict(candidate, intent)) reasons.push('RELIGIOUS_CLICHE');
 
   return {

@@ -4,7 +4,7 @@
 
 import { resolveBiblicalContext } from './biblical-context.js';
 
-export const VISUAL_ENGINE_VERSION = '2.1.0';
+export const VISUAL_ENGINE_VERSION = '2.2.0';
 
 const STYLE_SIGNATURE = [
   'editorial photography',
@@ -14,6 +14,27 @@ const STYLE_SIGNATURE = [
   'contemplative atmosphere',
   'negative space'
 ];
+
+const LITERAL_QUERY_HINTS = Object.freeze({
+  pastagem: 'sheep grazing pastoral field',
+  mar: 'rough sea small distant boat',
+  'água': 'natural river water restrained landscape',
+  caminho: 'narrow path restrained landscape',
+  luz: 'natural physical light shadow',
+  semente: 'sower seeds field',
+  vinha: 'vine branches vineyard detail',
+  deserto: 'dry desert restrained landscape',
+  montanha: 'mountain terrain atmospheric distance',
+  cidade: 'ancient city walls restrained landscape',
+  ave: 'birds natural habitat',
+  cruz: 'wooden cross historically restrained scene',
+  'túmulo': 'stone tomb entrance quiet historical landscape',
+  batalha: 'distant conflict landscape non graphic',
+  'prisão': 'stone prison interior restrained light',
+  fogo: 'real fire furnace restrained non graphic scene',
+  'pão': 'bread on simple table natural light',
+  'céu': 'natural sky restrained atmosphere'
+});
 
 const THEME_PROFILES = {
   paz: {
@@ -176,6 +197,116 @@ const THEME_PROFILES = {
     palette: ['#111b1d', '#3f5c58', '#7a7766', '#dbd2be'],
     mode: 'conceptual'
   },
+  sofrimento: {
+    primaryTheme: 'sofrimento',
+    emotionalTone: ['doloroso', 'sóbrio', 'resiliente'],
+    visualIntent: 'reconhecer dor e vulnerabilidade sem romantizar sofrimento nem antecipar triunfo',
+    symbolicElements: ['fragilidade', 'persistência', 'presença'],
+    preferredScenes: ['subdued solitary interior with natural side light', 'difficult path under restrained weather', 'quiet human presence in a somber authentic environment'],
+    avoid: ['fotografia alegre', 'celebração', 'vitória precoce', 'dor encenada', 'violência gráfica'],
+    palette: ['#0d1217', '#303a42', '#6a625d', '#c7baaa'],
+    mode: 'conceptual'
+  },
+  medo: {
+    primaryTheme: 'medo',
+    emotionalTone: ['tenso', 'vulnerável', 'contido'],
+    visualIntent: 'ameaça e vulnerabilidade com possibilidade de abrigo ou direção, sem estética de terror',
+    symbolicElements: ['incerteza', 'ameaça', 'refúgio'],
+    preferredScenes: ['limited visibility with a subtle safe light', 'small human figure in a vast uncertain environment', 'shelter against restrained severe weather'],
+    avoid: ['filme de terror', 'monstros', 'jumpscare', 'pânico encenado', 'violência gráfica'],
+    palette: ['#081018', '#263640', '#625d55', '#c8b891'],
+    mode: 'conceptual'
+  },
+  morte: {
+    primaryTheme: 'morte',
+    emotionalTone: ['solene', 'enlutado', 'silencioso'],
+    visualIntent: 'mortalidade, perda e silêncio sem exploração mórbida ou horror',
+    symbolicElements: ['ausência', 'finitude', 'memória'],
+    preferredScenes: ['quiet empty space with subdued natural light', 'bare restrained landscape suggesting absence', 'still room with respectful negative space'],
+    avoid: ['cadáver', 'sangue', 'violência gráfica', 'cemitério genérico', 'terror', 'funeral de banco de imagens'],
+    palette: ['#090d11', '#2b3035', '#585754', '#b8b0a5'],
+    mode: 'conceptual'
+  },
+  ressurreicao: {
+    primaryTheme: 'ressurreição',
+    emotionalTone: ['assombro', 'esperançoso', 'solene'],
+    visualIntent: 'passagem real da morte para a vida e esperança restaurada sem espetáculo religioso artificial',
+    symbolicElements: ['vida', 'renovação', 'abertura'],
+    preferredScenes: ['restrained first light emerging after deep darkness', 'new life with quiet luminous atmosphere and negative space', 'subtle opening from darkness into natural light'],
+    avoid: ['ator de branco', 'raios divinos artificiais', 'céu angelical', 'sunrise motivacional', 'IA fantasiosa'],
+    palette: ['#090f14', '#344854', '#8a8069', '#e0d4ad'],
+    mode: 'conceptual'
+  },
+  justica: {
+    primaryTheme: 'justiça',
+    emotionalTone: ['firme', 'sóbrio', 'responsável'],
+    visualIntent: 'retidão, dignidade e defesa do vulnerável sem reduzir justiça a símbolos jurídicos clichês',
+    symbolicElements: ['equidade', 'responsabilidade', 'dignidade'],
+    preferredScenes: ['authentic human dignity in restrained documentary setting', 'balanced architectural space with clear natural light', 'quiet act of support or protection without staged posing'],
+    avoid: ['martelo de juiz', 'balança genérica', 'tribunal de banco de imagens', 'vingança', 'triunfalismo'],
+    palette: ['#0e1519', '#34434a', '#716a5b', '#d2c5aa'],
+    mode: 'conceptual'
+  },
+  guerra: {
+    primaryTheme: 'guerra',
+    emotionalTone: ['tenso', 'sombrio', 'grave'],
+    visualIntent: 'conflito, ameaça e custo humano sem glorificar violência, armas ou destruição',
+    symbolicElements: ['conflito', 'ameaça', 'perda'],
+    preferredScenes: ['distant restrained conflict aftermath without graphic violence', 'threatened city or landscape under tense atmosphere', 'people seeking safety in non-graphic documentary distance'],
+    avoid: ['gore', 'explosão heroica', 'arma em destaque', 'propaganda militar', 'pose de soldado', 'violência gráfica'],
+    palette: ['#0c1114', '#353b3c', '#675e52', '#b9aa8e'],
+    mode: 'hybrid'
+  },
+  profecia: {
+    primaryTheme: 'profecia',
+    emotionalTone: ['solene', 'expectante', 'simbólico'],
+    visualIntent: 'anúncio, advertência ou esperança futura com sobriedade, respeitando linguagem profética e apocalíptica',
+    symbolicElements: ['expectativa', 'advertência', 'visão'],
+    preferredScenes: ['restrained symbolic landscape with strong negative space', 'distant city under solemn atmospheric light', 'watchful horizon with controlled dramatic tension'],
+    avoid: ['bola de cristal', 'adivinhação', 'fantasia mística', 'apocalipse de IA', 'catástrofe espetacular'],
+    palette: ['#0b1118', '#303b49', '#665c4e', '#c9b27e'],
+    mode: 'conceptual'
+  },
+  lamento: {
+    primaryTheme: 'lamento',
+    emotionalTone: ['enlutado', 'silencioso', 'vulnerável'],
+    visualIntent: 'dar espaço à dor, ausência e saudade sem sentimentalismo fabricado',
+    symbolicElements: ['ausência', 'saudade', 'súplica'],
+    preferredScenes: ['quiet desolate space with restrained natural light', 'solitary figure from distance with large negative space', 'rain or subdued landscape without melodrama'],
+    avoid: ['sorriso', 'celebração', 'pôr do sol romântico', 'choro encenado', 'cemitério automático'],
+    palette: ['#0b1015', '#303940', '#625e5a', '#bdb4aa'],
+    mode: 'conceptual'
+  },
+  julgamento: {
+    primaryTheme: 'julgamento',
+    emotionalTone: ['solene', 'grave', 'responsável'],
+    visualIntent: 'peso de prestação de contas e consequência sem sensacionalismo de condenação',
+    symbolicElements: ['responsabilidade', 'consequência', 'verdade'],
+    preferredScenes: ['solemn threshold or doorway with controlled contrast', 'restrained architectural space suggesting accountability', 'dark-to-light composition with serious quiet atmosphere'],
+    avoid: ['martelo de juiz', 'fogo do inferno', 'demônios', 'tribunal clichê', 'terror religioso'],
+    palette: ['#090e13', '#32383e', '#655d52', '#c5b493'],
+    mode: 'conceptual'
+  },
+  reconciliacao: {
+    primaryTheme: 'reconciliação',
+    emotionalTone: ['humilde', 'íntimo', 'restaurador'],
+    visualIntent: 'reaproximação depois de ruptura com linguagem humana autêntica e não publicitária',
+    symbolicElements: ['retorno', 'escuta', 'vínculo'],
+    preferredScenes: ['two people reconnecting with subtle authentic body language', 'family reunion from respectful documentary distance', 'quiet shared space after tension with warm natural light'],
+    avoid: ['abraço publicitário', 'casal romântico genérico', 'festa', 'pose olhando para câmera'],
+    palette: ['#17191a', '#4d514c', '#8b7560', '#dfcdb5'],
+    mode: 'conceptual'
+  },
+  relacionamento: {
+    primaryTheme: 'relacionamento',
+    emotionalTone: ['humano', 'caloroso', 'autêntico'],
+    visualIntent: 'presença e vínculo entre pessoas de forma verdadeira, respeitando o tipo de relação indicado pela passagem',
+    symbolicElements: ['presença', 'cuidado', 'comunidade'],
+    preferredScenes: ['authentic people sharing quiet presence without posing', 'family or friends in natural candid interaction', 'subtle act of care in warm restrained light'],
+    avoid: ['casal romântico automático', 'ensaio publicitário', 'sensualidade', 'grupo olhando para câmera'],
+    palette: ['#181817', '#4d4941', '#8b745b', '#e1ceb2'],
+    mode: 'conceptual'
+  },
   pastor: {
     primaryTheme: 'pastoreio',
     emotionalTone: ['protetor', 'sereno', 'pastoral'],
@@ -241,7 +372,11 @@ const THEME_PROFILES = {
 };
 
 const BOOK_GENRES = {
-  sl: 'poesia', pv: 'sabedoria', ec: 'sabedoria', jó: 'poesia sapiencial', ct: 'poesia',
+  gn: 'narrativa/torá', ex: 'narrativa/torá', lv: 'lei/torá', nm: 'narrativa/torá', dt: 'lei/torá',
+  js: 'narrativa', jz: 'narrativa', rt: 'narrativa', '1sm': 'narrativa', '2sm': 'narrativa',
+  '1rs': 'narrativa', '2rs': 'narrativa', '1cr': 'narrativa', '2cr': 'narrativa',
+  ed: 'narrativa', ne: 'narrativa', et: 'narrativa',
+  sl: 'poesia', pv: 'sabedoria', ec: 'sabedoria', 'jó': 'poesia sapiencial', ct: 'poesia',
   is: 'profecia', jr: 'profecia', lm: 'lamento', ez: 'profecia', dn: 'profecia/apocalíptica',
   os: 'profecia', jl: 'profecia', am: 'profecia', ob: 'profecia', jn: 'narrativa/profecia',
   mq: 'profecia', na: 'profecia', hc: 'profecia', sf: 'profecia', ag: 'profecia', zc: 'profecia', ml: 'profecia',
@@ -255,7 +390,9 @@ const BOOK_GENRES = {
 
 const CONCEPTUAL_THEMES = new Set([
   'paz','alegria','amor','fe','forca','esperanca','confianca','gratidao','sabedoria',
-  'conforto','coragem','superacao','cura','perdao','oracao','descanso'
+  'conforto','coragem','superacao','cura','perdao','oracao','descanso',
+  'sofrimento','medo','morte','ressurreicao','justica','profecia','lamento',
+  'julgamento','reconciliacao','relacionamento'
 ]);
 
 function normalize(value = '') {
@@ -265,10 +402,22 @@ function normalize(value = '') {
     .toLowerCase();
 }
 
-function includesAny(text, terms) {
-  return terms.some(term => text.includes(normalize(term)));
+function escapeRegex(value = '') {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function containsSemanticTerm(text, term) {
+  const haystack = normalize(text);
+  const needle = normalize(term).trim();
+  if (!needle) return false;
+
+  const pattern = escapeRegex(needle).replace(/\s+/g, '\\s+');
+  return new RegExp('(^|[^a-z0-9])' + pattern + '(?=$|[^a-z0-9])').test(haystack);
+}
+
+function includesAny(text, terms) {
+  return terms.some(term => containsSemanticTerm(text, term));
+}
 function detectLiteralSignals(text) {
   const signals = [];
   const rules = [
@@ -278,12 +427,17 @@ function detectLiteralSignals(text) {
     ['caminho', ['caminho', 'vereda', 'trilha', 'estrada']],
     ['luz', ['lampada', 'candeeiro', 'luz']],
     ['semente', ['semente', 'semeia', 'semeador', 'ceifa', 'colheita']],
-    ['vinha', ['videira', 'vinha', 'ramos']],
+    ['vinha', ['videira', 'videiras', 'vinhedo', 'vinhedos', 'uma vinha', 'a vinha', 'minha vinha', 'ramos']],
     ['deserto', ['deserto']],
     ['montanha', ['monte', 'montes', 'montanha']],
     ['cidade', ['cidade', 'muralha', 'portas']],
     ['ave', ['ave', 'aves', 'passaro', 'passaros', 'pássaro', 'pássaros']],
     ['cruz', ['cruz', 'cruzes']],
+    ['túmulo', ['tumulo', 'túmulo', 'sepulcro', 'sepultado', 'sepultamento']],
+    ['batalha', ['guerra', 'batalha', 'exercito', 'exército', 'soldados', 'espada', 'lanca', 'lança']],
+    ['prisão', ['prisao', 'prisão', 'carcere', 'cárcere', 'cadeias', 'algemas']],
+    ['fogo', ['fogo', 'fornalha', 'chamas']],
+    ['pão', ['pao', 'pão', 'paes', 'pães']],
     ['céu', ['ceu', 'ceus', 'estrelas', 'firmamento']]
   ];
   for (const [label, terms] of rules) {
@@ -304,13 +458,14 @@ function detectMetaphoricalUse(text, signal) {
 }
 
 const STRONG_LITERAL_SIGNALS = new Set([
-  'pastagem', 'mar', 'semente', 'vinha', 'deserto', 'cidade', 'ave', 'cruz'
+  'pastagem', 'mar', 'semente', 'vinha', 'deserto', 'cidade', 'ave', 'cruz',
+  'túmulo', 'batalha', 'prisão', 'fogo', 'pão'
 ]);
 
 function deriveMode(profile, text, literalSignals) {
   const literal = literalSignals.filter(signal => !detectMetaphoricalUse(text, signal));
   if (!literal.length) {
-    if (CONCEPTUAL_THEMES.has(profile.primaryTheme) || profile.mode === 'conceptual') return 'conceptual';
+    if (CONCEPTUAL_THEMES.has(normalize(profile.primaryTheme)) || profile.mode === 'conceptual') return 'conceptual';
     return profile.mode || 'abstract';
   }
 
@@ -328,7 +483,13 @@ export function analyzeVerse(verse = {}) {
   const profile = THEME_PROFILES[rawTheme] || THEME_PROFILES.fe;
   const text = normalize(verse.text || '');
   const context = resolveBiblicalContext(verse);
-  const literalSignals = detectLiteralSignals(text);
+  const detectedSignals = detectLiteralSignals(text);
+  const suppressedSignals = new Set(
+    (context.suppressLiteral || []).map(normalize)
+  );
+  const literalSignals = detectedSignals.filter(
+    signal => !suppressedSignals.has(normalize(signal))
+  );
   const mode = deriveMode(profile, text, literalSignals);
 
   const literalElements = unique([
@@ -338,10 +499,16 @@ export function analyzeVerse(verse = {}) {
 
   const symbolicElements = unique([
     ...(profile.symbolicElements || []),
-    ...literalSignals.filter(signal => detectMetaphoricalUse(text, signal)).map(signal => `${signal} como metáfora`)
+    ...literalSignals
+      .filter(signal => detectMetaphoricalUse(text, signal))
+      .map(signal => `${signal} como metáfora`),
+    ...detectedSignals
+      .filter(signal => suppressedSignals.has(normalize(signal)))
+      .map(signal => `${signal} como imagem contextual`)
   ]);
 
-  const genre = BOOK_GENRES[normalize(verse.book)] || 'bíblico';
+  const rawBook = String(verse.book || '').trim().toLowerCase();
+  const genre = BOOK_GENRES[rawBook] || BOOK_GENRES[normalize(rawBook)] || 'bíblico';
 
   const confidenceBase = verse.theme ? 0.84 : 0.68;
   const contextBonus = context.source === 'curated-context' ? 0.04 : 0;
@@ -358,6 +525,7 @@ export function analyzeVerse(verse = {}) {
       surroundingContext: context.text,
       narrativeSituation: context.narrativeSituation,
       characters: [...context.characters],
+      suppressedLiteralElements: [...(context.suppressLiteral || [])],
       contextSource: context.source
     },
     semantic: {
@@ -388,7 +556,9 @@ export function analyzeVerse(verse = {}) {
       environment: literalElements,
       composition: ['clean composition', 'negative space', 'editorial framing'],
       paletteHints: [...profile.palette],
-      humanPresence: ['amor','perdão'].includes(rawTheme) ? 'preferred' : 'optional'
+      humanPresence: ['amor','perdao','reconciliacao','relacionamento'].includes(rawTheme)
+        ? 'preferred'
+        : 'optional'
     },
     textComposition: {
       preferredSafeAreas: ['center', 'upper-left', 'lower-left'],
@@ -401,15 +571,32 @@ export function analyzeVerse(verse = {}) {
 
 export function buildVisualQueries(intent) {
   const negative = intent.visualIntent.negativeConcepts
-    .slice(0, 4)
+    .slice(0, 5)
     .map(item => `avoid ${normalize(item)}`)
     .join(', ');
 
-  return intent.visualIntent.preferredScenes.slice(0, 3).map((scene, index) => ({
+  const literalHints = unique(
+    (intent.representation.literalElements || [])
+      .map(item => LITERAL_QUERY_HINTS[item])
+      .filter(Boolean)
+  );
+
+  const contextualLiteralScene = literalHints.length
+    ? literalHints.join(' ')
+    : '';
+
+  const preferred = [...(intent.visualIntent.preferredScenes || [])];
+  const scenes = unique([
+    ...(contextualLiteralScene ? [contextualLiteralScene] : []),
+    ...preferred
+  ]).slice(0, 4);
+
+  return scenes.map((scene, index) => ({
     id: `q${index + 1}`,
-    query: [...scene.split(' '), ...STYLE_SIGNATURE].join(' '),
+    query: [scene, ...STYLE_SIGNATURE].join(' '),
     negativePrompt: negative,
-    representationMode: intent.representation.mode
+    representationMode: intent.representation.mode,
+    source: index === 0 && contextualLiteralScene ? 'literal-context' : 'semantic-scene'
   }));
 }
 
