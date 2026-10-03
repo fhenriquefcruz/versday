@@ -32,7 +32,7 @@ A regra é simples:
 - composição precisa funcionar com texto;
 - focal point é separado para desktop e mobile;
 - repetição reduz score, mas nunca supera pertinência;
-- feedback negativo invalida a associação para aquela passagem;
+- feedback negativo invalida a associação para aquela passagem e impede a mesma imagem de reaparecer em outras passagens do mesmo tema;
 - contexto bíblico curado é aplicado antes da intenção visual em passagens sensíveis;
 - os 5 melhores candidatos passam por análise de pixels para luminância, complexidade e safe area;
 - watermark, texto embutido, baixa resolução, publicidade e clichê religioso sem suporte literal são hard filters.
