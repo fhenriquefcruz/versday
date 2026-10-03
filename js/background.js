@@ -25,19 +25,83 @@ function preload(url) {
   });
 }
 
+function appendCreditLink(container, label, href) {
+  const link = document.createElement('a');
+  link.textContent = label;
+  link.href = href;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  container.appendChild(link);
+}
+
+export function buildVisualCreditModel(visual) {
+  if (visual?.mode !== 'photo') return null;
+
+  const provider = String(visual.provider || '');
+  if (provider.toLowerCase() === 'unsplash') {
+    const photographer = String(visual.photographer || 'Fotógrafo do Unsplash');
+    const photographerLink = String(visual.photographerLink || '');
+    return {
+      type: 'unsplash',
+      photographer,
+      photographerLink,
+      providerLabel: 'Unsplash',
+      providerLink: 'https://unsplash.com/?utm_source=VersDay&utm_medium=referral'
+    };
+  }
+
+  if (visual.providerUrl) {
+    return {
+      type: 'provider',
+      providerLabel: provider || 'Fonte da imagem',
+      providerLink: String(visual.providerUrl)
+    };
+  }
+
+  return null;
+}
+
 function updateCredit(visual) {
   const container = document.getElementById('unsplash-credit');
   if (!container) return;
 
-  if (visual?.mode === 'photo' && visual.providerUrl) {
-    const provider = String(visual.provider || 'fonte externa');
-    container.innerHTML = `Imagem selecionada semanticamente · <a href="${visual.providerUrl}" target="_blank" rel="noopener noreferrer">${provider}</a>`;
-    container.style.display = 'block';
+  container.replaceChildren();
+
+  const model = buildVisualCreditModel(visual);
+  if (!model) {
+    container.style.display = 'none';
     return;
   }
 
-  container.innerHTML = '';
-  container.style.display = 'none';
+  if (model.type === 'unsplash') {
+    container.append('Foto por ');
+
+    if (model.photographerLink) {
+      appendCreditLink(
+        container,
+        model.photographer,
+        model.photographerLink
+      );
+    } else {
+      container.append(model.photographer);
+    }
+
+    container.append(' no ');
+    appendCreditLink(
+      container,
+      model.providerLabel,
+      model.providerLink
+    );
+  } else {
+    container.append('Imagem selecionada semanticamente · ');
+    appendCreditLink(
+      container,
+      model.providerLabel,
+      model.providerLink
+    );
+  }
+
+  container.style.display = 'block';
 }
 
 function applyVisualToLayer(layer, visual) {
