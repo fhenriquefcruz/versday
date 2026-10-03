@@ -78,6 +78,91 @@ function regionStats(gray, w, h, x0, y0, x1, y1) {
   };
 }
 
+export function inferFocalPointFromRegions(regions = []) {
+  if (!regions.length) return { x: 0.5, y: 0.5 };
+
+  const ranked = [...regions].sort((a, b) => {
+    const aScore = Number(a.saliencyScore ?? a.saliency ?? 0);
+    const bScore = Number(b.saliencyScore ?? b.saliency ?? 0);
+
+    if (Math.abs(bScore - aScore) > 0.0001) return bScore - aScore;
+
+    const center = { x: 0.5, y: 0.5 };
+    return distance(
+      { x: Number(a.x ?? 0.5), y: Number(a.y ?? 0.5) },
+      center
+    ) - distance(
+      { x: Number(b.x ?? 0.5), y: Number(b.y ?? 0.5) },
+      center
+    );
+  });
+
+  return {
+    x: clamp(Number(ranked[0].x ?? 0.5)),
+    y: clamp(Number(ranked[0].y ?? 0.5))
+  };
+}
+
+function estimateSourceFocalPoint(img) {
+  if (typeof document === 'undefined') return { x: 0.5, y: 0.5 };
+
+  const width = 96;
+  const height = 64;
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) return { x: 0.5, y: 0.5 };
+
+  try {
+    ctx.drawImage(img, 0, 0, width, height);
+  } catch {
+    return { x: 0.5, y: 0.5 };
+  }
+
+  let data;
+  try {
+    data = ctx.getImageData(0, 0, width, height).data;
+  } catch {
+    return { x: 0.5, y: 0.5 };
+  }
+
+  const gray = new Float32Array(width * height);
+
+  for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+    gray[p] =
+      data[i] * 0.2126 +
+      data[i + 1] * 0.7152 +
+      data[i + 2] * 0.0722;
+  }
+
+  const regions = [];
+
+  for (let ry = 0; ry < 3; ry++) {
+    for (let rx = 0; rx < 3; rx++) {
+      const x0 = Math.floor(rx * width / 3);
+      const x1 = Math.floor((rx + 1) * width / 3);
+      const y0 = Math.floor(ry * height / 3);
+      const y1 = Math.floor((ry + 1) * height / 3);
+
+      const stats = regionStats(gray, width, height, x0, y0, x1, y1);
+      const saliencyScore =
+        stats.variance * 0.45 +
+        stats.edgeDensity * 2.4;
+
+      regions.push({
+        name: REGION_NAMES[ry][rx],
+        x: (rx + 0.5) / 3,
+        y: (ry + 0.5) / 3,
+        saliencyScore
+      });
+    }
+  }
+
+  return inferFocalPointFromRegions(regions);
+}
+
 function drawCover(ctx, img, width, height, focal = { x: 0.5, y: 0.5 }) {
   const sourceWidth = img.naturalWidth || img.width;
   const sourceHeight = img.naturalHeight || img.height;
@@ -275,10 +360,12 @@ export async function analyzeCandidateVisual(candidate) {
   const img = await loadBitmap(candidate.previewUrl || candidate.imageUrl);
   if (!img) return candidate;
 
-  const derivedFocal = candidate.focalPoint || { x: 0.5, y: 0.5 };
+  const inferredFocal = candidate.focalPoint || estimateSourceFocalPoint(img);
+  const derivedFocal = inferredFocal || { x: 0.5, y: 0.5 };
   const derivedMobileFocal =
     candidate.mobileFocalPoint ||
     candidate.focalPoint ||
+    inferredFocal ||
     { x: 0.5, y: 0.5 };
 
   const desktop = analyzeFrame(
@@ -320,15 +407,14 @@ export async function analyzeCandidateVisual(candidate) {
     height: candidate.height || img.naturalHeight,
     safeTextAreas: desktopSafe,
     mobileSafeTextAreas: mobileSafe,
-    focalPoint:
-      candidate.focalPoint ||
-      (desktop ? { x: desktop.saliency.x, y: desktop.saliency.y } : derivedFocal),
+    focalPoint: derivedFocal,
     mobileFocalPoint: derivedMobileFocal,
     compositionScore:
       typeof candidate.compositionScore === 'number'
         ? clamp(candidate.compositionScore * 0.42 + measuredComposition * 0.58)
         : measuredComposition,
     technicalAnalysis: {
+      focalSource: candidate.focalPoint ? 'provided' : 'source-saliency',
       averageLuminance: desktop?.averageLuminance ?? mobile?.averageLuminance ?? 0.5,
       complexity: desktop?.complexity ?? mobile?.complexity ?? 0.5,
       bestSafeArea: desktop?.bestSafeArea || desktopSafe[0] || 'center',
