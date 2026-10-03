@@ -544,7 +544,9 @@ export function analyzeVerse(verse = {}) {
       environment: literalElements,
       composition: ['clean composition', 'negative space', 'editorial framing'],
       paletteHints: [...profile.palette],
-      humanPresence: ['amor','perdão'].includes(rawTheme) ? 'preferred' : 'optional'
+      humanPresence: ['amor','perdao','reconciliacao','relacionamento'].includes(rawTheme)
+        ? 'preferred'
+        : 'optional'
     },
     textComposition: {
       preferredSafeAreas: ['center', 'upper-left', 'lower-left'],
