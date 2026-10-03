@@ -50,7 +50,7 @@ test('visual engine preserves download location and retriggers tracking from cac
   );
 });
 
-test('visual engine version invalidates pre-compliance cached visuals', async () => {
+test('visual engine version invalidates pre-tablet cached visuals', async () => {
   const source = await readFile(
     new URL('../js/visualIntelligence.js', import.meta.url),
     'utf8'
