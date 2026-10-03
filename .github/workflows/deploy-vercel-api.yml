@@ -35,6 +35,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -162,8 +164,8 @@ jobs:
             console.log('VersDay API healthcheck passed.');
           "
 
-          IMAGES_CONFIGURED="$(node -p "JSON.parse(require('fs').readFileSync('health.json','utf8')).providers?.imagesConfigured === true")"
-          CHAT_CONFIGURED="$(node -p "JSON.parse(require('fs').readFileSync('health.json','utf8')).providers?.chatConfigured === true")"
+          IMAGES_CONFIGURED="$(node -p 'JSON.parse(require("fs").readFileSync("health.json","utf8")).providers?.imagesConfigured === true')"
+          CHAT_CONFIGURED="$(node -p 'JSON.parse(require("fs").readFileSync("health.json","utf8")).providers?.chatConfigured === true')"
 
           echo "images=$IMAGES_CONFIGURED" >> "$GITHUB_OUTPUT"
           echo "chat=$CHAT_CONFIGURED" >> "$GITHUB_OUTPUT"
