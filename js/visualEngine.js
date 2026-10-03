@@ -20,6 +20,7 @@ import {
   notifyProviderSelection,
   validateVisualFinalists
 } from './visualProvider.js';
+import { isBackendProviderReady } from './backendHealth.js';
 
 function clampVisual(value, min = 0, max = 1) {
   return Math.max(min, Math.min(max, value));
@@ -83,6 +84,7 @@ function buildPhotoVisual(candidate, scoring, intent, purpose) {
     sceneSignature: scoring.noveltySignals?.sceneSignature || null,
     compositionSignature: scoring.noveltySignals?.compositionSignature || null,
     technicalAnalysis: candidate.technicalAnalysis || null,
+    curationConfidence: Number(candidate.curationConfidence ?? 0),
     vlmValidation: candidate.vlmValidation || null
   };
 }
@@ -92,6 +94,14 @@ function debugEnabled() {
   return new URLSearchParams(location.search).get('visualDebug') === '1';
 }
 
+export async function cachedVisualNeedsVlmRefresh(visual) {
+  if (!visual || visual.mode !== 'photo') return false;
+  if (visual.vlmValidation) return false;
+  if (Number(visual.curationConfidence ?? 0) >= 1) return false;
+
+  return (await isBackendProviderReady('vlm')) === true;
+}
+
 export async function resolveVisualForVerse(verse, options = {}) {
   const force = Boolean(options.force || options.forceRefresh);
   const purpose = String(options.purpose || 'background');
@@ -99,7 +109,11 @@ export async function resolveVisualForVerse(verse, options = {}) {
 
   if (!force) {
     const cached = getCachedVisual(reference, purpose);
-    if (cached?.visual) {
+    const requiresVlmRefresh = cached?.visual
+      ? await cachedVisualNeedsVlmRefresh(cached.visual)
+      : false;
+
+    if (cached?.visual && !requiresVlmRefresh) {
       rememberVisualUsage(reference, cached.visual, cached.intent, purpose);
       if (cached.visual.mode === 'photo') {
         await notifyProviderSelection(cached.visual);
