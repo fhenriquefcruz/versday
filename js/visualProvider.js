@@ -33,10 +33,12 @@ function getValidateEndpoint() {
   const search = getSearchEndpoint();
   if (!search) return '';
 
-  return search.replace(
+  const derived = search.replace(
     /\/visual-search(?:\?.*)?$/,
     '/visual-validate'
   );
+
+  return derived === search ? '' : derived;
 }
 
 function sanitizeCandidate(raw) {
