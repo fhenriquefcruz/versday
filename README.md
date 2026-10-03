@@ -98,7 +98,9 @@ UNSPLASH_ACCESS_KEY=...     # chave nova/rotacionada; opcional se já existir no
 GROQ_API_KEY=...            # chave nova/rotacionada; opcional se já existir no Vercel
 ```
 
-Depois execute **Deploy VersDay API to Vercel** em `Actions → Run workflow`.
+Depois execute **Deploy VersDay API to Vercel** em `Actions → Run workflow` e informe um **scope Vercel dedicado ao VersDay**.
+
+> O VersDay deve ter projeto/conta/equipe próprios no Vercel. Não use o scope da RTM: RTM é outro projeto e permanece totalmente separado.
 
 O workflow:
 
