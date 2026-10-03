@@ -112,9 +112,12 @@ function buildPhotoVisual(candidate, scoring, intent, purpose) {
   const safeAreas = candidate.safeTextAreas?.length
     ? candidate.safeTextAreas
     : ['center'];
+  const tabletSafeAreas = candidate.tabletSafeTextAreas?.length
+    ? candidate.tabletSafeTextAreas
+    : safeAreas;
   const mobileSafeAreas = candidate.mobileSafeTextAreas?.length
     ? candidate.mobileSafeTextAreas
-    : safeAreas;
+    : tabletSafeAreas;
 
   return {
     mode: 'photo',
@@ -131,14 +134,27 @@ function buildPhotoVisual(candidate, scoring, intent, purpose) {
     width: candidate.width || 0,
     height: candidate.height || 0,
     focalPoint: candidate.focalPoint || { x: 0.5, y: 0.5 },
-    mobileFocalPoint:
+    tabletFocalPoint:
+      candidate.tabletFocalPoint ||
       candidate.mobileFocalPoint ||
       candidate.focalPoint ||
       { x: 0.5, y: 0.5 },
+    mobileFocalPoint:
+      candidate.mobileFocalPoint ||
+      candidate.tabletFocalPoint ||
+      candidate.focalPoint ||
+      { x: 0.5, y: 0.5 },
     safeTextAreas: safeAreas,
+    tabletSafeTextAreas: tabletSafeAreas,
     mobileSafeTextAreas: mobileSafeAreas,
     textPlacement: safeAreas[0] || 'center',
-    mobileTextPlacement: mobileSafeAreas[0] || safeAreas[0] || 'center',
+    tabletTextPlacement:
+      tabletSafeAreas[0] || safeAreas[0] || 'center',
+    mobileTextPlacement:
+      mobileSafeAreas[0] ||
+      tabletSafeAreas[0] ||
+      safeAreas[0] ||
+      'center',
     overlayStrength: deriveOverlayStrength(candidate, scoring),
     visualIntent: intent.visualIntent.description,
     photographer: candidate.photographer || null,
