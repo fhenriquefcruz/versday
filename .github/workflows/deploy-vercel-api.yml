@@ -15,7 +15,7 @@ on:
         type: string
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: versday-api-production
@@ -29,6 +29,8 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       PROJECT_NAME: ${{ inputs.project_name }}
       VERCEL_SCOPE: ${{ inputs.scope }}
+      UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
 
     steps:
       - name: Checkout
@@ -76,6 +78,35 @@ jobs:
             --scope "$VERCEL_SCOPE" \
             --token "$VERCEL_TOKEN"
 
+      - name: Sync provider configuration when supplied
+        shell: bash
+        run: |
+          sync_env() {
+            local NAME="$1"
+            local VALUE="$2"
+
+            if [ -z "$VALUE" ]; then
+              echo "$NAME was not supplied as a GitHub secret; preserving any existing Vercel value."
+              return 0
+            fi
+
+            vercel env rm "$NAME" production \
+              --yes \
+              --scope "$VERCEL_SCOPE" \
+              --token "$VERCEL_TOKEN" >/dev/null 2>&1 || true
+
+            printf '%s' "$VALUE" | vercel env add "$NAME" production \
+              --scope "$VERCEL_SCOPE" \
+              --token "$VERCEL_TOKEN" >/dev/null
+
+            echo "$NAME synchronized to Vercel production."
+          }
+
+          sync_env "UNSPLASH_ACCESS_KEY" "$UNSPLASH_ACCESS_KEY"
+          sync_env "GROQ_API_KEY" "$GROQ_API_KEY"
+          sync_env "GROQ_MODEL" "llama-3.3-70b-versatile"
+          sync_env "ALLOWED_ORIGIN" "https://fhenriquefcruz.github.io"
+
       - name: Deploy production backend
         id: deploy
         shell: bash
@@ -106,6 +137,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Verify health endpoint
+        id: health
         env:
           DEPLOY_URL: ${{ steps.deploy.outputs.url }}
         shell: bash
@@ -130,8 +162,55 @@ jobs:
             console.log('VersDay API healthcheck passed.');
           "
 
+          IMAGES_CONFIGURED="$(node -p "JSON.parse(require('fs').readFileSync('health.json','utf8')).providers?.imagesConfigured === true")"
+          CHAT_CONFIGURED="$(node -p "JSON.parse(require('fs').readFileSync('health.json','utf8')).providers?.chatConfigured === true")"
+
+          echo "images=$IMAGES_CONFIGURED" >> "$GITHUB_OUTPUT"
+          echo "chat=$CHAT_CONFIGURED" >> "$GITHUB_OUTPUT"
+
           {
             echo ""
             echo "### Health payload"
             cat health.json
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Configure GitHub Pages runtime endpoints
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.url }}
+          IMAGES_CONFIGURED: ${{ steps.health.outputs.images }}
+          CHAT_CONFIGURED: ${{ steps.health.outputs.chat }}
+        run: |
+          node scripts/configure-backend.mjs \
+            --base-url "$DEPLOY_URL" \
+            --images "$IMAGES_CONFIGURED" \
+            --chat "$CHAT_CONFIGURED" \
+            --cache-tag "run-${GITHUB_RUN_NUMBER}"
+
+      - name: Publish runtime endpoint configuration
+        shell: bash
+        run: |
+          if git diff --quiet -- index.html service-worker.js; then
+            echo "Runtime endpoints already match this backend state."
+            exit 0
+          fi
+
+          git fetch origin main
+
+          if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
+            echo "::error::main changed during deployment. Re-run this workflow against the new HEAD."
+            exit 1
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html service-worker.js
+          git commit -m "chore(runtime): activate VersDay API providers"
+          git push origin HEAD:main
+
+          {
+            echo ""
+            echo "### GitHub Pages runtime"
+            echo "- imagesConfigured: ${{ steps.health.outputs.images }}"
+            echo "- chatConfigured: ${{ steps.health.outputs.chat }}"
+            echo "- Runtime endpoints committed to main."
           } >> "$GITHUB_STEP_SUMMARY"
