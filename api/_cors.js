@@ -6,8 +6,11 @@ const DEFAULT_ALLOWED_ORIGINS = new Set([
   'http://127.0.0.1:5173'
 ]);
 
-export function applyCors(req, res) {
+export function applyCors(req, res, options = {}) {
   const origin = req.headers.origin;
+  const methods = Array.isArray(options.methods) && options.methods.length
+    ? options.methods
+    : ['POST', 'OPTIONS'];
   const configured = String(process.env.ALLOWED_ORIGIN || '')
     .split(',')
     .map(value => value.trim())
@@ -19,7 +22,7 @@ export function applyCors(req, res) {
     res.setHeader('Vary', 'Origin');
   }
 
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', methods.join(', '));
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Cache-Control', 'no-store');
 
