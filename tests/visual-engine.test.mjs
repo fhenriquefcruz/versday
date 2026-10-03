@@ -477,3 +477,93 @@ test('novidade continua sendo critério secundário e não altera limiar semânt
   assert.ok(heavilyRepeated.scores.novelty >= 0.25);
   assert.ok(heavilyRepeated.scores.final < baseline.scores.final);
 });
+
+test('metadados rejeitam texto embutido, branding e clichê de stock', () => {
+  const intent = analyzeVerse({
+    text: 'Confia no Senhor de todo o teu coração.',
+    reference: 'pv 3:5',
+    book: 'pv',
+    chapter: 3,
+    verse: 5,
+    theme: 'confianca'
+  });
+
+  const cases = [
+    {
+      candidate: {
+        id: 'poster-text',
+        imageUrl: 'https://example.com/poster.jpg',
+        width: 2400,
+        height: 1600,
+        description: 'motivational quote poster with typography',
+        tags: ['quote poster', 'lettering']
+      },
+      reason: 'EMBEDDED_TEXT_METADATA'
+    },
+    {
+      candidate: {
+        id: 'brand-ad',
+        imageUrl: 'https://example.com/ad.jpg',
+        width: 2400,
+        height: 1600,
+        alt: 'commercial product with company logo and product packaging',
+        tags: ['brand logo', 'advertising']
+      },
+      reason: 'BRANDING_OR_ADVERTISING_METADATA'
+    },
+    {
+      candidate: {
+        id: 'cheap-stock',
+        imageUrl: 'https://example.com/stock.jpg',
+        width: 2400,
+        height: 1600,
+        description: 'business team posing in a stock photo',
+        tags: ['corporate handshake']
+      },
+      reason: 'GENERIC_STOCK_CLICHE'
+    }
+  ];
+
+  for (const item of cases) {
+    const filtered = hardFilterCandidate(item.candidate, intent);
+    assert.equal(filtered.accepted, false);
+    assert.ok(
+      filtered.reasons.includes(item.reason),
+      `${item.reason} ausente: ${filtered.reasons.join(', ')}`
+    );
+  }
+});
+
+test('metadados editoriais comuns não são confundidos com publicidade ou texto embutido', () => {
+  const intent = analyzeVerse({
+    text: 'Em paz me deito e logo pego no sono.',
+    reference: 'sl 4:8',
+    book: 'sl',
+    chapter: 4,
+    verse: 8,
+    theme: 'paz'
+  });
+
+  const filtered = hardFilterCandidate({
+    id: 'clean-editorial',
+    imageUrl: 'https://example.com/quiet-room.jpg',
+    width: 3200,
+    height: 2100,
+    description: 'quiet interior with soft window light and an empty chair',
+    alt: 'calm contemplative room at dawn',
+    tags: ['interior', 'window', 'quiet', 'natural light']
+  }, intent);
+
+  assert.equal(
+    filtered.reasons.includes('EMBEDDED_TEXT_METADATA'),
+    false
+  );
+  assert.equal(
+    filtered.reasons.includes('BRANDING_OR_ADVERTISING_METADATA'),
+    false
+  );
+  assert.equal(
+    filtered.reasons.includes('GENERIC_STOCK_CLICHE'),
+    false
+  );
+});
