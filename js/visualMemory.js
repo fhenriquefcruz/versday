@@ -89,6 +89,25 @@ export function setCachedVisual(reference, intent, visual, purpose = 'background
   writeJson(CACHE_KEY, cache);
 }
 
+export function invalidateCachedVisual(
+  reference,
+  purpose = 'background',
+  visualId = null
+) {
+  if (!reference) return false;
+
+  const cache = readJson(CACHE_KEY, {});
+  const key = cacheKey(reference, purpose);
+  const entry = cache[key];
+
+  if (!entry) return false;
+  if (visualId && entry.visual?.id !== visualId) return false;
+
+  delete cache[key];
+  writeJson(CACHE_KEY, cache);
+  return true;
+}
+
 export function rememberVisualUsage(reference, visual, intent = null, purpose = 'background') {
   if (!visual?.id) return;
   const usage = readJson(USAGE_KEY, []);
