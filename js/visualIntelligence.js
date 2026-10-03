@@ -15,6 +15,27 @@ const STYLE_SIGNATURE = [
   'negative space'
 ];
 
+const LITERAL_QUERY_HINTS = Object.freeze({
+  pastagem: 'sheep grazing pastoral field',
+  mar: 'rough sea small distant boat',
+  'água': 'natural river water restrained landscape',
+  caminho: 'narrow path restrained landscape',
+  luz: 'natural physical light shadow',
+  semente: 'sower seeds field',
+  vinha: 'vine branches vineyard detail',
+  deserto: 'dry desert restrained landscape',
+  montanha: 'mountain terrain atmospheric distance',
+  cidade: 'ancient city walls restrained landscape',
+  ave: 'birds natural habitat',
+  cruz: 'wooden cross historically restrained scene',
+  'túmulo': 'stone tomb entrance quiet historical landscape',
+  batalha: 'distant conflict landscape non graphic',
+  'prisão': 'stone prison interior restrained light',
+  fogo: 'real fire furnace restrained non graphic scene',
+  'pão': 'bread on simple table natural light',
+  'céu': 'natural sky restrained atmosphere'
+});
+
 const THEME_PROFILES = {
   paz: {
     primaryTheme: 'paz',
@@ -211,7 +232,7 @@ const THEME_PROFILES = {
     emotionalTone: ['assombro', 'esperançoso', 'solene'],
     visualIntent: 'passagem real da morte para a vida e esperança restaurada sem espetáculo religioso artificial',
     symbolicElements: ['vida', 'renovação', 'abertura'],
-    preferredScenes: ['restrained first light emerging after deep darkness', 'open stone tomb only when narrative context makes it literal', 'new life with quiet luminous atmosphere and negative space'],
+    preferredScenes: ['restrained first light emerging after deep darkness', 'new life with quiet luminous atmosphere and negative space', 'subtle opening from darkness into natural light'],
     avoid: ['ator de branco', 'raios divinos artificiais', 'céu angelical', 'sunrise motivacional', 'IA fantasiosa'],
     palette: ['#090f14', '#344854', '#8a8069', '#e0d4ad'],
     mode: 'conceptual'
@@ -519,15 +540,32 @@ export function analyzeVerse(verse = {}) {
 
 export function buildVisualQueries(intent) {
   const negative = intent.visualIntent.negativeConcepts
-    .slice(0, 4)
+    .slice(0, 5)
     .map(item => `avoid ${normalize(item)}`)
     .join(', ');
 
-  return intent.visualIntent.preferredScenes.slice(0, 3).map((scene, index) => ({
+  const literalHints = unique(
+    (intent.representation.literalElements || [])
+      .map(item => LITERAL_QUERY_HINTS[item])
+      .filter(Boolean)
+  );
+
+  const contextualLiteralScene = literalHints.length
+    ? literalHints.join(' ')
+    : '';
+
+  const preferred = [...(intent.visualIntent.preferredScenes || [])];
+  const scenes = unique([
+    ...(contextualLiteralScene ? [contextualLiteralScene] : []),
+    ...preferred
+  ]).slice(0, 4);
+
+  return scenes.map((scene, index) => ({
     id: `q${index + 1}`,
-    query: [...scene.split(' '), ...STYLE_SIGNATURE].join(' '),
+    query: [scene, ...STYLE_SIGNATURE].join(' '),
     negativePrompt: negative,
-    representationMode: intent.representation.mode
+    representationMode: intent.representation.mode,
+    source: index === 0 && contextualLiteralScene ? 'literal-context' : 'semantic-scene'
   }));
 }
 
