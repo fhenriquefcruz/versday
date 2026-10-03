@@ -58,6 +58,7 @@ test('ativador conecta providers prontos e força nova versão do cache PWA', as
     /const CACHE_NAME = 'versday-v8-backend-run-123';/
   );
   assert.equal(result.cacheName, 'versday-v8-backend-run-123');
+  assert.equal(result.changed, true);
 });
 
 test('ativador mantém providers desligados quando health não os confirma', async () => {
@@ -82,4 +83,31 @@ test('ativador mantém providers desligados quando health não os confirma', asy
   assert.match(result.indexHtml, /name="versday-chat-endpoint" content=""/);
   assert.equal(result.endpoints.visual, '');
   assert.equal(result.endpoints.chat, '');
+});
+
+test('ativador é idempotente quando endpoint e providers não mudam', async () => {
+  const [indexHtml, serviceWorker] = await Promise.all([
+    readFile(new URL('../index.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8')
+  ]);
+
+  const first = configureBackendContent(indexHtml, serviceWorker, {
+    baseUrl: 'https://versday-api.example.com',
+    imagesConfigured: true,
+    chatConfigured: true,
+    cacheTag: 'run-1'
+  });
+
+  const second = configureBackendContent(first.indexHtml, first.serviceWorker, {
+    baseUrl: 'https://versday-api.example.com',
+    imagesConfigured: true,
+    chatConfigured: true,
+    cacheTag: 'run-2'
+  });
+
+  assert.equal(first.changed, true);
+  assert.equal(second.changed, false);
+  assert.equal(second.indexHtml, first.indexHtml);
+  assert.equal(second.serviceWorker, first.serviceWorker);
+  assert.equal(second.cacheName, first.cacheName);
 });
