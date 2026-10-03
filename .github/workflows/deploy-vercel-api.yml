@@ -9,9 +9,8 @@ on:
         default: versday-api
         type: string
       scope:
-        description: Vercel team slug
+        description: Vercel account/team slug dedicated to VersDay
         required: true
-        default: rtm11
         type: string
 
 permissions:
@@ -42,6 +41,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Validate VersDay Vercel scope
+        shell: bash
+        run: |
+          if [ -z "$VERCEL_SCOPE" ]; then
+            echo "::error::A Vercel scope dedicated to VersDay is required."
+            exit 1
+          fi
+
+          NORMALIZED_SCOPE="$(printf '%s' "$VERCEL_SCOPE" | tr '[:upper:]' '[:lower:]')"
+
+          if [ "$NORMALIZED_SCOPE" = "rtm11" ] || [ "$NORMALIZED_SCOPE" = "rtm" ]; then
+            echo "::error::RTM is a separate project. Use a Vercel account/team dedicated to VersDay."
+            exit 1
+          fi
 
       - name: Require Vercel token
         shell: bash
