@@ -17,7 +17,8 @@ import {
 } from './visualMemory.js';
 import {
   fetchProviderCandidates,
-  notifyProviderSelection
+  notifyProviderSelection,
+  validateVisualFinalists
 } from './visualProvider.js';
 
 function clampVisual(value, min = 0, max = 1) {
@@ -81,7 +82,8 @@ function buildPhotoVisual(candidate, scoring, intent, purpose) {
     query: candidate.query || null,
     sceneSignature: scoring.noveltySignals?.sceneSignature || null,
     compositionSignature: scoring.noveltySignals?.compositionSignature || null,
-    technicalAnalysis: candidate.technicalAnalysis || null
+    technicalAnalysis: candidate.technicalAnalysis || null,
+    vlmValidation: candidate.vlmValidation || null
   };
 }
 
@@ -165,7 +167,79 @@ export async function resolveVisualForVerse(verse, options = {}) {
     candidates = candidates.map(candidate => byId.get(candidate.id) || candidate);
   }
 
-  const { selected, ranked } = selectBestCandidate(candidates, intent, recentUsage);
+  const locallyRanked = rankCandidates(
+    candidates,
+    intent,
+    recentUsage
+  );
+  const locallyAccepted = locallyRanked.filter(item => item.accepted);
+  const localLeader = locallyAccepted[0] || null;
+
+  let vlmDiagnostics = {
+    enabled: false,
+    reason: localLeader ? 'NOT_REQUIRED' : 'NO_LOCAL_FINALIST',
+    model: null,
+    evaluatedCount: 0,
+    rejectedIds: [],
+    decisions: []
+  };
+
+  // Custo controlado: VLM só entra quando o melhor finalista local é
+  // externo/não-curado. Fotos curadas manualmente não geram chamada.
+  if (
+    localLeader &&
+    Number(localLeader.candidate.curationConfidence ?? 0) < 1
+  ) {
+    const vlmCandidates = locallyAccepted
+      .slice(0, 3)
+      .map(item => item.candidate)
+      .filter(candidate =>
+        Number(candidate.curationConfidence ?? 0) < 1
+      );
+
+    const validation = await validateVisualFinalists(
+      intent,
+      vlmCandidates,
+      purpose
+    );
+
+    vlmDiagnostics = {
+      enabled: Boolean(validation.enabled),
+      reason: validation.reason || null,
+      model: validation.model || null,
+      evaluatedCount: validation.decisions?.length || 0,
+      rejectedIds: (validation.decisions || [])
+        .filter(decision => !decision.accepted)
+        .map(decision => decision.id),
+      decisions: validation.decisions || []
+    };
+
+    if (validation.enabled && validation.decisions?.length) {
+      const decisionsById = new Map(
+        validation.decisions.map(decision => [
+          decision.id,
+          decision
+        ])
+      );
+
+      candidates = candidates.map(candidate => {
+        const decision = decisionsById.get(candidate.id);
+        if (!decision) return candidate;
+
+        return {
+          ...candidate,
+          vlmValidation: decision,
+          vlmRejected: !decision.accepted
+        };
+      });
+    }
+  }
+
+  const { selected, ranked } = selectBestCandidate(
+    candidates,
+    intent,
+    recentUsage
+  );
 
   let visual;
   if (selected) {
@@ -190,12 +264,14 @@ export async function resolveVisualForVerse(verse, options = {}) {
     providerCandidateCount: providerCandidates.length,
     curatedCandidateCount: curatedCandidates.length,
     analyzedCandidateCount: analyzed.length,
+    vlm: vlmDiagnostics,
     acceptedCandidateId: selected?.candidate?.id || null,
     ranked: ranked.slice(0, 5).map(item => ({
       id: item.candidate.id,
       accepted: item.accepted,
       scores: item.scores,
       noveltySignals: item.noveltySignals,
+      vlmValidation: item.candidate.vlmValidation || null,
       rejectedReasons: item.rejectedReasons
     }))
   };
