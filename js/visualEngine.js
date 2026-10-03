@@ -104,7 +104,9 @@ export async function resolveVisualForVerse(verse, options = {}) {
     'ADVERTISING',
     'UNSAFE_CONTENT',
     'LOW_RESOLUTION',
-    'RELIGIOUS_CLICHE'
+    'RELIGIOUS_CLICHE',
+    'GRAPHIC_OR_EXPLOITATIVE',
+    'THEMATIC_CLICHE'
   ]);
 
   const shortlist = preliminary
