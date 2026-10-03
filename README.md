@@ -50,7 +50,7 @@ A busca dinâmica de imagens é opcional e usa `js/visualProvider.js`. Para ativ
 />
 ```
 
-O endpoint deve guardar as credenciais de Unsplash/Pexels no servidor e devolver candidatos normalizados.
+O endpoint deve guardar credenciais privadas no servidor e devolver candidatos normalizados. A busca dinâmica atual usa Unsplash; o Pexels é usado apenas no acervo curado estático.
 
 O assistente bíblico segue a mesma regra:
 
@@ -113,6 +113,25 @@ O workflow:
 9. publica essa configuração na `main`, disparando o Pages normalmente.
 
 O frontend também consulta o healthcheck: chat e busca externa não são habilitados quando o provider correspondente ainda não está pronto. O endpoint `/api/health` nunca devolve os valores das credenciais.
+
+### Conformidade dos provedores de imagem
+
+**Unsplash API**
+
+- usa diretamente as URLs de imagem retornadas em `photo.urls` (hotlinking);
+- mantém `download_location` no objeto visual e no cache;
+- dispara `/api/visual-select` quando a foto é efetivamente selecionada, inclusive em reutilização via cache;
+- exibe crédito no formato “Foto por [fotógrafo] no Unsplash”, com link para o perfil do fotógrafo e para o Unsplash com parâmetros UTM;
+- a credencial `UNSPLASH_ACCESS_KEY` permanece exclusivamente no backend.
+
+**Pexels curado**
+
+- as fotografias do catálogo interno são usadas sob a licença Pexels;
+- o VersDay não usa a API do Pexels para a busca dinâmica atual;
+- a licença permite uso em website/app sem atribuição obrigatória, embora o produto mantenha link de origem quando disponível;
+- o VersDay não redistribui as fotos como biblioteca de stock ou wallpaper independente.
+
+As regras devem ser revalidadas antes de trocar de fornecedor ou ativar nova API.
 
 ## Share cards
 
