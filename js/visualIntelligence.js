@@ -4,7 +4,7 @@
 
 import { resolveBiblicalContext } from './biblical-context.js';
 
-export const VISUAL_ENGINE_VERSION = '2.2.0';
+export const VISUAL_ENGINE_VERSION = '2.3.0';
 
 const STYLE_SIGNATURE = [
   'editorial photography',

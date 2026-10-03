@@ -77,6 +77,7 @@ function buildPhotoVisual(candidate, scoring, intent, purpose) {
     visualIntent: intent.visualIntent.description,
     photographer: candidate.photographer || null,
     photographerLink: candidate.photographerLink || null,
+    downloadLocation: candidate.downloadLocation || null,
     query: candidate.query || null,
     sceneSignature: scoring.noveltySignals?.sceneSignature || null,
     compositionSignature: scoring.noveltySignals?.compositionSignature || null,
@@ -98,6 +99,9 @@ export async function resolveVisualForVerse(verse, options = {}) {
     const cached = getCachedVisual(reference, purpose);
     if (cached?.visual) {
       rememberVisualUsage(reference, cached.visual, cached.intent, purpose);
+      if (cached.visual.mode === 'photo') {
+        await notifyProviderSelection(cached.visual);
+      }
       return {
         intent: cached.intent,
         queries: buildVisualQueries(cached.intent),
