@@ -117,7 +117,8 @@ function hasForbiddenVisual(candidate, intent) {
 
 function hardFilterReasons(candidate, intent) {
   const reasons = [];
-  if (!candidate?.imageUrl) reasons.push('NO_IMAGE_URL');
+  if (!candidate || typeof candidate !== 'object') return ['INVALID_CANDIDATE'];
+  if (!candidate.imageUrl) reasons.push('NO_IMAGE_URL');
   if (candidate.hasWatermark) reasons.push('WATERMARK');
   if (candidate.hasEmbeddedText) reasons.push('EMBEDDED_TEXT');
   if (candidate.isAdvertising) reasons.push('ADVERTISING');
