@@ -20,8 +20,35 @@ import {
   notifyProviderSelection
 } from './visualProvider.js';
 
+function clampVisual(value, min = 0, max = 1) {
+  return Math.max(min, Math.min(max, value));
+}
+
+export function deriveOverlayStrength(candidate = {}, scoring = {}) {
+  const analysis = candidate.technicalAnalysis || {};
+  const luminance = clampVisual(Number(analysis.averageLuminance ?? 0.5));
+  const complexity = clampVisual(Number(analysis.complexity ?? 0.5));
+  const safeScore = clampVisual(Number(analysis.bestSafeScore ?? 0.6));
+  const composition = clampVisual(Number(scoring?.scores?.composition ?? candidate.compositionScore ?? 0.78));
+
+  return Number(clampVisual(
+    0.14 +
+    luminance * 0.08 +
+    complexity * 0.11 +
+    (1 - safeScore) * 0.10 +
+    (composition < 0.82 ? 0.04 : 0),
+    0.16,
+    0.44
+  ).toFixed(3));
+}
+
 function buildPhotoVisual(candidate, scoring, intent, purpose) {
-  const safeAreas = candidate.safeTextAreas?.length ? candidate.safeTextAreas : ['center'];
+  const safeAreas = candidate.safeTextAreas?.length
+    ? candidate.safeTextAreas
+    : ['center'];
+  const mobileSafeAreas = candidate.mobileSafeTextAreas?.length
+    ? candidate.mobileSafeTextAreas
+    : safeAreas;
 
   return {
     mode: 'photo',
@@ -43,12 +70,15 @@ function buildPhotoVisual(candidate, scoring, intent, purpose) {
       candidate.focalPoint ||
       { x: 0.5, y: 0.5 },
     safeTextAreas: safeAreas,
+    mobileSafeTextAreas: mobileSafeAreas,
     textPlacement: safeAreas[0] || 'center',
-    overlayStrength: scoring.scores.composition >= 0.88 ? 0.2 : 0.3,
+    mobileTextPlacement: mobileSafeAreas[0] || safeAreas[0] || 'center',
+    overlayStrength: deriveOverlayStrength(candidate, scoring),
     visualIntent: intent.visualIntent.description,
     photographer: candidate.photographer || null,
     photographerLink: candidate.photographerLink || null,
-    query: candidate.query || null
+    query: candidate.query || null,
+    technicalAnalysis: candidate.technicalAnalysis || null
   };
 }
 
