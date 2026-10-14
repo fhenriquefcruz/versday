@@ -134,6 +134,9 @@ export function buildVisualDebugViewModel(selection = {}) {
       enabled: Boolean(diagnostics.vlm?.enabled),
       reason: diagnostics.vlm?.reason || null,
       model: diagnostics.vlm?.model || null,
+      prequalifiedCount: Number(
+        diagnostics.vlm?.prequalifiedCount || 0
+      ),
       evaluatedCount: Number(
         diagnostics.vlm?.evaluatedCount || 0
       ),
@@ -440,7 +443,7 @@ function renderPanelBody(panel, model) {
     contextGrid,
     'VLM',
     model.vlm.enabled
-      ? `${model.vlm.model || 'ativo'} · ${model.vlm.evaluatedCount}`
+      ? `${model.vlm.model || 'ativo'} · pré ${model.vlm.prequalifiedCount} · avaliados ${model.vlm.evaluatedCount}`
       : model.vlm.reason || 'desligado'
   );
   contextSection.appendChild(contextGrid);

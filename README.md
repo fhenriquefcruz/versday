@@ -127,28 +127,34 @@ Fluxo quando habilitado:
 
 ```
 24 candidatos externos
-→ ranking local
+→ ranking local + hard filters
 → top 5 com análise de pixels
-→ novo ranking local
-→ até 3 finalistas externos/não-curados
-→ VLM
+   (até 3 vagas priorizadas para externos pesquisados)
+→ externos com qualidade/composição válidas
+   podem continuar mesmo como near-miss semântico local
+→ VLM em até 3 imagens
+→ evidência visual semântica/emocional
+→ novo ranking
 → seleção final
 ```
 
 Regras:
 
 - fotos do catálogo manualmente curado não geram chamada VLM;
-- o VLM só é usado quando o líder local é externo/não-curado;
-- máximo de 3 imagens por validação;
-- timeout curto e comportamento fail-open: indisponibilidade do VLM nunca quebra o VersDay;
+- máximo de 3 imagens externas por validação;
+- candidato externo só chega à pré-validação se tiver origem de busca real, análise de pixels e passar hard filters, qualidade e composição;
+- `SEMANTIC_MISMATCH` e `LOW_FINAL_SCORE` podem ser tratados como falta de metadados do provider **antes** do VLM, nunca como aprovação;
+- o VLM aprovado pode complementar somente os componentes **semântico e emocional**, porque analisou a fotografia real;
+- VLM nunca altera quality score, composition score, identity score, responsive score ou novelty;
 - reprovação multimodal adiciona `VLM_REJECTED` e é eliminatória;
-- quando o VLM está ativo, candidatos externos fora do lote avaliado recebem `VLM_NOT_VALIDATED` e não podem subir por leapfrog;
+- quando o VLM está ativo, externos fora do lote efetivamente avaliado recebem `VLM_NOT_VALIDATED` e não podem subir por leapfrog;
 - candidatos curados manualmente continuam elegíveis sem chamada VLM;
-- o VLM não aumenta artificialmente o score de beleza ou semântica — ele funciona como gate de contradição/compatibilidade;
+- com VLM desligado, o comportamento permanece estrito: candidato externo sem evidência semântica local suficiente é rejeitado e o VersDay usa catálogo curado/fallback;
+- timeout curto e comportamento fail-open: indisponibilidade do VLM nunca quebra o VersDay;
 - modelo padrão atual: `qwen/qwen3.8-27b`;
 - ativação: `VISUAL_VLM_ENABLED=true` ou `enable_vlm=true` no workflow de deploy.
 
-A intenção é usar visão computacional somente onde ela agrega valor, depois de filtros baratos, controlando custo e latência.
+A ponte dinâmica corrige um problema importante de providers de busca: Unsplash pode devolver uma fotografia semanticamente adequada, mas com `themes/moods/representationModes` incompletos. O VersDay não presume que a foto está correta por ter aparecido na busca; a compatibilidade adicional só entra depois da inspeção multimodal da própria imagem.
 
 ### Conformidade dos provedores de imagem
 

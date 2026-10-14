@@ -413,6 +413,35 @@ export function hardFilterCandidate(candidate, intent) {
   };
 }
 
+function getVlmSemanticEvidence(candidate = {}) {
+  const validation = candidate.vlmValidation;
+  if (!validation?.accepted) {
+    return {
+      applied: false,
+      semantic: 0,
+      emotional: 0
+    };
+  }
+
+  return {
+    applied: true,
+    semantic: Math.max(
+      0,
+      Math.min(
+        1,
+        Number(validation.semanticCompatibility ?? 0)
+      )
+    ),
+    emotional: Math.max(
+      0,
+      Math.min(
+        1,
+        Number(validation.emotionalCompatibility ?? 0)
+      )
+    )
+  };
+}
+
 function responsiveScore(candidate, intent) {
   const purpose = intent.visualPurpose || 'background';
   const width = Number(candidate.width || 0);
@@ -468,7 +497,11 @@ export function scoreCandidate(candidate, intent, recentUsage = []) {
 
   const literalMatch = overlapScore(tags, intent.representation.literalElements);
   const symbolicMatch = overlapScore(tags, intent.representation.symbolicElements);
-  const emotionalMatch = overlapScore(candidate.moods || [], intent.semantic.emotionalTone);
+  const emotionalMatch = overlapScore(
+    candidate.moods || [],
+    intent.semantic.emotionalTone
+  );
+  const vlmEvidence = getVlmSemanticEvidence(candidate);
   const modeMatch = modes.includes(intent.representation.mode) ? 1 : 0;
   const sceneMatch = lexicalScore(candidate, intent);
   const providerRelevance = Math.max(0, Math.min(1, Number(candidate.providerSearchScore ?? 0)));
@@ -513,9 +546,27 @@ export function scoreCandidate(candidate, intent, recentUsage = []) {
     rawSemanticScore >= curatedFloorMinimum &&
     rawSemanticScore < VISUAL_THRESHOLDS.semantic;
 
-  const semanticScore = curationFloorApplied
+  const locallyAdjustedSemantic = curationFloorApplied
     ? VISUAL_THRESHOLDS.semantic
     : rawSemanticScore;
+
+  // O VLM observa a fotografia real. Quando ele aprova explicitamente
+  // um candidato externo, sua compatibilidade semântica/emocional pode
+  // complementar metadados pobres do provedor. Isso não afeta beleza,
+  // composição, qualidade, identidade ou novidade.
+  const semanticScore = vlmEvidence.applied
+    ? Math.max(
+        locallyAdjustedSemantic,
+        vlmEvidence.semantic
+      )
+    : locallyAdjustedSemantic;
+
+  const emotionalScore = vlmEvidence.applied
+    ? Math.max(
+        emotionalMatch,
+        vlmEvidence.emotional
+      )
+    : emotionalMatch;
 
   const qualityScore = Math.max(0, Math.min(1, Number(candidate.qualityScore ?? 0.8)));
   const compositionScore = Math.max(0, Math.min(1, Number(candidate.compositionScore ?? 0.76)));
@@ -530,7 +581,7 @@ export function scoreCandidate(candidate, intent, recentUsage = []) {
 
   const finalScore =
     semanticScore * 0.45 +
-    emotionalMatch * 0.15 +
+    emotionalScore * 0.15 +
     qualityScore * 0.12 +
     compositionScore * 0.12 +
     identityScore * 0.06 +
@@ -543,7 +594,7 @@ export function scoreCandidate(candidate, intent, recentUsage = []) {
     candidate,
     scores: {
       semantic: Number(semanticScore.toFixed(3)),
-      emotional: Number(emotionalMatch.toFixed(3)),
+      emotional: Number(emotionalScore.toFixed(3)),
       quality: Number(qualityScore.toFixed(3)),
       composition: Number(compositionScore.toFixed(3)),
       identity: Number(identityScore.toFixed(3)),
@@ -561,6 +612,15 @@ export function scoreCandidate(candidate, intent, recentUsage = []) {
       ),
       floorMinimum: Number(
         curatedFloorMinimum.toFixed(3)
+      )
+    },
+    vlmSignals: {
+      applied: vlmEvidence.applied,
+      semanticEvidence: Number(
+        vlmEvidence.semantic.toFixed(3)
+      ),
+      emotionalEvidence: Number(
+        vlmEvidence.emotional.toFixed(3)
       )
     },
     rejectedReasons: [...new Set(rejectedReasons)],

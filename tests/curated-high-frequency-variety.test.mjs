@@ -81,8 +81,8 @@ function versesForTheme(theme) {
   });
 }
 
-test('engine visual sobe para 2.10.0 após expansão de variedade', () => {
-  assert.equal(VISUAL_ENGINE_VERSION, '2.10.0');
+test('engine visual sobe para 2.11.0 após expansão de variedade', () => {
+  assert.equal(VISUAL_ENGINE_VERSION, '2.11.0');
 });
 
 for (const target of TARGETS) {
