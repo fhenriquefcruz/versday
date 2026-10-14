@@ -59,8 +59,8 @@ function externalCandidate(overrides = {}) {
   };
 }
 
-test('engine sobe para 2.11.0 com ponte semântica do provider', () => {
-  assert.equal(VISUAL_ENGINE_VERSION, '2.11.0');
+test('engine sobe para 2.12.0 com ponte semântica do provider', () => {
+  assert.equal(VISUAL_ENGINE_VERSION, '2.12.0');
 });
 
 test('candidato externo sem evidência visual continua abaixo do gate semântico', () => {
