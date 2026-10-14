@@ -60,4 +60,4 @@ test('visual engine version invalidates pre-scene-family cached visuals', async 
     source.includes("VISUAL_ENGINE_VERSION = '2.9.0'"),
     true
   );
-}
+});
