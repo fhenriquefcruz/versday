@@ -539,9 +539,31 @@ window.addEventListener('click', e => {
   if (e.target === histModal) histModal.style.display = 'none';
 });
 
+function initServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('./service-worker.js')
+      .then(registration =>
+        console.log(
+          '[VersDay] SW registrado:',
+          registration.scope
+        )
+      )
+      .catch(error =>
+        console.warn(
+          '[VersDay] SW falhou:',
+          error
+        )
+      );
+  });
+}
+
 // ========== Boot ==========
 initTheme();
 initBackgroundLayers();
 initVisualDebugPanel();
+initServiceWorker();
 loadNewVerse();
 initChat();
