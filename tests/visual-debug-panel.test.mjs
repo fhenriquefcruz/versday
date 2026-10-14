@@ -34,6 +34,7 @@ test('view model de debug expõe decisão, performance e ranking sem dados bruto
       semanticScore: 0.91,
       compositionScore: 0.83,
       textPlacement: 'upper-left',
+      tabletTextPlacement: 'right',
       mobileTextPlacement: 'lower',
       overlayStrength: 0.24,
       imageUrl: 'https://images.unsplash.com/should-not-appear'
@@ -75,6 +76,7 @@ test('view model de debug expõe decisão, performance e ranking sem dados bruto
 
   assert.equal(model.reference, 'pv 3:5');
   assert.equal(model.decision.code, 'PHOTO_ACCEPTED');
+  assert.equal(model.visual.tabletTextPlacement, 'right');
   assert.equal(model.timings.totalMs, 711.2);
   assert.equal(model.ranked.length, 1);
   assert.equal(model.ranked[0].id, 'candidate-1');

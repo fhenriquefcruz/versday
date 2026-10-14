@@ -107,8 +107,26 @@ function updateCredit(visual) {
 
 function applyVisualToLayer(layer, visual) {
   layer.classList.toggle('bg-abstract', visual.mode === 'abstract');
-  layer.style.setProperty('--focal-desktop', focalToCss(visual.focalPoint));
-  layer.style.setProperty('--focal-mobile', focalToCss(visual.mobileFocalPoint || visual.focalPoint));
+  layer.style.setProperty(
+    '--focal-desktop',
+    focalToCss(visual.focalPoint)
+  );
+  layer.style.setProperty(
+    '--focal-tablet',
+    focalToCss(
+      visual.tabletFocalPoint ||
+      visual.mobileFocalPoint ||
+      visual.focalPoint
+    )
+  );
+  layer.style.setProperty(
+    '--focal-mobile',
+    focalToCss(
+      visual.mobileFocalPoint ||
+      visual.tabletFocalPoint ||
+      visual.focalPoint
+    )
+  );
 
   if (visual.mode === 'photo') {
     layer.style.backgroundImage = `url("${visual.imageUrl}")`;
@@ -173,9 +191,17 @@ export async function setBackgroundImage(verse, options = {}) {
   appState.currentBackgroundImageUrl = visual.mode === 'photo' ? visual.imageUrl : '';
 
   document.body.dataset.visualMode = visual.mode;
-  document.body.dataset.textPlacement = visual.textPlacement || 'center';
+  document.body.dataset.textPlacement =
+    visual.textPlacement || 'center';
+  document.body.dataset.tabletTextPlacement =
+    visual.tabletTextPlacement ||
+    visual.textPlacement ||
+    'center';
   document.body.dataset.mobileTextPlacement =
-    visual.mobileTextPlacement || visual.textPlacement || 'center';
+    visual.mobileTextPlacement ||
+    visual.tabletTextPlacement ||
+    visual.textPlacement ||
+    'center';
   document.documentElement.style.setProperty(
     '--visual-overlay-alpha',
     String(visual.overlayStrength ?? 0.22)
@@ -216,6 +242,7 @@ async function resolveAndApplyFallback(verse, failedSelection) {
   appState.currentBackgroundImageUrl = '';
   document.body.dataset.visualMode = 'abstract';
   document.body.dataset.textPlacement = 'center';
+  document.body.dataset.tabletTextPlacement = 'center';
   document.body.dataset.mobileTextPlacement = 'center';
   updateCredit(fallback);
 

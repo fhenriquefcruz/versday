@@ -258,6 +258,7 @@ function evaluateVerse(verse) {
   let composition = true;
   let legibility = true;
   let mobile = true;
+  let tablet = true;
   let desktop = true;
 
   if (selected) {
@@ -270,6 +271,7 @@ function evaluateVerse(verse) {
       Array.isArray(selected.candidate.safeTextAreas) &&
       selected.candidate.safeTextAreas.length >= 1;
     mobile = Boolean(selected.candidate.mobileFocalPoint);
+    tablet = Boolean(selected.candidate.tabletFocalPoint);
     desktop = Boolean(selected.candidate.focalPoint);
 
     if (
@@ -285,6 +287,7 @@ function evaluateVerse(verse) {
     composition = safe;
     legibility = safe;
     mobile = safe;
+    tablet = safe;
     desktop = safe;
   }
 
@@ -296,6 +299,7 @@ function evaluateVerse(verse) {
     composition,
     legibility,
     mobile,
+    tablet,
     desktop
   };
 

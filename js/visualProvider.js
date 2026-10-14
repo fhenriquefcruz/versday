@@ -63,9 +63,26 @@ function sanitizeCandidate(raw) {
     representationModes: Array.isArray(raw.representationModes)
       ? raw.representationModes.map(String)
       : [],
-    safeTextAreas: Array.isArray(raw.safeTextAreas) ? raw.safeTextAreas.map(String) : [],
+    safeTextAreas: Array.isArray(raw.safeTextAreas)
+      ? raw.safeTextAreas.map(String)
+      : [],
+    tabletSafeTextAreas: Array.isArray(raw.tabletSafeTextAreas)
+      ? raw.tabletSafeTextAreas.map(String)
+      : [],
+    mobileSafeTextAreas: Array.isArray(raw.mobileSafeTextAreas)
+      ? raw.mobileSafeTextAreas.map(String)
+      : [],
     focalPoint: raw.focalPoint || null,
-    mobileFocalPoint: raw.mobileFocalPoint || raw.focalPoint || null,
+    tabletFocalPoint:
+      raw.tabletFocalPoint ||
+      raw.mobileFocalPoint ||
+      raw.focalPoint ||
+      null,
+    mobileFocalPoint:
+      raw.mobileFocalPoint ||
+      raw.tabletFocalPoint ||
+      raw.focalPoint ||
+      null,
     qualityScore: Number(raw.qualityScore ?? 0.8),
     compositionScore: Number(raw.compositionScore ?? 0.74),
     identityScore: Number(raw.identityScore ?? 0.78),
