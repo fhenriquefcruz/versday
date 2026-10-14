@@ -50,11 +50,11 @@ test('visual engine preserves download location and retriggers tracking from cac
   );
 });
 
-test('visual engine version invalidates pre-tablet cached visuals', async () => {
+test('visual engine version invalidates pre-scene-family cached visuals', async () => {
   const source = await readFile(
     new URL('../js/visualIntelligence.js', import.meta.url),
     'utf8'
   );
 
-  assert.match(source, /VISUAL_ENGINE_VERSION = '2\.8\.0'/);
+  assert.match(source, /VISUAL_ENGINE_VERSION = '2\\.9\\.0'/);
 });
