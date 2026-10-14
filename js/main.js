@@ -63,18 +63,57 @@ function getFullBookName(abbrev) {
   return BOOK_NAMES[abbrev] || abbrev;
 }
 
-function escapeHtml(str) {
-  return String(str).replace(/[&<>]/g, m =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])
-  );
+function normalizePositiveInteger(value, max = 200) {
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < 1 || number > max) {
+    return null;
+  }
+  return number;
+}
+
+function normalizeBookCode(value) {
+  const code = String(value || '').trim().toLowerCase();
+  return Object.prototype.hasOwnProperty.call(BOOK_NAMES, code)
+    ? code
+    : '';
+}
+
+function buildChapterUrl(verse) {
+  const book = normalizeBookCode(verse?.book);
+  const chapter = normalizePositiveInteger(verse?.chapter, 200);
+  if (!book || !chapter) return '';
+
+  return `https://www.bibliaonline.com.br/ara/${encodeURIComponent(book)}/${chapter}`;
+}
+
+function createElement(tag, options = {}) {
+  const element = document.createElement(tag);
+
+  if (options.className) element.className = options.className;
+  if (options.text !== undefined) {
+    element.textContent = String(options.text);
+  }
+  if (options.title) element.title = options.title;
+
+  return element;
+}
+
+function renderEmptyState(container, text) {
+  const message = createElement('p', { text });
+  message.style.textAlign = 'center';
+  message.style.padding = '20px';
+  message.style.opacity = '.7';
+  container.replaceChildren(message);
 }
 
 // ========== Loading ==========
-function smoothUpdate(html) {
+function smoothUpdate(render) {
   dynamicZone.style.transition = 'opacity 0.15s';
   dynamicZone.style.opacity = '0';
+
   setTimeout(() => {
-    dynamicZone.innerHTML = html;
+    dynamicZone.replaceChildren();
+    render(dynamicZone);
     dynamicZone.style.opacity = '1';
   }, 150);
 }
@@ -83,28 +122,49 @@ let timerInterval = null;
 
 function showLoading(show) {
   if (show) {
-    dynamicZone.innerHTML = `
-      <div class="loading-timer">
-        <div class="timer-circle">0</div>
-        <div class="loading-message">Buscando versículo...</div>
-        <div id="delayMessage"></div>
-      </div>
-    `;
-    let seconds = 0;
+    const wrapper = createElement('div', {
+      className: 'loading-timer'
+    });
+    const timer = createElement('div', {
+      className: 'timer-circle',
+      text: '0'
+    });
+    const message = createElement('div', {
+      className: 'loading-message',
+      text: 'Buscando versículo...'
+    });
+    const delay = createElement('div');
+    delay.id = 'delayMessage';
+
+    wrapper.append(timer, message, delay);
+    dynamicZone.replaceChildren(wrapper);
+
     const start = Date.now();
     timerInterval = setInterval(() => {
-      if (!appState.isLoading) { clearInterval(timerInterval); return; }
-      const el = document.querySelector('.timer-circle');
-      if (el) el.textContent = Math.floor((Date.now() - start) / 1000);
-      if (Math.floor((Date.now() - start) / 1000) >= 8) {
-        const msgDiv = document.getElementById('delayMessage');
-        if (msgDiv && !msgDiv.innerHTML) {
-          msgDiv.innerHTML = '<div class="delay-message">🙏 Aguarde, buscando nos repositórios...</div>';
+      if (!appState.isLoading) {
+        clearInterval(timerInterval);
+        return;
+      }
+
+      const seconds = Math.floor((Date.now() - start) / 1000);
+      const timerElement = document.querySelector('.timer-circle');
+      if (timerElement) timerElement.textContent = String(seconds);
+
+      if (seconds >= 8) {
+        const delayElement = document.getElementById('delayMessage');
+        if (delayElement && !delayElement.hasChildNodes()) {
+          delayElement.appendChild(
+            createElement('div', {
+              className: 'delay-message',
+              text: '🙏 Aguarde, buscando nos repositórios...'
+            })
+          );
         }
       }
     }, 1000);
-  } else {
-    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  } else if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
   }
 }
 
@@ -115,19 +175,49 @@ function displayVerse(verse) {
   addToHistoryRef(verse.reference);
   addToHistory(verse);
 
-  const fullBook = getFullBookName(verse.book);
-  const displayRef = `${fullBook} ${verse.chapter}:${verse.verse}`;
+  const fullBook = getFullBookName(
+    normalizeBookCode(verse.book) || String(verse.book || '')
+  );
+  const chapter = normalizePositiveInteger(verse.chapter, 200);
+  const verseNumber = normalizePositiveInteger(verse.verse, 300);
+  const displayRef = [
+    fullBook,
+    chapter && verseNumber
+      ? `${chapter}:${verseNumber}`
+      : String(verse.reference || '')
+  ].filter(Boolean).join(' ');
 
-  const html = `
-    <div class="verse-text">${escapeHtml(verse.text)}</div>
-    <div class="verse-reference-wrapper">
-      <span class="verse-reference">${escapeHtml(displayRef)}</span>
-      <a href="https://www.bibliaonline.com.br/ara/${verse.book.toLowerCase()}/${verse.chapter}"
-         target="_blank" rel="noopener noreferrer" class="chapter-link" title="Ler capítulo completo">📖</a>
-    </div>
-  `;
+  smoothUpdate(container => {
+    const verseText = createElement('div', {
+      className: 'verse-text',
+      text: verse.text || ''
+    });
+    const referenceWrapper = createElement('div', {
+      className: 'verse-reference-wrapper'
+    });
+    const reference = createElement('span', {
+      className: 'verse-reference',
+      text: displayRef
+    });
 
-  smoothUpdate(html);
+    referenceWrapper.appendChild(reference);
+
+    const chapterUrl = buildChapterUrl(verse);
+    if (chapterUrl) {
+      const chapterLink = createElement('a', {
+        className: 'chapter-link',
+        text: '📖',
+        title: 'Ler capítulo completo'
+      });
+      chapterLink.href = chapterUrl;
+      chapterLink.target = '_blank';
+      chapterLink.rel = 'noopener noreferrer';
+      referenceWrapper.appendChild(chapterLink);
+    }
+
+    container.append(verseText, referenceWrapper);
+  });
+
   setBackgroundImage(verse)
     .then(selection => {
       renderVisualFeedback();
@@ -140,18 +230,27 @@ function displayVerse(verse) {
 }
 
 function renderVisualFeedback() {
-  if (!visualFeedback || !appState.currentVerse || appState.currentVisual?.mode !== 'photo') {
+  if (
+    !visualFeedback ||
+    !appState.currentVerse ||
+    appState.currentVisual?.mode !== 'photo'
+  ) {
     if (visualFeedback) visualFeedback.hidden = true;
     return;
   }
 
   visualFeedback.hidden = false;
-  const current = getFeedback(appState.currentVerse.reference, appState.currentVisual.id);
-  visualFeedback.querySelectorAll('[data-visual-feedback]').forEach(button => {
-    const active = button.dataset.visualFeedback === current;
-    button.classList.toggle('is-active', active);
-    button.setAttribute('aria-pressed', String(active));
-  });
+  const current = getFeedback(
+    appState.currentVerse.reference,
+    appState.currentVisual.id
+  );
+  visualFeedback
+    .querySelectorAll('[data-visual-feedback]')
+    .forEach(button => {
+      const active = button.dataset.visualFeedback === current;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
 }
 
 // ========== Carregar versículo — equilibrado entre API e fallback ==========
@@ -163,41 +262,47 @@ async function loadNewVerse() {
   try {
     let verse = null;
 
-    // 1. Tenta usar o cache
     const cache = getCache();
     if (cache.length > 0) {
-      let idx = cache.findIndex(v =>
-        v.reference !== lastVerseRef && !isRecentlyUsed(v.reference)
+      const idx = cache.findIndex(v =>
+        v.reference !== lastVerseRef &&
+        !isRecentlyUsed(v.reference)
       );
+
       if (idx !== -1) {
         verse = cache[idx];
         cache.splice(idx, 1);
         setCache(cache);
-        addToCache(lastVerseRef, isRecentlyUsed); // repõe cache em background
+        addToCache(lastVerseRef, isRecentlyUsed);
       }
     }
 
-    // 2. Cache vazio — sorteia do acervo curado local
     if (!verse) {
       let fallback = getRandomFallbackVerse();
       let attempts = 0;
-      while (isRecentlyUsed(fallback.reference) && attempts < 20) {
+
+      while (
+        isRecentlyUsed(fallback.reference) &&
+        attempts < 20
+      ) {
         fallback = getRandomFallbackVerse();
         attempts++;
       }
+
       verse = fallback;
     }
 
     displayVerse(verse);
-
   } catch (err) {
     console.error('[VersDay] Erro ao carregar versículo:', err);
     displayVerse(getRandomFallbackVerse());
   } finally {
     appState.isLoading = false;
     showLoading(false);
-    // Repõe cache se necessário
-    if (getCache().length < 8) addToCache(lastVerseRef, isRecentlyUsed);
+
+    if (getCache().length < 8) {
+      addToCache(lastVerseRef, isRecentlyUsed);
+    }
   }
 }
 
@@ -206,102 +311,173 @@ function updateFavoriteButton() {
   if (!appState.currentVerse || !favoriteCurrentBtn) return;
   const fav = isFavorite(appState.currentVerse.reference);
   favoriteCurrentBtn.textContent = fav ? '⭐' : '☆';
-  favoriteCurrentBtn.setAttribute('aria-label', fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos');
+  favoriteCurrentBtn.setAttribute(
+    'aria-label',
+    fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'
+  );
 }
 
 function toggleFavoriteCurrent() {
   if (!appState.currentVerse) return;
+
   if (isFavorite(appState.currentVerse.reference)) {
     removeFavorite(appState.currentVerse.reference);
   } else {
     addFavorite(appState.currentVerse);
   }
+
   updateFavoriteButton();
   renderFavorites();
 }
 
-if (favoriteCurrentBtn) favoriteCurrentBtn.addEventListener('click', toggleFavoriteCurrent);
+if (favoriteCurrentBtn) {
+  favoriteCurrentBtn.addEventListener(
+    'click',
+    toggleFavoriteCurrent
+  );
+}
 
 // ========== Modais ==========
-function renderFavorites() {
-  const favs = getFavorites();
-  if (!favs.length) {
-    favListDiv.innerHTML = '<p style="text-align:center;padding:20px;opacity:.7">Nenhum favorito ainda. ⭐</p>';
-    return;
-  }
-  favListDiv.innerHTML = favs.map(fav => `
-    <div class="favorite-item">
-      <div style="flex:1;min-width:0">
-        <strong>${getFullBookName(fav.book)} ${fav.chapter}:${fav.verse}</strong>
-        <br><small style="opacity:.75">${escapeHtml(fav.text.substring(0, 90))}…</small>
-      </div>
-      <div style="display:flex;gap:4px;flex-shrink:0">
-        <button class="load-fav" data-ref="${escapeHtml(fav.reference)}" title="Ler">📖</button>
-        <button class="remove-fav" data-ref="${escapeHtml(fav.reference)}" title="Remover">🗑️</button>
-      </div>
-    </div>
-  `).join('');
-
-  favListDiv.querySelectorAll('.load-fav').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const found = getFavorites().find(f => f.reference === btn.dataset.ref);
-      if (found) displayVerse(found);
-      favModal.style.display = 'none';
-    });
+function createVerseListItem(item, kind) {
+  const row = createElement('div', {
+    className:
+      kind === 'favorite'
+        ? 'favorite-item'
+        : 'history-item'
   });
-  favListDiv.querySelectorAll('.remove-fav').forEach(btn => {
-    btn.addEventListener('click', () => {
-      removeFavorite(btn.dataset.ref);
+
+  const content = createElement('div');
+  content.style.flex = '1';
+  content.style.minWidth = '0';
+
+  const bookCode = normalizeBookCode(item.book);
+  const bookName = getFullBookName(
+    bookCode || String(item.book || '')
+  );
+  const chapter = normalizePositiveInteger(item.chapter, 200);
+  const verseNumber = normalizePositiveInteger(item.verse, 300);
+  const referenceText =
+    chapter && verseNumber
+      ? `${bookName} ${chapter}:${verseNumber}`
+      : String(item.reference || '');
+
+  const title = createElement('strong', {
+    text: referenceText
+  });
+  const preview = createElement('small', {
+    text: `${String(item.text || '').slice(0, 90)}…`
+  });
+  preview.style.opacity = '.75';
+
+  content.append(
+    title,
+    document.createElement('br'),
+    preview
+  );
+
+  const actions = createElement('div');
+  actions.style.display = 'flex';
+  actions.style.gap = '4px';
+  actions.style.flexShrink = '0';
+
+  const load = createElement('button', {
+    className: kind === 'favorite' ? 'load-fav' : 'load-hist',
+    text: '📖',
+    title: 'Ler'
+  });
+  load.type = 'button';
+  load.addEventListener('click', () => {
+    const collection =
+      kind === 'favorite'
+        ? getFavorites()
+        : getHistory();
+    const found = collection.find(
+      entry => entry.reference === item.reference
+    );
+
+    if (found) displayVerse(found);
+
+    if (kind === 'favorite') {
+      favModal.style.display = 'none';
+    } else {
+      histModal.style.display = 'none';
+    }
+  });
+
+  actions.appendChild(load);
+
+  if (kind === 'favorite') {
+    const remove = createElement('button', {
+      className: 'remove-fav',
+      text: '🗑️',
+      title: 'Remover'
+    });
+    remove.type = 'button';
+    remove.addEventListener('click', () => {
+      removeFavorite(item.reference);
       renderFavorites();
       updateFavoriteButton();
     });
-  });
+    actions.appendChild(remove);
+  } else {
+    const favorite = createElement('button', {
+      className: 'fav-hist',
+      text: '⭐',
+      title: 'Favoritar'
+    });
+    favorite.type = 'button';
+    favorite.addEventListener('click', () => {
+      addFavorite({
+        text: String(item.text || ''),
+        reference: String(item.reference || ''),
+        book: bookCode,
+        chapter,
+        verse: verseNumber
+      });
+      favorite.textContent = '✅';
+      favorite.disabled = true;
+    });
+    actions.appendChild(favorite);
+  }
+
+  row.append(content, actions);
+  return row;
+}
+
+function renderFavorites() {
+  const favs = getFavorites();
+
+  if (!favs.length) {
+    renderEmptyState(
+      favListDiv,
+      'Nenhum favorito ainda. ⭐'
+    );
+    return;
+  }
+
+  favListDiv.replaceChildren(
+    ...favs.map(fav =>
+      createVerseListItem(fav, 'favorite')
+    )
+  );
 }
 
 function renderHistory() {
   const history = getHistory();
+
   if (!history.length) {
-    histListDiv.innerHTML = '<p style="text-align:center;padding:20px;opacity:.7">Nenhum versículo visto ainda. 📜</p>';
+    renderEmptyState(
+      histListDiv,
+      'Nenhum versículo visto ainda. 📜'
+    );
     return;
   }
-  histListDiv.innerHTML = history.map(hist => `
-    <div class="history-item">
-      <div style="flex:1;min-width:0">
-        <strong>${getFullBookName(hist.book)} ${hist.chapter}:${hist.verse}</strong>
-        <br><small style="opacity:.75">${escapeHtml(hist.text.substring(0, 90))}…</small>
-      </div>
-      <div style="display:flex;gap:4px;flex-shrink:0">
-        <button class="load-hist" data-ref="${escapeHtml(hist.reference)}" title="Ler">📖</button>
-        <button class="fav-hist" data-ref="${escapeHtml(hist.reference)}"
-          data-book="${escapeHtml(hist.book)}"
-          data-chapter="${hist.chapter}"
-          data-verse="${hist.verse}"
-          data-text="${escapeHtml(hist.text)}"
-          title="Favoritar">⭐</button>
-      </div>
-    </div>
-  `).join('');
 
-  histListDiv.querySelectorAll('.load-hist').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const found = getHistory().find(h => h.reference === btn.dataset.ref);
-      if (found) displayVerse(found);
-      histModal.style.display = 'none';
-    });
-  });
-  histListDiv.querySelectorAll('.fav-hist').forEach(btn => {
-    btn.addEventListener('click', () => {
-      addFavorite({
-        text: btn.dataset.text,
-        reference: btn.dataset.ref,
-        book: btn.dataset.book,
-        chapter: parseInt(btn.dataset.chapter),
-        verse: parseInt(btn.dataset.verse)
-      });
-      btn.textContent = '✅';
-      btn.disabled = true;
-    });
-  });
+  histListDiv.replaceChildren(
+    ...history.map(item =>
+      createVerseListItem(item, 'history')
+    )
+  );
 }
 
 // ========== Eventos ==========
