@@ -6,7 +6,11 @@ import {
   VISUAL_ENGINE_VERSION
 } from './visualIntelligence.js';
 import { getCuratedCandidates } from './visualCatalog.js';
-import { rankCandidates, selectBestCandidate } from './visualSelector.js';
+import {
+  rankCandidates,
+  selectBestCandidate,
+  VISUAL_THRESHOLDS
+} from './visualSelector.js';
 import { analyzeShortlist } from './visual-analysis.js';
 import {
   getCachedVisual,
@@ -88,6 +92,42 @@ export function deriveVisualDecision({
         : 'ABSTRACT_NO_ACCEPTED_CANDIDATE',
     dominantRejectReason: dominant
   };
+}
+
+const VLM_PREVALIDATION_ALLOWED_REASONS = new Set([
+  'SEMANTIC_MISMATCH',
+  'LOW_FINAL_SCORE'
+]);
+
+export function isVlmPrequalifiedResult(result) {
+  const candidate = result?.candidate;
+  if (!candidate) return false;
+
+  if (Number(candidate.curationConfidence ?? 0) >= 1) {
+    return false;
+  }
+
+  // A pré-validação só se aplica a resultados vindos de uma busca
+  // externa real e já analisados em pixels.
+  if (Number(candidate.providerSearchScore ?? 0) < 0.56) {
+    return false;
+  }
+  if (!candidate.technicalAnalysis) {
+    return false;
+  }
+
+  if (
+    Number(result.scores?.quality ?? 0) <
+      VISUAL_THRESHOLDS.quality ||
+    Number(result.scores?.composition ?? 0) <
+      VISUAL_THRESHOLDS.composition
+  ) {
+    return false;
+  }
+
+  return (result.rejectedReasons || []).every(reason =>
+    VLM_PREVALIDATION_ALLOWED_REASONS.has(reason)
+  );
 }
 
 export function deriveOverlayStrength(candidate = {}, scoring = {}) {
@@ -255,7 +295,11 @@ export async function resolveVisualForVerse(verse, options = {}) {
   const recentUsage = getRecentVisualUsage(12, purpose);
 
   // Primeiro ranking barato: só os melhores chegam à análise real de pixels.
-  const preliminary = rankCandidates(candidates, intent, recentUsage);
+  const preliminary = rankCandidates(
+    candidates,
+    intent,
+    recentUsage
+  );
   const hardReasons = new Set([
     'NO_IMAGE_URL',
     'EMBEDDED_TEXT',
@@ -271,10 +315,46 @@ export async function resolveVisualForVerse(verse, options = {}) {
     'GENERIC_STOCK_CLICHE'
   ]);
 
-  const shortlist = preliminary
-    .filter(item => !item.rejectedReasons.some(reason => hardReasons.has(reason)))
-    .slice(0, 5)
-    .map(item => item.candidate);
+  const pixelEligible = preliminary.filter(
+    item =>
+      !item.rejectedReasons.some(reason =>
+        hardReasons.has(reason)
+      )
+  );
+
+  const vlmReady =
+    providerCandidates.length > 0 &&
+    (await isBackendProviderReady('vlm')) === true;
+
+  let pixelResults = pixelEligible.slice(0, 5);
+
+  if (vlmReady) {
+    const externalPriority = pixelEligible
+      .filter(item =>
+        Number(
+          item.candidate.curationConfidence ?? 0
+        ) < 1 &&
+        Number(
+          item.candidate.providerSearchScore ?? 0
+        ) >= 0.56
+      )
+      .slice(0, 3);
+
+    const prioritizedIds = new Set(
+      externalPriority.map(item => item.candidate.id)
+    );
+
+    pixelResults = [
+      ...externalPriority,
+      ...pixelEligible.filter(
+        item => !prioritizedIds.has(item.candidate.id)
+      )
+    ].slice(0, 5);
+  }
+
+  const shortlist = pixelResults.map(
+    item => item.candidate
+  );
 
   const pixelStarted = nowMs();
   const analyzed = await analyzeShortlist(shortlist, 5);
@@ -289,30 +369,34 @@ export async function resolveVisualForVerse(verse, options = {}) {
     intent,
     recentUsage
   );
-  const locallyAccepted = locallyRanked.filter(item => item.accepted);
-  const localLeader = locallyAccepted[0] || null;
+  const vlmPrequalified = locallyRanked
+    .filter(isVlmPrequalifiedResult)
+    .slice(0, 3);
 
   let vlmDiagnostics = {
     enabled: false,
-    reason: localLeader ? 'NOT_REQUIRED' : 'NO_LOCAL_FINALIST',
+    reason:
+      providerCandidates.length === 0
+        ? 'NO_PROVIDER_CANDIDATES'
+        : !vlmReady
+          ? 'VLM_NOT_CONFIGURED'
+          : vlmPrequalified.length
+            ? 'PENDING'
+            : 'NO_PREQUALIFIED_EXTERNAL',
     model: null,
+    prequalifiedCount: vlmPrequalified.length,
     evaluatedCount: 0,
     rejectedIds: [],
     decisions: []
   };
 
-  // Custo controlado: VLM só entra quando o melhor finalista local é
-  // externo/não-curado. Fotos curadas manualmente não geram chamada.
-  if (
-    localLeader &&
-    Number(localLeader.candidate.curationConfidence ?? 0) < 1
-  ) {
-    const vlmCandidates = locallyAccepted
-      .slice(0, 3)
-      .map(item => item.candidate)
-      .filter(candidate =>
-        Number(candidate.curationConfidence ?? 0) < 1
-      );
+  // O VLM pode examinar externos que ainda falham somente por ausência
+  // de evidência semântica nos metadados do provedor. Hard filters,
+  // qualidade e composição continuam obrigatórios antes desta etapa.
+  if (vlmReady && vlmPrequalified.length) {
+    const vlmCandidates = vlmPrequalified.map(
+      item => item.candidate
+    );
 
     const vlmStarted = nowMs();
     const validation = await validateVisualFinalists(
