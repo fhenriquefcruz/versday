@@ -14,8 +14,8 @@ test('assistant HTML is escaped before lightweight markdown rendering', () => {
   const rendered = formatAssistantHtml(malicious);
 
   assert.doesNotMatch(rendered, /<img/i);
-  assert.doesNotMatch(rendered, /onerror=/i);
   assert.match(rendered, /&lt;img/);
+  assert.match(rendered, /onerror=&quot;alert\(1\)&quot;/);
   assert.match(rendered, /<strong>seguro<\/strong>/);
   assert.match(rendered, /<em>itálico<\/em>/);
 });
