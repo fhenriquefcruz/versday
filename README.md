@@ -206,6 +206,7 @@ Com `?visualDebug=1`, o console mostra também `decision`, `timings` e o resumo 
 ```bash
 npm run test:performance
 npm run audit:coverage
+npm run audit:variety
 ```
 
 ## Share cards
@@ -233,7 +234,9 @@ npm run test:performance
 
 O gate agregado exige **approval rate mínimo de 95%**.
 
-A auditoria complementar `npm run audit:coverage` mostra cobertura fotográfica por tema usando apenas o catálogo curado. Ela é diagnóstica: temas `abstract-first` não recebem meta mínima de foto, porque fallback abstrato coerente continua sendo uma saída correta. Uma passagem só é aprovada quando produz intenção/queries válidas e termina em uma destas saídas:
+A auditoria complementar `npm run audit:coverage` mostra cobertura fotográfica por tema usando apenas o catálogo curado. Ela é diagnóstica: temas `abstract-first` não recebem meta mínima de foto, porque fallback abstrato coerente continua sendo uma saída correta.
+
+A auditoria `npm run audit:variety` mede **todas as fotografias que realmente passam os gates**, não apenas o vencedor de cada verso. Para temas frequentes (8+ passagens), ela sinaliza `VARIETY_RISK` quando não existem pelo menos duas fotos e duas famílias de cena aceitas. É diagnóstica: temas sensíveis/abstract-first ficam fora dessa meta. Uma passagem só é aprovada quando produz intenção/queries válidas e termina em uma destas saídas:
 
 - fotografia que ultrapassa os thresholds semântico, de qualidade e composição, com focal point e safe area;
 - fallback abstrato editorial válido quando nenhuma fotografia merece ser exibida.
