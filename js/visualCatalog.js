@@ -750,6 +750,90 @@ export const CURATED_VISUALS = [
       'pódio', 'medalha',
       'vitória esportiva', 'euforia'
     ]
+  }),
+  pexels('20243345', 'pexels-photo-20243345.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/a-group-of-people-sitting-outside-and-smiling-20243345/',
+    description: 'A group of friends share spontaneous laughter outdoors in natural daylight, expressing genuine joy without staged celebration.',
+    alt: 'Amigos riem espontaneamente ao ar livre em um momento natural e leve.',
+    width: 5177,
+    height: 3444,
+    themes: ['alegria'],
+    sceneFamily: 'joy-candid-friends-outdoors',
+    tags: [
+      'alegria', 'abertura', 'luz', 'renovação',
+      'candid joy', 'friends', 'laughter', 'outdoors',
+      'natural light', 'spontaneous', 'connection'
+    ],
+    moods: ['luminoso', 'vivo', 'leve'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-left', 'upper-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.54, y: 0.52 },
+    tabletFocalPoint: { x: 0.53, y: 0.52 },
+    mobileFocalPoint: { x: 0.52, y: 0.52 },
+    compositionScore: 0.87,
+    identityScore: 0.92,
+    negativeTags: [
+      'pose publicitária', 'festa artificial',
+      'neon', 'saturação extrema'
+    ]
+  }),
+  pexels('33247012', 'pexels-photo-33247012.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/windy-coastal-scene-with-dramatic-waves-33247012/',
+    description: 'A lone tree bends under strong coastal wind beside rough waves, remaining rooted under visible pressure.',
+    alt: 'Árvore solitária resiste a vento forte diante de um mar agitado.',
+    width: 3072,
+    height: 4080,
+    themes: ['força'],
+    sceneFamily: 'strength-tree-in-wind',
+    tags: [
+      'força', 'firmeza', 'resistência', 'sustentação',
+      'tree', 'strong wind', 'rough sea', 'pressure',
+      'rooted', 'stormy coast', 'resilience'
+    ],
+    moods: ['firme', 'resiliente', 'sóbrio'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-left', 'upper-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.52, y: 0.58 },
+    tabletFocalPoint: { x: 0.52, y: 0.56 },
+    mobileFocalPoint: { x: 0.52, y: 0.54 },
+    compositionScore: 0.89,
+    identityScore: 0.93,
+    negativeTags: [
+      'fisiculturismo', 'pose heroica artificial',
+      'explosões', 'triunfalismo'
+    ]
+  }),
+  pexels('16634008', 'pexels-photo-16634008.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/silhouette-of-a-man-standing-by-the-window-in-a-room-16634008/',
+    description: 'A solitary silhouette stands quietly by a window in a dim room, creating space for inward attention and contemplation.',
+    alt: 'Silhueta solitária permanece em silêncio junto a uma janela em ambiente discreto.',
+    width: 4726,
+    height: 3775,
+    themes: ['oração'],
+    sceneFamily: 'prayer-solitary-window-contemplation',
+    tags: [
+      'oração', 'silêncio', 'recolhimento', 'presença',
+      'solitary figure', 'window light', 'contemplation',
+      'stillness', 'quiet room', 'negative space'
+    ],
+    moods: ['silencioso', 'íntimo', 'reverente'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['left', 'upper-left'],
+    tabletSafeTextAreas: ['left', 'upper-left'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.62, y: 0.50 },
+    tabletFocalPoint: { x: 0.60, y: 0.50 },
+    mobileFocalPoint: { x: 0.58, y: 0.50 },
+    compositionScore: 0.88,
+    identityScore: 0.92,
+    negativeTags: [
+      'mãos juntas automáticas', 'igreja genérica',
+      'cruz genérica', 'multidão religiosa'
+    ]
   })
 ];
 
