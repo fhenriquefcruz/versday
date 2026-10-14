@@ -67,7 +67,7 @@ Sem esses endpoints, o VersDay continua funcional com o motor visual local, cat�
 
 O diretório `api/` já contém funções server-side para uma implantação serverless:
 
-- `api/visual-search.js` — consulta semanticamente o Unsplash e retorna vários candidatos normalizados;
+- `api/visual-search.js` — consulta até 4 queries no Unsplash, intercala resultados round-robin e retorna candidatos normalizados com proveniência de busca;
 - `api/visual-select.js` — executa o download tracking exigido pelo Unsplash quando uma foto é escolhida;
 - `api/visual-validate.js` — valida opcionalmente até 3 finalistas externos com visão multimodal;
 - `api/chat.js` — mantém a credencial do assistente bíblico fora do navegador;
@@ -87,7 +87,20 @@ ALLOWED_ORIGIN=https://fhenriquefcruz.github.io
 
 Os valores reais nunca devem ir para `index.html`, `js/` ou para commits. Credenciais que já tenham sido publicadas historicamente precisam ser revogadas e rotacionadas nos provedores.
 
-Em uma implantação Vercel (`*.vercel.app`), os endpoints `/api/visual-search`, `/api/visual-select` e `/api/chat` são detectados automaticamente. No GitHub Pages, o VersDay continua sem segredos e usa o catálogo curado + fallback abstrato.
+Regras do provider dinâmico:
+
+- a query gerada é **instrução de busca**, não evidência da fotografia;
+- `candidate.query` não participa de semantic score, hard filters nem scene signature;
+- relevância local usa apenas metadados da própria foto, sinais do provider e, quando habilitado, inspeção VLM da imagem real;
+- até 4 queries são executadas em paralelo;
+- cada query Unsplash tem timeout server-side de **3,2 s**, abaixo do budget de 4,5 s do cliente;
+- resultados são mesclados round-robin para uma única query não dominar o shortlist;
+- IDs duplicados entre queries são removidos;
+- falhas parciais preservam os grupos que responderam;
+- se todas as queries falharem, o endpoint responde 429 em rate limit ou 502 nas demais falhas, permitindo fallback explícito;
+- a resposta de busca inclui somente diagnóstico agregado (`queryCount`, `failedQueries`, timeouts, rate limit e quantidade de resultados), nunca chave ou segredo.
+
+Em uma implantação Vercel (`*.vercel.app`), os endpoints `/api/visual-search`, `/api/visual-select`, `/api/visual-validate`, `/api/health` e `/api/chat` são detectados automaticamente. No GitHub Pages, o VersDay continua sem segredos e usa o catálogo curado + fallback abstrato.
 
 ### Bootstrap do backend Vercel
 
