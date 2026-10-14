@@ -26,3 +26,40 @@ test('nenhuma chave de provedor é publicada no cliente', async () => {
   assert.doesNotMatch(source, /const\s+UNSPLASH_ACCESS_KEY\s*=\s*['"][^'"]+['"]/, 'chave Unsplash exposta');
   assert.doesNotMatch(source, /Authorization:\s*['"]Client-ID\s+[A-Za-z0-9_-]{20,}/, 'credencial Unsplash hardcoded');
 });
+
+test('parser HTML dinâmico é proibido fora do renderer sanitizado do chat', async () => {
+  const jsDir = new URL('../js', import.meta.url).pathname;
+  const files = await collectJs(jsDir);
+  const violations = [];
+
+  for (const file of files) {
+    const source = await readFile(file, 'utf8');
+    const relative = file.replace(jsDir, '').replace(/^\//, '');
+
+    if (relative === 'chat.js') {
+      const matches = source.match(/\.innerHTML\s*=/g) || [];
+      assert.equal(
+        matches.length,
+        1,
+        'chat.js deve ter somente o sink sanitizado esperado'
+      );
+      assert.match(
+        source,
+        /formatAssistantHtml\(text\)/
+      );
+      continue;
+    }
+
+    if (
+      /\.innerHTML\s*=|insertAdjacentHTML|document\.write|\beval\s*\(|new Function\s*\(/.test(source)
+    ) {
+      violations.push(relative);
+    }
+  }
+
+  assert.deepEqual(
+    violations,
+    [],
+    `sinks HTML/código dinâmico fora do chat: ${violations.join(', ')}`
+  );
+});
