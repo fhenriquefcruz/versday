@@ -169,6 +169,21 @@ Regras:
 
 A ponte dinâmica corrige um problema importante de providers de busca: Unsplash pode devolver uma fotografia semanticamente adequada, mas com `themes/moods/representationModes` incompletos. O VersDay não presume que a foto está correta por ter aparecido na busca; a compatibilidade adicional só entra depois da inspeção multimodal da própria imagem.
 
+### Proteção contra abuso da API
+
+Os endpoints que consomem provedores externos possuem um limiter server-side best-effort, por rota e por cliente:
+
+- chat: **12 requisições/minuto**;
+- busca visual: **30 requisições/minuto**;
+- VLM: **8 requisições/minuto**;
+- tracking Unsplash: **60 requisições/minuto**.
+
+O identificador do cliente é derivado de `x-forwarded-for` e convertido em hash efêmero; o IP bruto não é persistido. Respostas bloqueadas usam HTTP `429`, `Retry-After` e headers de quota.
+
+Em produção, localhost deixa de fazer parte da allowlist CORS padrão. O GitHub Pages permanece permitido e origens adicionais só entram explicitamente por `ALLOWED_ORIGIN`.
+
+Como funções serverless podem executar em múltiplas instâncias, o limiter em memória é uma primeira barreira de custo/abuso, não um contador global. Quando existir um projeto Vercel dedicado ao VersDay, complemente-o com rate limiting no Vercel Firewall/WAF.
+
 ### Conformidade dos provedores de imagem
 
 **Unsplash API**
