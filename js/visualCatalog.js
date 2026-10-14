@@ -379,6 +379,60 @@ export const CURATED_VISUALS = [
       'romance', 'festa', 'publicidade',
       'pose olhando para câmera'
     ]
+  }),
+  pexels('4978541', 'pexels-photo-4978541.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/silhouette-of-a-person-inside-a-dark-room-4978541/',
+    description: 'A quiet human silhouette sits in a doorway facing open dusk light, expressing trust amid uncertainty without religious iconography.',
+    alt: 'Silhueta de uma pessoa sentada diante de uma abertura com luz suave ao entardecer.',
+    width: 4000,
+    height: 6000,
+    themes: ['fé'],
+    tags: [
+      'fé', 'direção', 'presença', 'luz discreta',
+      'uncertainty', 'silhouette', 'doorway', 'quiet',
+      'trust', 'unknown', 'distant light', 'contemplation'
+    ],
+    moods: ['contemplativo', 'confiante', 'sóbrio'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-left', 'upper-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.50, y: 0.56 },
+    tabletFocalPoint: { x: 0.50, y: 0.54 },
+    mobileFocalPoint: { x: 0.50, y: 0.54 },
+    compositionScore: 0.88,
+    identityScore: 0.93,
+    negativeTags: [
+      'cruz', 'bíblia aberta', 'igreja',
+      'pose religiosa', 'publicidade'
+    ]
+  }),
+  pexels('18820283', 'pexels-photo-18820283.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/sunlight-streaming-into-a-dark-room-through-a-lone-window-18820283/',
+    description: 'Natural sunlight enters a dark room through a real window, creating restrained contrast, clarity and negative space.',
+    alt: 'Luz natural entrando por uma janela em um ambiente escuro.',
+    width: 6105,
+    height: 4070,
+    themes: ['luz'],
+    tags: [
+      'luz', 'clareza', 'revelação', 'direção',
+      'natural light', 'window', 'shadow', 'contrast',
+      'illumination', 'dark room', 'negative space'
+    ],
+    moods: ['claro', 'esperançoso', 'contemplativo'],
+    representationModes: ['literal', 'hybrid', 'conceptual'],
+    safeTextAreas: ['left', 'lower-left'],
+    tabletSafeTextAreas: ['left', 'lower-left'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.68, y: 0.46 },
+    tabletFocalPoint: { x: 0.64, y: 0.48 },
+    mobileFocalPoint: { x: 0.60, y: 0.48 },
+    compositionScore: 0.91,
+    identityScore: 0.94,
+    negativeTags: [
+      'raios divinos', 'efeito celestial',
+      'neon', 'publicidade', 'cruz'
+    ]
   })
 ];
 
