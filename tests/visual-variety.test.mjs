@@ -28,6 +28,13 @@ const CORE_VARIETY_THEMES = new Set([
   'perseveranca'
 ]);
 
+const SECONDARY_VARIETY_THEMES = new Set([
+  'alegria',
+  'forca',
+  'oracao',
+  'descanso'
+]);
+
 function normalize(value = '') {
   return String(value)
     .normalize('NFD')
@@ -183,6 +190,23 @@ test('temas frequentes cobertos mantêm pelo menos duas fotos e duas famílias d
       item.varietyRisk,
       false,
       `${theme} ainda sinalizado como VARIETY_RISK`
+    );
+  }
+});
+
+test('temas médios da fase 2 mantêm pelo menos duas fotos e duas famílias de cena', () => {
+  const report = evaluateCuratedVariety();
+
+  for (const theme of SECONDARY_VARIETY_THEMES) {
+    const item = report.find(entry => entry.theme === theme);
+    assert.ok(item, `tema ausente no audit: ${theme}`);
+    assert.ok(
+      item.uniqueAcceptedPhotos >= 2,
+      `${theme}: apenas ${item.uniqueAcceptedPhotos} foto(s) aceita(s)`
+    );
+    assert.ok(
+      item.uniqueSceneFamilies >= 2,
+      `${theme}: apenas ${item.uniqueSceneFamilies} família(s) de cena`
     );
   }
 });
