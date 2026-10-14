@@ -87,7 +87,13 @@ function sanitizeCandidate(raw) {
     compositionScore: Number(raw.compositionScore ?? 0.74),
     identityScore: Number(raw.identityScore ?? 0.78),
     negativeTags: Array.isArray(raw.negativeTags) ? raw.negativeTags.map(String) : [],
-    providerSearchScore: Number(raw.providerSearchScore ?? 0),
+    providerRank: Number(raw.providerRank ?? 0),
+    providerQueryIndex: Number(
+      raw.providerQueryIndex ?? 0
+    ),
+    providerSearchScore: Number(
+      raw.providerSearchScore ?? 0
+    ),
     query: String(raw.query || ''),
     photographer: raw.photographer ? String(raw.photographer) : null,
     photographerLink: raw.photographerLink ? String(raw.photographerLink) : null,
