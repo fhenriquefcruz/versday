@@ -67,3 +67,16 @@ Antes de ativar o backend em produção, confirme no provedor que:
 2. as chaves atuais foram emitidas depois da revogação;
 3. elas existem apenas como secrets do backend/GitHub Actions/Vercel;
 4. nenhuma credencial reutilizada do histórico foi reativada.
+
+## Renderização de dados persistidos
+
+Dados vindos de cache, histórico, favoritos, APIs e provedores externos devem ser tratados como não confiáveis, mesmo quando normalmente são produzidos pelo próprio VersDay.
+
+Regras:
+
+- versículos, referências, nomes e previews são renderizados com `textContent`;
+- favoritos e histórico usam `createElement`/`replaceChildren` e closures, não template strings HTML;
+- URLs de capítulo só são criadas a partir de códigos de livros conhecidos e capítulos inteiros positivos;
+- `innerHTML`, `insertAdjacentHTML`, `document.write`, `eval` e `new Function` são proibidos nos módulos do cliente;
+- a única exceção é o renderer de chat, cuja entrada passa obrigatoriamente por `formatAssistantHtml()`, que escapa HTML antes de aplicar Markdown leve;
+- a suíte de segurança varre todos os módulos `js/` para impedir regressão.
