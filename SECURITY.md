@@ -95,3 +95,24 @@ A implementação atual:
 - remove localhost da allowlist CORS padrão em produção.
 
 O limiter em memória é best-effort por instância. Em um deployment serverless distribuído, proteção global deve ser configurada também no firewall/rate limiting da plataforma.
+
+## Content Security Policy
+
+O GitHub Pages usa uma CSP declarada no próprio `index.html`.
+
+A política atual:
+
+- scripts: somente arquivos do próprio VersDay;
+- scripts inline e `unsafe-eval`: proibidos;
+- estilos: self + Google Fonts + inline styles necessários ao layout atual;
+- fontes: self + `fonts.gstatic.com`;
+- imagens: self, `data:`, `blob:`, Pexels e Unsplash;
+- conexões: self, `data:`, `blob:`, Google Fonts e `*.vercel.app`;
+- objetos e frames: bloqueados;
+- forms: somente self.
+
+O registro do Service Worker vive em `main.js`, não em script inline.
+
+Se o backend dedicado do VersDay ganhar domínio customizado no futuro, adicione **somente esse domínio** a `connect-src`. Não substitua a allowlist por `https:` genérico.
+
+A suíte CI também valida que o `index.html` termina corretamente, contém o módulo principal e não reintroduz scripts inline.

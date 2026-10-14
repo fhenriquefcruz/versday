@@ -169,6 +169,14 @@ Regras:
 
 A ponte dinâmica corrige um problema importante de providers de busca: Unsplash pode devolver uma fotografia semanticamente adequada, mas com `themes/moods/representationModes` incompletos. O VersDay não presume que a foto está correta por ter aparecido na busca; a compatibilidade adicional só entra depois da inspeção multimodal da própria imagem.
 
+### CSP do GitHub Pages
+
+O frontend está protegido por Content Security Policy. Scripts executam apenas do próprio domínio; imagens remotas ficam restritas a Pexels/Unsplash e conexões de backend a `*.vercel.app`.
+
+O Service Worker é registrado pelo módulo `js/main.js`, portanto não há necessidade de liberar scripts inline.
+
+O CI valida a integridade estrutural do `index.html` e falha se o app shell perder o script principal, o modal de histórico, os fechamentos `</body></html>` ou relaxar a CSP.
+
 ### Proteção contra abuso da API
 
 Os endpoints que consomem provedores externos possuem um limiter server-side best-effort, por rota e por cliente:
