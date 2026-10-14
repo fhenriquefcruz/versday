@@ -44,3 +44,26 @@ npm test
 ```
 
 antes de qualquer merge.
+
+## Conteúdo gerado por IA
+
+Respostas de provedores de IA são tratadas como conteúdo não confiável.
+
+Regras:
+
+- a resposta do provider permanece em texto puro no histórico;
+- HTML vindo do modelo nunca é confiado diretamente;
+- qualquer formatação visual é aplicada somente depois de escapar caracteres HTML;
+- mensagens do usuário também são escapadas;
+- não use `innerHTML` com resposta bruta de provider.
+
+## Verificação de rotação
+
+O repositório documenta que credenciais antigas de Unsplash e Groq já foram publicadas no histórico. A presença ou ausência de uma chave nova no ambiente do provedor não pode ser comprovada apenas pelo código-fonte.
+
+Antes de ativar o backend em produção, confirme no provedor que:
+
+1. as credenciais antigas foram revogadas;
+2. as chaves atuais foram emitidas depois da revogação;
+3. elas existem apenas como secrets do backend/GitHub Actions/Vercel;
+4. nenhuma credencial reutilizada do histórico foi reativada.
