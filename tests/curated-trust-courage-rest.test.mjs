@@ -51,7 +51,7 @@ for (const target of TARGETS) {
 
     assert.ok(
       scored.scores.semantic >= VISUAL_THRESHOLDS.semantic,
-      `${target.visualId} semantic=${scored.scores.semantic}`
+      `${target.visualId} semantic=${scored.scores.semantic}; reasons=${scored.rejectedReasons.join(',')}`
     );
     assert.ok(
       scored.scores.final >= VISUAL_THRESHOLDS.final,
@@ -139,4 +139,25 @@ test('as três cenas possuem composição independente para desktop tablet e mob
     assert.ok(candidate.tabletSafeTextAreas?.length);
     assert.ok(candidate.mobileSafeTextAreas?.length);
   }
+});
+
+test('crossing bridge não é confundido com cruz religiosa', () => {
+  const verse = FALLBACK_VERSES.find(item =>
+    normalize(item.theme) === 'coragem'
+  );
+  const intent = analyzeVerse(verse);
+  const candidate = CURATED_VISUALS.find(item =>
+    item.id === 'pexels-3164128'
+  );
+
+  const scored = scoreCandidate(candidate, intent, []);
+
+  assert.equal(
+    scored.rejectedReasons.includes('RELIGIOUS_CLICHE'),
+    false
+  );
+  assert.ok(
+    scored.scores.semantic >= VISUAL_THRESHOLDS.semantic,
+    `semantic=${scored.scores.semantic}; reasons=${scored.rejectedReasons.join(',')}`
+  );
 });
