@@ -29,7 +29,7 @@ export function evaluateCuratedPhotoCoverage(verses = FALLBACK_VERSES) {
   for (const verse of verses) {
     const intent = analyzeVerse(verse);
     const candidates = getCuratedCandidates(intent, 12);
-    const { selected } = selectBestCandidate(
+    const { selected, ranked } = selectBestCandidate(
       candidates,
       intent,
       []
@@ -47,6 +47,8 @@ export function evaluateCuratedPhotoCoverage(verses = FALLBACK_VERSES) {
       photo: 0,
       abstract: 0,
       selectedIds: new Set(),
+      rejectedReasons: new Map(),
+      topRejectedIds: new Map(),
       references: []
     };
 
@@ -56,6 +58,25 @@ export function evaluateCuratedPhotoCoverage(verses = FALLBACK_VERSES) {
       current.selectedIds.add(selected.candidate.id);
     } else {
       current.abstract += 1;
+      const topRejected = ranked?.[0] || null;
+      if (topRejected) {
+        for (const reason of topRejected.rejectedReasons || []) {
+          current.rejectedReasons.set(
+            reason,
+            (current.rejectedReasons.get(reason) || 0) + 1
+          );
+        }
+        const topId = topRejected.candidate?.id || 'unknown';
+        current.topRejectedIds.set(
+          topId,
+          (current.topRejectedIds.get(topId) || 0) + 1
+        );
+      } else {
+        current.rejectedReasons.set(
+          'NO_CURATED_CANDIDATE',
+          (current.rejectedReasons.get('NO_CURATED_CANDIDATE') || 0) + 1
+        );
+      }
     }
     current.references.push({
       reference: verse.reference,
@@ -76,6 +97,12 @@ export function evaluateCuratedPhotoCoverage(verses = FALLBACK_VERSES) {
         ? item.photo / item.total
         : 0,
       uniquePhotos: item.selectedIds.size,
+      dominantRejectReason:
+        [...item.rejectedReasons.entries()]
+          .sort((a, b) => b[1] - a[1])[0]?.[0] || null,
+      topRejectedCandidate:
+        [...item.topRejectedIds.entries()]
+          .sort((a, b) => b[1] - a[1])[0]?.[0] || null,
       references: item.references
     }))
     .sort((a, b) => {
@@ -123,7 +150,9 @@ test('diagnóstico de cobertura fotográfica por tema permanece calculável', t 
         flag,
         `${item.photo}/${item.total}`,
         `${(item.photoRate * 100).toFixed(1)}%`,
-        `uniquePhotos=${item.uniquePhotos}`
+        `uniquePhotos=${item.uniquePhotos}`,
+        `reject=${item.dominantRejectReason || 'none'}`,
+        `top=${item.topRejectedCandidate || 'none'}`
       ].join(' · ')
     );
   }
