@@ -400,13 +400,16 @@ test('engine aplica VLM somente depois da análise de pixels e antes da seleçã
   );
 
   const pixelIndex = source.indexOf('await analyzeShortlist(');
+  const prequalIndex = source.indexOf('.filter(isVlmPrequalifiedResult)');
   const vlmIndex = source.indexOf('await validateVisualFinalists(');
   const finalSelectIndex = source.lastIndexOf('selectBestCandidate(');
 
   assert.ok(pixelIndex >= 0);
-  assert.ok(vlmIndex > pixelIndex);
+  assert.ok(prequalIndex > pixelIndex);
+  assert.ok(vlmIndex > prequalIndex);
   assert.ok(finalSelectIndex > vlmIndex);
-  assert.match(source, /curationConfidence \?\? 0\) < 1/);
+  assert.match(source, /providerSearchScore \?\? 0/);
+  assert.match(source, /technicalAnalysis/);
 });
 
 test('cache externo antigo é revalidado quando VLM passa a estar ativo', async () => {
