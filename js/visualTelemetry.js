@@ -86,6 +86,9 @@ export function sanitizeVisualDiagnostics(
     ),
     vlm: {
       enabled: Boolean(diagnostics.vlm?.enabled),
+      prequalifiedCount: Number(
+        diagnostics.vlm?.prequalifiedCount || 0
+      ),
       evaluatedCount: Number(
         diagnostics.vlm?.evaluatedCount || 0
       ),
