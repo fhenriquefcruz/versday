@@ -8,7 +8,8 @@
     "test:visual": "node --test tests/visual-engine.test.mjs",
     "benchmark:visual": "node --test tests/visual-benchmark.test.mjs",
     "test:performance": "node --test tests/visual-observability.test.mjs",
-    "audit:coverage": "node --test tests/visual-photo-coverage.test.mjs"
+    "audit:coverage": "node --test tests/visual-photo-coverage.test.mjs",
+    "audit:variety": "node --test tests/visual-variety.test.mjs"
   },
   "engines": {
     "node": ">=20"
