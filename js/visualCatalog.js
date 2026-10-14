@@ -273,6 +273,112 @@ export const CURATED_VISUALS = [
     mobileFocalPoint: { x: 0.5, y: 0.52 },
     compositionScore: 0.85,
     negativeTags: ['publicidade', 'triunfalismo', 'pose olhando para câmera']
+  }),
+  pexels('37825335', 'pexels-photo-37825335.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/close-up-of-writing-hands-in-classroom-setting-37825335/',
+    description: 'Close-up of a person writing in a notebook under natural light, focused on attentive reflection rather than academic status.',
+    alt: 'Mãos escrevendo em um caderno sob luz natural.',
+    width: 4272,
+    height: 2848,
+    themes: ['sabedoria'],
+    tags: [
+      'sabedoria', 'discernimento', 'atenção', 'escolha',
+      'writing', 'notebook', 'reflection', 'focus',
+      'natural light', 'thoughtful', 'observation'
+    ],
+    moods: ['reflexivo', 'sóbrio', 'claro', 'contemplativo'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-right', 'right'],
+    tabletSafeTextAreas: ['upper-right', 'lower-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.42, y: 0.58 },
+    tabletFocalPoint: { x: 0.44, y: 0.56 },
+    mobileFocalPoint: { x: 0.45, y: 0.55 },
+    compositionScore: 0.87,
+    identityScore: 0.91,
+    negativeTags: [
+      'biblioteca luxuosa', 'status acadêmico',
+      'publicidade', 'pose olhando para câmera'
+    ]
+  }),
+  pexels('29372724', 'pexels-photo-29372724.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/elderly-care-at-home-compassionate-support-29372724/',
+    description: 'A caregiver holds a senior adult hands at home, expressing quiet support, care and human presence.',
+    alt: 'Pessoa oferecendo cuidado e apoio pelas mãos a um adulto idoso.',
+    width: 5880,
+    height: 3920,
+    themes: ['amor'],
+    tags: [
+      'amor', 'presença', 'cuidado', 'aliança',
+      'care', 'compassion', 'support', 'reassurance',
+      'human connection', 'hands', 'dignity', 'presence'
+    ],
+    moods: ['íntimo', 'caloroso', 'humano', 'compassivo'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-left', 'upper-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.52, y: 0.58 },
+    tabletFocalPoint: { x: 0.52, y: 0.55 },
+    mobileFocalPoint: { x: 0.52, y: 0.54 },
+    compositionScore: 0.88,
+    identityScore: 0.93,
+    negativeTags: [
+      'romance', 'sensualidade', 'pose publicitária',
+      'casal de banco de imagens'
+    ]
+  }),
+  pexels('2540408', 'pexels-photo-2540408.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/photo-of-person-walking-on-pathway-near-rocks-2540408/',
+    description: 'A lone hiker continues through a rugged rocky trail, emphasizing endurance and progress rather than arrival or triumph.',
+    alt: 'Pessoa caminhando por uma trilha rochosa difícil e remota.',
+    themes: ['perseverança'],
+    tags: [
+      'perseverança', 'progresso', 'persistência', 'resistência',
+      'endurance', 'trail', 'journey', 'walking',
+      'rugged', 'rocks', 'continuity', 'effort'
+    ],
+    moods: ['resiliente', 'progressivo', 'sóbrio', 'firme'],
+    representationModes: ['conceptual', 'hybrid'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-left', 'upper-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.52, y: 0.56 },
+    tabletFocalPoint: { x: 0.52, y: 0.54 },
+    mobileFocalPoint: { x: 0.52, y: 0.54 },
+    compositionScore: 0.86,
+    identityScore: 0.92,
+    negativeTags: [
+      'troféu', 'cume vitorioso', 'celebração',
+      'pose heroica', 'turismo'
+    ]
+  }),
+  pexels('4746768', 'pexels-photo-4746768.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/two-men-hugging-4746768/',
+    description: 'Two people share a warm outdoor embrace in natural light, suggesting reconnection, release and restored human closeness.',
+    alt: 'Duas pessoas se abraçando ao ar livre em um gesto de reconexão.',
+    width: 6000,
+    height: 4000,
+    themes: ['perdão'],
+    tags: [
+      'perdão', 'reconciliação', 'liberação', 'recomeço',
+      'reconnection', 'embrace', 'hug', 'support',
+      'human connection', 'restored bond', 'release'
+    ],
+    moods: ['humilde', 'aliviado', 'reconciliador', 'caloroso'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-left', 'upper-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.52, y: 0.50 },
+    tabletFocalPoint: { x: 0.52, y: 0.50 },
+    mobileFocalPoint: { x: 0.52, y: 0.50 },
+    compositionScore: 0.87,
+    identityScore: 0.92,
+    negativeTags: [
+      'romance', 'festa', 'publicidade',
+      'pose olhando para câmera'
+    ]
   })
 ];
 
