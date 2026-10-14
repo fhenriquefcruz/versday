@@ -49,6 +49,12 @@ export function evaluateCuratedPhotoCoverage(verses = FALLBACK_VERSES) {
       selectedIds: new Set(),
       rejectedReasons: new Map(),
       topRejectedIds: new Map(),
+      rejectedScoreTotals: {
+        semantic: 0,
+        emotional: 0,
+        final: 0,
+        count: 0
+      },
       references: []
     };
 
@@ -71,6 +77,13 @@ export function evaluateCuratedPhotoCoverage(verses = FALLBACK_VERSES) {
           topId,
           (current.topRejectedIds.get(topId) || 0) + 1
         );
+        current.rejectedScoreTotals.semantic +=
+          Number(topRejected.scores?.semantic || 0);
+        current.rejectedScoreTotals.emotional +=
+          Number(topRejected.scores?.emotional || 0);
+        current.rejectedScoreTotals.final +=
+          Number(topRejected.scores?.final || 0);
+        current.rejectedScoreTotals.count += 1;
       } else {
         current.rejectedReasons.set(
           'NO_CURATED_CANDIDATE',
@@ -103,6 +116,20 @@ export function evaluateCuratedPhotoCoverage(verses = FALLBACK_VERSES) {
       topRejectedCandidate:
         [...item.topRejectedIds.entries()]
           .sort((a, b) => b[1] - a[1])[0]?.[0] || null,
+      rejectedScoreAverage: {
+        semantic: item.rejectedScoreTotals.count
+          ? item.rejectedScoreTotals.semantic /
+            item.rejectedScoreTotals.count
+          : 0,
+        emotional: item.rejectedScoreTotals.count
+          ? item.rejectedScoreTotals.emotional /
+            item.rejectedScoreTotals.count
+          : 0,
+        final: item.rejectedScoreTotals.count
+          ? item.rejectedScoreTotals.final /
+            item.rejectedScoreTotals.count
+          : 0
+      },
       references: item.references
     }))
     .sort((a, b) => {
@@ -152,7 +179,10 @@ test('diagnóstico de cobertura fotográfica por tema permanece calculável', t 
         `${(item.photoRate * 100).toFixed(1)}%`,
         `uniquePhotos=${item.uniquePhotos}`,
         `reject=${item.dominantRejectReason || 'none'}`,
-        `top=${item.topRejectedCandidate || 'none'}`
+        `top=${item.topRejectedCandidate || 'none'}`,
+        `avgSem=${item.rejectedScoreAverage.semantic.toFixed(3)}`,
+        `avgEmo=${item.rejectedScoreAverage.emotional.toFixed(3)}`,
+        `avgFinal=${item.rejectedScoreAverage.final.toFixed(3)}`
       ].join(' · ')
     );
   }
