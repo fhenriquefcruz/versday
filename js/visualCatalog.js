@@ -50,6 +50,7 @@ function pexels(id, filename, meta = {}) {
 
 export const CURATED_VISUALS = [
   pexels('457881', 'pexels-photo-457881.jpeg', {
+    sceneFamily: 'still-water-reflection',
     themes: ['paz', 'descanso'],
     tags: ['paz', 'descanso', 'water', 'lake', 'stillness', 'reflection', 'quietude'],
     moods: ['sereno', 'quieto', 'contemplativo'],
@@ -149,6 +150,7 @@ export const CURATED_VISUALS = [
     negativeTags: ['festa', 'comemoração', 'triunfalismo']
   }),
   pexels('1493215', 'pexels-photo-1493215.jpeg', {
+    sceneFamily: 'organic-renewal',
     themes: ['esperança', 'cura'],
     tags: ['esperança', 'cura', 'growth', 'nature', 'light', 'renewal', 'renovação'],
     moods: ['esperançoso', 'renovador', 'sereno'],
@@ -231,6 +233,7 @@ export const CURATED_VISUALS = [
     negativeTags: ['festa artificial', 'publicidade', 'ostentação']
   }),
   pexels('6670100', 'pexels-photo-6670100.jpeg', {
+    sceneFamily: 'human-comfort-support',
     providerUrl: 'https://www.pexels.com/photo/woman-giving-coffee-to-a-lonely-woman-6670100/',
     description: 'Two women share a comforting moment, one offering a warm cup indoors.',
     alt: 'Uma mulher oferece uma bebida quente a outra em um momento de acolhimento.',
@@ -275,6 +278,7 @@ export const CURATED_VISUALS = [
     negativeTags: ['publicidade', 'triunfalismo', 'pose olhando para câmera']
   }),
   pexels('37825335', 'pexels-photo-37825335.jpeg', {
+    sceneFamily: 'writing-reflection',
     providerUrl: 'https://www.pexels.com/photo/close-up-of-writing-hands-in-classroom-setting-37825335/',
     description: 'Close-up of a person writing in a notebook under natural light, focused on attentive reflection rather than academic status.',
     alt: 'Mãos escrevendo em um caderno sob luz natural.',
@@ -302,6 +306,7 @@ export const CURATED_VISUALS = [
     ]
   }),
   pexels('29372724', 'pexels-photo-29372724.jpeg', {
+    sceneFamily: 'caregiving-hands',
     providerUrl: 'https://www.pexels.com/photo/elderly-care-at-home-compassionate-support-29372724/',
     description: 'A caregiver holds a senior adult hands at home, expressing quiet support, care and human presence.',
     alt: 'Pessoa oferecendo cuidado e apoio pelas mãos a um adulto idoso.',
@@ -329,6 +334,7 @@ export const CURATED_VISUALS = [
     ]
   }),
   pexels('2540408', 'pexels-photo-2540408.jpeg', {
+    sceneFamily: 'rugged-human-journey',
     providerUrl: 'https://www.pexels.com/photo/photo-of-person-walking-on-pathway-near-rocks-2540408/',
     description: 'A lone hiker continues through a rugged rocky trail, emphasizing endurance and progress rather than arrival or triumph.',
     alt: 'Pessoa caminhando por uma trilha rochosa difícil e remota.',
@@ -381,6 +387,7 @@ export const CURATED_VISUALS = [
     ]
   }),
   pexels('4978541', 'pexels-photo-4978541.jpeg', {
+    sceneFamily: 'doorway-uncertainty',
     providerUrl: 'https://www.pexels.com/photo/silhouette-of-a-person-inside-a-dark-room-4978541/',
     description: 'A quiet human silhouette sits in a doorway facing open dusk light, expressing trust amid uncertainty without religious iconography.',
     alt: 'Silhueta de uma pessoa sentada diante de uma abertura com luz suave ao entardecer.',
@@ -750,7 +757,204 @@ export const CURATED_VISUALS = [
       'pódio', 'medalha',
       'vitória esportiva', 'euforia'
     ]
+  }),
+  pexels('35391620', 'pexels-photo-35391620.jpeg', {
+    sceneFamily: 'human-observation-window',
+    providerUrl: 'https://www.pexels.com/photo/elegant-portrait-of-a-thoughtful-woman-by-window-35391620/',
+    description: 'A contemplative adult observes quietly by a window in soft natural light, expressing reflection before action rather than academic status.',
+    alt: 'Pessoa observando em silêncio junto a uma janela com luz natural suave.',
+    width: 4000,
+    height: 6000,
+    themes: ['sabedoria'],
+    tags: [
+      'sabedoria', 'discernimento', 'atenção', 'escolha',
+      'observation', 'reflection', 'thoughtful', 'window',
+      'natural light', 'before acting', 'quiet decision'
+    ],
+    moods: ['reflexivo', 'sóbrio', 'claro', 'contemplativo'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['left', 'upper-left'],
+    tabletSafeTextAreas: ['left', 'upper-left'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.64, y: 0.46 },
+    tabletFocalPoint: { x: 0.60, y: 0.48 },
+    mobileFocalPoint: { x: 0.56, y: 0.48 },
+    compositionScore: 0.86,
+    identityScore: 0.91,
+    negativeTags: [
+      'biblioteca luxuosa', 'status acadêmico',
+      'publicidade', 'pose de autoridade'
+    ]
+  }),
+  pexels('35222682', 'pexels-photo-35222682.jpeg', {
+    sceneFamily: 'fog-uncertainty',
+    providerUrl: 'https://www.pexels.com/photo/lonely-figure-walking-in-foggy-landscape-35222682/',
+    description: 'A distant human figure continues through a quiet misty field where the way ahead is not fully visible.',
+    alt: 'Figura distante caminhando por um campo coberto de névoa e baixa visibilidade.',
+    width: 4000,
+    height: 6000,
+    themes: ['fé'],
+    tags: [
+      'fé', 'direção', 'presença', 'luz discreta',
+      'uncertainty', 'mist', 'fog', 'unknown',
+      'walking', 'quiet', 'trust', 'limited visibility'
+    ],
+    moods: ['contemplativo', 'confiante', 'sóbrio'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-left', 'upper-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.50, y: 0.60 },
+    tabletFocalPoint: { x: 0.50, y: 0.58 },
+    mobileFocalPoint: { x: 0.50, y: 0.56 },
+    compositionScore: 0.88,
+    identityScore: 0.93,
+    negativeTags: [
+      'terror', 'desespero', 'pose religiosa',
+      'cruz', 'igreja'
+    ]
+  }),
+  pexels('11840887', 'pexels-photo-11840887.jpeg', {
+    sceneFamily: 'growth-through-adversity',
+    providerUrl: 'https://www.pexels.com/photo/plant-sprout-on-dry-soil-11840887/',
+    description: 'A single green sprout emerges from cracked dry soil, showing realistic renewal after difficult conditions.',
+    alt: 'Broto verde crescendo em solo seco e rachado.',
+    width: 5184,
+    height: 3456,
+    themes: ['esperança'],
+    tags: [
+      'esperança', 'renovação', 'abertura',
+      'growth', 'new life', 'sprout', 'cracked soil',
+      'adversity', 'recovery', 'regeneration'
+    ],
+    moods: ['esperançoso', 'sereno', 'ascendente'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-left', 'upper-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.50, y: 0.56 },
+    tabletFocalPoint: { x: 0.50, y: 0.54 },
+    mobileFocalPoint: { x: 0.50, y: 0.52 },
+    compositionScore: 0.89,
+    identityScore: 0.93,
+    negativeTags: [
+      'arco-íris artificial', 'euforia',
+      'motivational wallpaper'
+    ]
+  }),
+  pexels('5082641', 'pexels-photo-5082641.jpeg', {
+    sceneFamily: 'family-shared-meal',
+    providerUrl: 'https://www.pexels.com/photo/people-at-a-kitchen-5082641/',
+    description: 'A family shares an ordinary meal at home, expressing presence, care and warm human connection.',
+    alt: 'Família compartilhando uma refeição em casa em um momento de presença e vínculo.',
+    width: 7784,
+    height: 5189,
+    themes: ['amor'],
+    tags: [
+      'amor', 'presença', 'cuidado', 'aliança',
+      'family', 'shared meal', 'togetherness',
+      'human connection', 'home', 'care', 'presence'
+    ],
+    moods: ['íntimo', 'caloroso', 'humano'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-left', 'upper-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.52, y: 0.54 },
+    tabletFocalPoint: { x: 0.52, y: 0.52 },
+    mobileFocalPoint: { x: 0.52, y: 0.52 },
+    compositionScore: 0.86,
+    identityScore: 0.92,
+    negativeTags: [
+      'sensualidade', 'pose romântica',
+      'publicidade', 'festa artificial'
+    ]
+  }),
+  pexels('9002404', 'pexels-photo-9002404.jpeg', {
+    sceneFamily: 'sheltered-quiet-interior',
+    providerUrl: 'https://www.pexels.com/photo/chair-by-the-window-9002404/',
+    description: 'A quiet armchair beside an open window in a dim sheltered interior, suggesting rest, protection and gentle calm.',
+    alt: 'Poltrona em um ambiente silencioso junto a uma janela aberta e luz suave.',
+    width: 3024,
+    height: 4032,
+    themes: ['conforto'],
+    tags: [
+      'conforto', 'acolhimento', 'abrigo',
+      'quiet interior', 'chair', 'window',
+      'shelter', 'rest', 'soft light', 'calm'
+    ],
+    moods: ['acolhedor', 'sereno', 'compassivo'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-right', 'right'],
+    tabletSafeTextAreas: ['upper-right', 'right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.46, y: 0.56 },
+    tabletFocalPoint: { x: 0.46, y: 0.54 },
+    mobileFocalPoint: { x: 0.48, y: 0.54 },
+    compositionScore: 0.88,
+    identityScore: 0.92,
+    negativeTags: [
+      'resort', 'luxo', 'publicidade',
+      'alegria excessiva'
+    ]
+  }),
+  pexels('29567505', 'pexels-photo-29567505.jpeg', {
+    sceneFamily: 'minimal-quiet-retreat',
+    providerUrl: 'https://www.pexels.com/photo/minimalist-chair-by-large-windows-in-sunlit-room-29567505/',
+    description: 'A single chair in a quiet minimalist room with large windows and natural light, conveying stillness and uncluttered calm.',
+    alt: 'Cadeira solitária em ambiente minimalista silencioso com grandes janelas e luz natural.',
+    width: 6000,
+    height: 4000,
+    themes: ['paz'],
+    tags: [
+      'paz', 'quietude', 'equilíbrio', 'abrigo',
+      'minimal interior', 'chair', 'large windows',
+      'natural light', 'stillness', 'quiet', 'retreat'
+    ],
+    moods: ['sereno', 'quieto', 'acolhedor'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['left', 'upper-left'],
+    tabletSafeTextAreas: ['left', 'upper-left'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.62, y: 0.52 },
+    tabletFocalPoint: { x: 0.58, y: 0.52 },
+    mobileFocalPoint: { x: 0.54, y: 0.52 },
+    compositionScore: 0.92,
+    identityScore: 0.94,
+    negativeTags: [
+      'resort', 'turismo', 'festa',
+      'luxo ostensivo'
+    ]
+  }),
+  pexels('9891886', 'pexels-photo-9891886.jpeg', {
+    sceneFamily: 'growth-through-barrier',
+    providerUrl: 'https://www.pexels.com/photo/a-plant-on-the-gray-concrete-9891886/',
+    description: 'A small green plant grows through a hard concrete surface, expressing persistence and continued progress under constraint.',
+    alt: 'Pequena planta crescendo através de uma superfície de concreto.',
+    width: 3504,
+    height: 2319,
+    themes: ['perseverança'],
+    tags: [
+      'perseverança', 'progresso', 'persistência', 'renovação',
+      'plant', 'concrete', 'barrier', 'growth',
+      'resilience', 'continuity', 'hard ground'
+    ],
+    moods: ['resiliente', 'progressivo', 'sóbrio'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-left', 'upper-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.50, y: 0.54 },
+    tabletFocalPoint: { x: 0.50, y: 0.52 },
+    mobileFocalPoint: { x: 0.50, y: 0.52 },
+    compositionScore: 0.89,
+    identityScore: 0.93,
+    negativeTags: [
+      'pódio', 'medalha', 'euforia',
+      'pose heroica'
+    ]
   })
+
 ];
 
 function normalize(value = '') {
