@@ -18,6 +18,16 @@ const ABSTRACT_FIRST_THEMES = new Set([
   'lamento'
 ]);
 
+const CORE_VARIETY_THEMES = new Set([
+  'sabedoria',
+  'fe',
+  'esperanca',
+  'amor',
+  'conforto',
+  'paz',
+  'perseveranca'
+]);
+
 function normalize(value = '') {
   return String(value)
     .normalize('NFD')
@@ -153,4 +163,26 @@ test('audit mede candidatos aceitos, não somente o vencedor repetido', () => {
     wisdom.uniqueAcceptedPhotos >= 1,
     'sabedoria deve ter pelo menos uma foto aceita'
   );
+});
+
+test('temas frequentes cobertos mantêm pelo menos duas fotos e duas famílias de cena', () => {
+  const report = evaluateCuratedVariety();
+
+  for (const theme of CORE_VARIETY_THEMES) {
+    const item = report.find(entry => entry.theme === theme);
+    assert.ok(item, `tema ausente no audit: ${theme}`);
+    assert.ok(
+      item.uniqueAcceptedPhotos >= 2,
+      `${theme}: apenas ${item.uniqueAcceptedPhotos} foto(s) aceita(s)`
+    );
+    assert.ok(
+      item.uniqueSceneFamilies >= 2,
+      `${theme}: apenas ${item.uniqueSceneFamilies} família(s) de cena`
+    );
+    assert.equal(
+      item.varietyRisk,
+      false,
+      `${theme} ainda sinalizado como VARIETY_RISK`
+    );
+  }
 });
