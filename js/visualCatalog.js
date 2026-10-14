@@ -419,7 +419,7 @@ export const CURATED_VISUALS = [
       'natural light', 'window', 'shadow', 'contrast',
       'illumination', 'dark room', 'negative space'
     ],
-    moods: ['claro', 'esperançoso', 'contemplativo'],
+    moods: ['revelador', 'esperançoso', 'solene', 'contemplativo'],
     representationModes: ['literal', 'hybrid', 'conceptual'],
     safeTextAreas: ['left', 'lower-left'],
     tabletSafeTextAreas: ['left', 'lower-left'],
