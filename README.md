@@ -205,6 +205,7 @@ Com `?visualDebug=1`, o console mostra também `decision`, `timings` e o resumo 
 
 ```bash
 npm run test:performance
+npm run audit:coverage
 ```
 
 ## Share cards
@@ -230,7 +231,9 @@ npm run benchmark:visual
 npm run test:performance
 ```
 
-O gate agregado exige **approval rate mínimo de 95%**. Uma passagem só é aprovada quando produz intenção/queries válidas e termina em uma destas saídas:
+O gate agregado exige **approval rate mínimo de 95%**.
+
+A auditoria complementar `npm run audit:coverage` mostra cobertura fotográfica por tema usando apenas o catálogo curado. Ela é diagnóstica: temas `abstract-first` não recebem meta mínima de foto, porque fallback abstrato coerente continua sendo uma saída correta. Uma passagem só é aprovada quando produz intenção/queries válidas e termina em uma destas saídas:
 
 - fotografia que ultrapassa os thresholds semântico, de qualidade e composição, com focal point e safe area;
 - fallback abstrato editorial válido quando nenhuma fotografia merece ser exibida.
