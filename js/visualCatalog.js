@@ -84,6 +84,7 @@ export const CURATED_VISUALS = [
     negativeTags: ['festa', 'multidão']
   }),
   pexels('1292115', 'pexels-photo-1292115.jpeg', {
+    sceneFamily: 'quiet-window-light',
     themes: ['luz', 'oração', 'fé'],
     tags: ['luz', 'light', 'shadow', 'window', 'interior', 'silêncio', 'recolhimento'],
     moods: ['contemplativo', 'silencioso', 'esperançoso', 'íntimo'],
@@ -139,6 +140,7 @@ export const CURATED_VISUALS = [
     negativeTags: ['alegria eufórica', 'festa', 'multidão']
   }),
   pexels('618848', 'pexels-photo-618848.jpeg', {
+    sceneFamily: 'rock-sea-resistance',
     themes: ['força', 'coragem'],
     tags: ['força', 'coragem', 'rock', 'waves', 'weather', 'resistência', 'adversidade'],
     moods: ['firme', 'resiliente', 'sóbrio'],
@@ -217,6 +219,7 @@ export const CURATED_VISUALS = [
     negativeTags: ['pose olhando para câmera', 'sensualidade', 'festa', 'abraço publicitário']
   }),
   pexels('4262003', 'pexels-photo-4262003.jpeg', {
+    sceneFamily: 'family-shared-joy',
     providerUrl: 'https://www.pexels.com/photo/family-setting-the-table-for-dinner-4262003/',
     description: 'A joyful family prepares a shared meal in a bright kitchen.',
     alt: 'Família preparando uma refeição em conjunto em uma cozinha iluminada.',
@@ -492,6 +495,7 @@ export const CURATED_VISUALS = [
     ]
   }),
   pexels('19023904', 'pexels-photo-19023904.jpeg', {
+    sceneFamily: 'empty-chair-shelter',
     providerUrl: 'https://www.pexels.com/photo/table-and-empty-chair-behind-19023904/',
     description: 'An empty chair rests in a quiet interior shaped by soft natural light and restrained shadows.',
     alt: 'Cadeira vazia em um interior silencioso com luz natural suave.',
@@ -952,6 +956,118 @@ export const CURATED_VISUALS = [
     negativeTags: [
       'pódio', 'medalha', 'euforia',
       'pose heroica'
+    ]
+  }),
+  pexels('35174361', 'pexels-photo-35174361.jpeg', {
+    sceneFamily: 'candid-friendship-joy',
+    providerUrl: 'https://www.pexels.com/photo/joyful-friends-in-natural-sunlit-setting-35174361/',
+    description: 'Two friends share a spontaneous joyful moment outdoors under soft natural sunlight, with relaxed candid body language.',
+    alt: 'Duas amigas compartilhando um momento espontâneo de alegria ao ar livre sob luz natural.',
+    width: 4000,
+    height: 5339,
+    themes: ['alegria'],
+    tags: [
+      'alegria', 'abertura', 'luz', 'renovação',
+      'authentic joy', 'candid friends', 'sunlight',
+      'outdoors', 'natural light', 'laughter', 'friendship'
+    ],
+    moods: ['luminoso', 'vivo', 'leve'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['left', 'upper-left'],
+    tabletSafeTextAreas: ['left', 'upper-left'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.64, y: 0.52 },
+    tabletFocalPoint: { x: 0.60, y: 0.52 },
+    mobileFocalPoint: { x: 0.56, y: 0.52 },
+    compositionScore: 0.87,
+    identityScore: 0.92,
+    negativeTags: [
+      'pose publicitária', 'festa artificial',
+      'neon', 'saturação extrema'
+    ]
+  }),
+  pexels('3377524', 'pexels-photo-3377524.jpeg', {
+    sceneFamily: 'uphill-human-effort',
+    providerUrl: 'https://www.pexels.com/photo/a-person-climbing-a-mountain-3377524/',
+    description: 'A solitary hiker climbs a steep ridge in a wide challenging landscape, emphasizing effort and sustained strength rather than triumph.',
+    alt: 'Pessoa subindo uma crista íngreme em uma paisagem ampla e desafiadora.',
+    width: 5184,
+    height: 3456,
+    themes: ['força'],
+    tags: [
+      'força', 'firmeza', 'resistência', 'sustentação',
+      'hiker', 'climb', 'ridge', 'effort',
+      'challenging landscape', 'endurance', 'steady progress'
+    ],
+    moods: ['firme', 'resiliente', 'sóbrio'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-left', 'upper-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.58, y: 0.56 },
+    tabletFocalPoint: { x: 0.56, y: 0.54 },
+    mobileFocalPoint: { x: 0.54, y: 0.52 },
+    compositionScore: 0.88,
+    identityScore: 0.92,
+    negativeTags: [
+      'fisiculturismo', 'pose heroica artificial',
+      'explosões', 'triunfalismo'
+    ]
+  }),
+  pexels('30644362', 'pexels-photo-30644362.jpeg', {
+    sceneFamily: 'silent-window-contemplation',
+    providerUrl: 'https://www.pexels.com/photo/pensive-man-reflecting-by-window-in-berlin-light-30644362/',
+    description: 'A solitary person sits quietly by a window in natural light, leaving generous space for stillness, attention and inward reflection.',
+    alt: 'Pessoa sentada em silêncio junto a uma janela sob luz natural suave.',
+    width: 3606,
+    height: 5410,
+    themes: ['oração'],
+    tags: [
+      'oração', 'silêncio', 'recolhimento', 'presença',
+      'quiet room', 'solitary figure', 'window light',
+      'stillness', 'attention', 'reflection', 'negative space'
+    ],
+    moods: ['silencioso', 'íntimo', 'reverente'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['left', 'upper-left'],
+    tabletSafeTextAreas: ['left', 'upper-left'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.66, y: 0.50 },
+    tabletFocalPoint: { x: 0.62, y: 0.50 },
+    mobileFocalPoint: { x: 0.58, y: 0.50 },
+    compositionScore: 0.90,
+    identityScore: 0.93,
+    negativeTags: [
+      'mãos juntas automáticas', 'igreja genérica',
+      'cruz genérica', 'multidão religiosa'
+    ]
+  }),
+  pexels('39914924', 'pexels-photo-39914924.jpeg', {
+    sceneFamily: 'forest-hammock-rest',
+    providerUrl: 'https://www.pexels.com/photo/green-forest-with-colorful-hammock-in-pine-grove-39914924/',
+    description: 'A simple hammock rests quietly beneath a shaded pine grove, conveying pause and protected stillness rather than a resort or beach holiday.',
+    alt: 'Rede simples em um bosque sombreado e silencioso entre pinheiros.',
+    width: 4272,
+    height: 2856,
+    themes: ['descanso'],
+    tags: [
+      'descanso', 'pausa', 'abrigo', 'quietude',
+      'hammock', 'pine forest', 'shade',
+      'protected place', 'stillness', 'slow', 'calm'
+    ],
+    moods: ['quieto', 'protegido', 'desacelerado'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-left', 'upper-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.54, y: 0.56 },
+    tabletFocalPoint: { x: 0.52, y: 0.54 },
+    mobileFocalPoint: { x: 0.50, y: 0.52 },
+    compositionScore: 0.87,
+    identityScore: 0.90,
+    negativeTags: [
+      'resort', 'rede de praia', 'turismo',
+      'festa', 'publicidade'
     ]
   })
 
