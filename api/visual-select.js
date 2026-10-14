@@ -1,4 +1,5 @@
 import { applyCors, readJsonBody } from './_cors.js';
+import { applyRateLimit, RATE_LIMIT_POLICIES } from './_rate-limit.js';
 
 function isAllowedDownloadLocation(value) {
   try {
@@ -14,6 +15,7 @@ function isAllowedDownloadLocation(value) {
 export default async function handler(req, res) {
   if (applyCors(req, res)) return;
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (applyRateLimit(req, res, 'visual-select', RATE_LIMIT_POLICIES.visualSelect)) return;
 
   const accessKey = process.env.UNSPLASH_ACCESS_KEY;
   if (!accessKey) return res.status(503).json({ error: 'Image provider not configured' });

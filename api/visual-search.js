@@ -1,4 +1,5 @@
 import { applyCors, readJsonBody } from './_cors.js';
+import { applyRateLimit, RATE_LIMIT_POLICIES } from './_rate-limit.js';
 
 const UNSPLASH_SEARCH_URL = 'https://api.unsplash.com/search/photos';
 const MAX_QUERIES = 4;
@@ -193,6 +194,14 @@ export default async function handler(req, res) {
       error: 'Method not allowed'
     });
   }
+  if (
+    applyRateLimit(
+      req,
+      res,
+      'visual-search',
+      RATE_LIMIT_POLICIES.visualSearch
+    )
+  ) return;
 
   const accessKey = process.env.UNSPLASH_ACCESS_KEY;
   if (!accessKey) {

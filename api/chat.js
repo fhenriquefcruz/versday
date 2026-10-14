@@ -1,4 +1,5 @@
 import { applyCors, readJsonBody } from './_cors.js';
+import { applyRateLimit, RATE_LIMIT_POLICIES } from './_rate-limit.js';
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const SYSTEM_INSTRUCTION = `Você é um amigo que entende muito da Bíblia e adora explicar as coisas de um jeito simples e gostoso de ler. Ajude as pessoas a entenderem as Escrituras como se estivessem conversando sobre a vida. Seja caloroso, paciente e use linguagem natural e fluida. Evite cabeçalhos artificiais. Para perguntas profundas, inclua contexto histórico e linguístico com responsabilidade, distinguindo interpretação de fato. Cite passagens de forma natural, não invente referências e responda sempre em português brasileiro.`;
@@ -14,6 +15,7 @@ function normalizeHistory(history) {
 export default async function handler(req, res) {
   if (applyCors(req, res)) return;
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (applyRateLimit(req, res, 'chat', RATE_LIMIT_POLICIES.chat)) return;
 
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) return res.status(503).json({ error: 'Chat provider not configured' });

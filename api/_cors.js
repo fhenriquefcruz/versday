@@ -1,21 +1,42 @@
-const DEFAULT_ALLOWED_ORIGINS = new Set([
-  'https://fhenriquefcruz.github.io',
+const PRODUCTION_ALLOWED_ORIGINS = new Set([
+  'https://fhenriquefcruz.github.io'
+]);
+
+const DEVELOPMENT_ALLOWED_ORIGINS = new Set([
   'http://localhost:3000',
   'http://localhost:5173',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:5173'
 ]);
 
+export function isProductionRuntime() {
+  return (
+    String(process.env.VERCEL_ENV || '').toLowerCase() === 'production' ||
+    String(process.env.NODE_ENV || '').toLowerCase() === 'production'
+  );
+}
+
+export function getAllowedOrigins() {
+  const configured = String(process.env.ALLOWED_ORIGIN || '')
+    .split(',')
+    .map(value => value.trim())
+    .filter(Boolean);
+
+  return new Set([
+    ...PRODUCTION_ALLOWED_ORIGINS,
+    ...(!isProductionRuntime()
+      ? DEVELOPMENT_ALLOWED_ORIGINS
+      : []),
+    ...configured
+  ]);
+}
+
 export function applyCors(req, res, options = {}) {
   const origin = req.headers.origin;
   const methods = Array.isArray(options.methods) && options.methods.length
     ? options.methods
     : ['POST', 'OPTIONS'];
-  const configured = String(process.env.ALLOWED_ORIGIN || '')
-    .split(',')
-    .map(value => value.trim())
-    .filter(Boolean);
-  const allowed = new Set([...DEFAULT_ALLOWED_ORIGINS, ...configured]);
+  const allowed = getAllowedOrigins();
 
   if (origin && allowed.has(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);

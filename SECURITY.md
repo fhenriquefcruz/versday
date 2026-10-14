@@ -80,3 +80,18 @@ Regras:
 - `innerHTML`, `insertAdjacentHTML`, `document.write`, `eval` e `new Function` são proibidos nos módulos do cliente;
 - a única exceção é o renderer de chat, cuja entrada passa obrigatoriamente por `formatAssistantHtml()`, que escapa HTML antes de aplicar Markdown leve;
 - a suíte de segurança varre todos os módulos `js/` para impedir regressão.
+
+## Proteção contra abuso e custo
+
+Endpoints que acionam serviços externos devem aplicar limitação por rota antes de consumir cota do provedor.
+
+A implementação atual:
+
+- usa `x-forwarded-for` no ambiente Vercel;
+- transforma o identificador em hash antes de mantê-lo em memória;
+- não persiste nem registra o IP bruto;
+- devolve `429` e `Retry-After` quando a janela é excedida;
+- mantém o healthcheck fora do limiter;
+- remove localhost da allowlist CORS padrão em produção.
+
+O limiter em memória é best-effort por instância. Em um deployment serverless distribuído, proteção global deve ser configurada também no firewall/rate limiting da plataforma.
