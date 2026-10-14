@@ -379,6 +379,138 @@ export const CURATED_VISUALS = [
       'romance', 'festa', 'publicidade',
       'pose olhando para câmera'
     ]
+  }),
+  pexels('29248081', 'pexels-photo-29248081.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/blurred-view-through-rain-soaked-window-indoors-29248081/',
+    description: 'Rain blurs the outside view through a window while the protected interior remains quiet and restrained.',
+    alt: 'Chuva no vidro separando um interior protegido de uma paisagem externa incerta.',
+    width: 7011,
+    height: 4674,
+    themes: ['confiança'],
+    tags: [
+      'confiança', 'refúgio', 'direção', 'sustentação',
+      'shelter', 'protected interior', 'rain', 'window',
+      'uncertainty', 'weather', 'obscured view', 'quiet'
+    ],
+    moods: ['seguro', 'sereno', 'encorajador', 'contemplativo'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['left', 'upper-left'],
+    tabletSafeTextAreas: ['left', 'upper-left'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.55, y: 0.5 },
+    tabletFocalPoint: { x: 0.54, y: 0.5 },
+    mobileFocalPoint: { x: 0.53, y: 0.5 },
+    compositionScore: 0.88,
+    identityScore: 0.92,
+    negativeTags: [
+      'festa', 'turismo', 'publicidade', 'praia tropical'
+    ]
+  }),
+  pexels('10711944', 'pexels-photo-10711944.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/sunbeam-shining-in-a-dark-empty-hallway-10711944/',
+    description: 'A restrained sunbeam enters a dark, empty passage and creates a quiet direction through uncertainty.',
+    alt: 'Facho discreto de luz atravessando um ambiente escuro e silencioso.',
+    width: 3456,
+    height: 4608,
+    themes: ['fé'],
+    tags: [
+      'fé', 'direção', 'presença', 'luz discreta',
+      'sunbeam', 'darkness', 'quiet room', 'uncertainty',
+      'subtle light', 'negative space', 'stillness'
+    ],
+    moods: ['contemplativo', 'confiante', 'sóbrio', 'silencioso'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['left', 'lower-left'],
+    tabletSafeTextAreas: ['left', 'lower-left'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.62, y: 0.48 },
+    tabletFocalPoint: { x: 0.60, y: 0.50 },
+    mobileFocalPoint: { x: 0.58, y: 0.50 },
+    compositionScore: 0.88,
+    identityScore: 0.92,
+    negativeTags: [
+      'cruz', 'bíblia aberta', 'mãos em oração',
+      'igreja', 'publicidade'
+    ]
+  }),
+  pexels('3164128', 'pexels-photo-3164128.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/bridge-over-river-3164128/',
+    description: 'A lone person crosses a narrow bridge into dense fog, continuing despite an uncertain path ahead.',
+    alt: 'Pessoa atravessando sozinha uma ponte estreita cercada por neblina.',
+    themes: ['coragem'],
+    tags: [
+      'coragem', 'travessia', 'resistência', 'decisão',
+      'crossing', 'bridge', 'fog', 'uncertainty',
+      'journey', 'risk', 'solitary', 'forward'
+    ],
+    moods: ['firme', 'tenso', 'encorajador', 'sóbrio'],
+    representationModes: ['conceptual', 'hybrid'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-right', 'lower-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.50, y: 0.58 },
+    tabletFocalPoint: { x: 0.50, y: 0.56 },
+    mobileFocalPoint: { x: 0.50, y: 0.55 },
+    compositionScore: 0.88,
+    identityScore: 0.92,
+    negativeTags: [
+      'pose heroica', 'troféu', 'comemoração',
+      'triunfalismo'
+    ]
+  }),
+  pexels('19023904', 'pexels-photo-19023904.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/table-and-empty-chair-behind-19023904/',
+    description: 'An empty chair rests in a quiet interior shaped by soft natural light and restrained shadows.',
+    alt: 'Cadeira vazia em um interior silencioso com luz natural suave.',
+    width: 3024,
+    height: 4032,
+    themes: ['descanso'],
+    tags: [
+      'descanso', 'pausa', 'abrigo', 'quietude',
+      'empty chair', 'stillness', 'quiet interior',
+      'soft light', 'rest', 'shelter', 'slow', 'calm'
+    ],
+    moods: ['quieto', 'protegido', 'desacelerado', 'sereno'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-right', 'left'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.55, y: 0.58 },
+    tabletFocalPoint: { x: 0.54, y: 0.56 },
+    mobileFocalPoint: { x: 0.53, y: 0.54 },
+    compositionScore: 0.89,
+    identityScore: 0.92,
+    negativeTags: [
+      'resort', 'rede de praia', 'turismo',
+      'festa', 'publicidade'
+    ]
+  }),
+  pexels('18820283', 'pexels-photo-18820283.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/sunlight-streaming-into-a-dark-room-through-a-lone-window-18820283/',
+    description: 'A single window sends natural light into a dark room, creating a clear contrast between illumination and shadow.',
+    alt: 'Luz natural entrando por uma única janela e recortando um ambiente escuro.',
+    width: 6105,
+    height: 4070,
+    themes: ['luz'],
+    tags: [
+      'luz', 'revelação', 'clareza', 'esperança',
+      'natural light', 'beam', 'darkness', 'shadow',
+      'contrast', 'window', 'illumination', 'negative space'
+    ],
+    moods: ['revelador', 'esperançoso', 'solene', 'contemplativo'],
+    representationModes: ['hybrid', 'conceptual'],
+    safeTextAreas: ['left', 'lower-left'],
+    tabletSafeTextAreas: ['left', 'lower-left'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.64, y: 0.48 },
+    tabletFocalPoint: { x: 0.62, y: 0.50 },
+    mobileFocalPoint: { x: 0.60, y: 0.50 },
+    compositionScore: 0.90,
+    identityScore: 0.93,
+    negativeTags: [
+      'lens flare', 'céu divino artificial',
+      'HDR', 'sol isolado'
+    ]
   })
 ];
 
