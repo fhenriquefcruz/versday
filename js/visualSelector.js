@@ -166,6 +166,17 @@ function containsAny(text, terms = []) {
   return terms.some(term => text.includes(normalize(term)));
 }
 
+function containsSemanticTerm(text, term) {
+  const haystack = normalize(text)
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+  const needle = normalize(term)
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+  if (!needle) return false;
+  return (' ' + haystack + ' ').includes(' ' + needle + ' ');
+}
+
 const SCENE_STOPWORDS = new Set([
   'editorial','photography','cinematic','natural','light','restrained','color',
   'palette','clean','composition','contemplative','atmosphere','negative','space',
@@ -344,12 +355,12 @@ function religiousClicheConflict(candidate, intent) {
 
   for (const group of RELIGIOUS_CLICHE_GROUPS) {
     const appearsInCandidate = group.terms.some(term =>
-      candidateText.includes(normalize(term))
+      containsSemanticTerm(candidateText, term)
     );
     if (!appearsInCandidate) continue;
 
     const explicitlyJustified = group.terms.some(term =>
-      intentText.includes(normalize(term))
+      containsSemanticTerm(intentText, term)
     );
     if (!explicitlyJustified) return true;
   }
