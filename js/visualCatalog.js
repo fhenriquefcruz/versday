@@ -433,6 +433,82 @@ export const CURATED_VISUALS = [
       'raios divinos', 'efeito celestial',
       'neon', 'publicidade', 'cruz'
     ]
+  }),
+  pexels('29248081', 'pexels-photo-29248081.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/blurred-view-through-rain-soaked-window-indoors-29248081/',
+    description: 'Rain blurs the outside view through a window while the protected interior remains quiet and restrained.',
+    alt: 'Chuva no vidro separando um interior protegido de uma paisagem externa incerta.',
+    width: 7011,
+    height: 4674,
+    themes: ['confiança'],
+    tags: [
+      'confiança', 'refúgio', 'direção', 'sustentação',
+      'shelter', 'protected interior', 'rain', 'window',
+      'uncertainty', 'weather', 'obscured view', 'quiet'
+    ],
+    moods: ['seguro', 'sereno', 'encorajador', 'contemplativo'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['left', 'upper-left'],
+    tabletSafeTextAreas: ['left', 'upper-left'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.55, y: 0.50 },
+    tabletFocalPoint: { x: 0.54, y: 0.50 },
+    mobileFocalPoint: { x: 0.53, y: 0.50 },
+    compositionScore: 0.88,
+    identityScore: 0.92,
+    negativeTags: [
+      'festa', 'turismo', 'publicidade', 'praia tropical'
+    ]
+  }),
+  pexels('3164128', 'pexels-photo-3164128.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/bridge-over-river-3164128/',
+    description: 'A lone person crosses a narrow bridge into dense fog, continuing despite an uncertain path ahead.',
+    alt: 'Pessoa atravessando sozinha uma ponte estreita cercada por neblina.',
+    themes: ['coragem'],
+    tags: [
+      'coragem', 'travessia', 'resistência', 'decisão',
+      'crossing', 'bridge', 'fog', 'uncertainty',
+      'journey', 'risk', 'solitary', 'forward'
+    ],
+    moods: ['firme', 'tenso', 'encorajador', 'sóbrio'],
+    representationModes: ['conceptual', 'hybrid'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-right', 'lower-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.50, y: 0.58 },
+    tabletFocalPoint: { x: 0.50, y: 0.56 },
+    mobileFocalPoint: { x: 0.50, y: 0.55 },
+    compositionScore: 0.88,
+    identityScore: 0.92,
+    negativeTags: [
+      'pose heroica', 'troféu', 'comemoração', 'triunfalismo'
+    ]
+  }),
+  pexels('19023904', 'pexels-photo-19023904.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/table-and-empty-chair-behind-19023904/',
+    description: 'An empty chair rests in a quiet interior shaped by soft natural light and restrained shadows.',
+    alt: 'Cadeira vazia em um interior silencioso com luz natural suave.',
+    width: 3024,
+    height: 4032,
+    themes: ['descanso'],
+    tags: [
+      'descanso', 'pausa', 'abrigo', 'quietude',
+      'empty chair', 'stillness', 'quiet interior',
+      'soft light', 'rest', 'shelter', 'slow', 'calm'
+    ],
+    moods: ['quieto', 'protegido', 'desacelerado', 'sereno'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-right', 'left'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.55, y: 0.58 },
+    tabletFocalPoint: { x: 0.54, y: 0.56 },
+    mobileFocalPoint: { x: 0.53, y: 0.54 },
+    compositionScore: 0.89,
+    identityScore: 0.92,
+    negativeTags: [
+      'resort', 'rede de praia', 'turismo', 'festa', 'publicidade'
+    ]
   })
 ];
 
