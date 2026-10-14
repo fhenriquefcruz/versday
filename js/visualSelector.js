@@ -198,7 +198,6 @@ export function buildSceneSignature(candidate = {}) {
   }
 
   const source = [
-    candidate.query,
     candidate.description,
     candidate.alt,
     ...(candidate.tags || [])
@@ -288,7 +287,6 @@ function lexicalScore(candidate, intent) {
   const candidateTokens = tokenize([
     candidate.description,
     candidate.alt,
-    candidate.query,
     ...(candidate.tags || [])
   ].join(' '));
 
