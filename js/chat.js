@@ -5,8 +5,29 @@ let chatHistory = [];
 let isLoading = false;
 let chatAvailable = false;
 
-function escapeHtml(str) {
-  return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m]));
+export function escapeHtml(str) {
+  return String(str).replace(
+    /[&<>"']/g,
+    char => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[char])
+  );
+}
+
+export function formatAssistantHtml(text) {
+  let safe = escapeHtml(text);
+
+  safe = safe.replace(/^#{1,6}\s+/gm, '');
+  safe = safe.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  safe = safe.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  safe = safe.replace(/\n\n/g, '<br><br>');
+  safe = safe.replace(/\n/g, '<br>');
+
+  return safe;
 }
 
 export function initChat() {
@@ -61,7 +82,7 @@ export function initChat() {
     div.className = `chat-message ${role}`;
     div.innerHTML = role === 'user'
       ? `<strong>Você</strong>${escapeHtml(text)}`
-      : `<strong>Assistente Teológico</strong>${text}`;
+      : `<strong>Assistente Teológico</strong>${formatAssistantHtml(text)}`;
     chatMessages.appendChild(div);
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
