@@ -12,7 +12,7 @@ test('workflow Vercel mantém guardas de deploy e ativação automática', async
 
   assert.match(workflow, /workflow_dispatch:/);
   assert.match(workflow, /permissions:\s*\n\s+contents: write/);
-  assert.match(workflow, /uses: actions\/checkout@v4\s*\n\s+with:\s*\n\s+ref: main/);
+  assert.match(workflow, /uses: actions\/checkout@v7\s*\n\s+with:\s*\n\s+ref: main/);
   assert.match(workflow, /vercel@59\.19\.1/);
   assert.match(workflow, /sync_env "UNSPLASH_ACCESS_KEY" "\$UNSPLASH_ACCESS_KEY"/);
   assert.match(workflow, /sync_env "GROQ_API_KEY" "\$GROQ_API_KEY"/);
