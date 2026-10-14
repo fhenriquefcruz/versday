@@ -189,6 +189,14 @@ const SCENE_STOPWORDS = new Set([
 ]);
 
 export function buildSceneSignature(candidate = {}) {
+  const explicitFamily = normalize(
+    candidate.sceneFamily || ''
+  );
+
+  if (explicitFamily) {
+    return `family:${explicitFamily}`;
+  }
+
   const source = [
     candidate.query,
     candidate.description,

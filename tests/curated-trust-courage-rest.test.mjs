@@ -30,8 +30,8 @@ function normalize(value = '') {
     .trim();
 }
 
-test('engine visual sobe para 2.8.0 após expansão de cobertura', () => {
-  assert.equal(VISUAL_ENGINE_VERSION, '2.8.0');
+test('engine visual sobe para 2.9.0 após expansão de cobertura', () => {
+  assert.equal(VISUAL_ENGINE_VERSION, '2.9.0');
 });
 
 for (const target of TARGETS) {

@@ -236,7 +236,7 @@ O gate agregado exige **approval rate mínimo de 95%**.
 
 A auditoria complementar `npm run audit:coverage` mostra cobertura fotográfica por tema usando apenas o catálogo curado. Ela é diagnóstica: temas `abstract-first` não recebem meta mínima de foto, porque fallback abstrato coerente continua sendo uma saída correta.
 
-A auditoria `npm run audit:variety` mede **todas as fotografias que realmente passam os gates**, não apenas o vencedor de cada verso. Para temas frequentes (8+ passagens), ela sinaliza `VARIETY_RISK` quando não existem pelo menos duas fotos e duas famílias de cena aceitas. É diagnóstica: temas sensíveis/abstract-first ficam fora dessa meta. Uma passagem só é aprovada quando produz intenção/queries válidas e termina em uma destas saídas:
+A auditoria `npm run audit:variety` mede **todas as fotografias que realmente passam os gates**, não apenas o vencedor de cada verso. Para temas frequentes (8+ passagens), ela sinaliza `VARIETY_RISK` quando não existem pelo menos duas fotos e duas famílias de cena aceitas. Além disso, sabedoria, fé, esperança, amor, conforto, paz e perseverança têm gate de CI exigindo **duas fotos aceitas e duas famílias de cena distintas**. Temas sensíveis/abstract-first ficam fora dessa meta. Uma passagem só é aprovada quando produz intenção/queries válidas e termina em uma destas saídas:
 
 - fotografia que ultrapassa os thresholds semântico, de qualidade e composição, com focal point e safe area;
 - fallback abstrato editorial válido quando nenhuma fotografia merece ser exibida.
@@ -255,7 +255,7 @@ Os gates cobrem:
 - ausência de chaves privadas no cliente;
 - contexto bíblico curado;
 - hard filters técnicos e semânticos;
-- acervo premium com pelo menos 36 imagens classificadas;
+- acervo premium com pelo menos 42 imagens classificadas;
 - cobertura curada para alegria, gratidão, relacionamento, reconciliação, sofrimento, lamento, justiça, sabedoria, amor, perseverança, perdão, fé, luz, confiança, coragem e descanso como cenas próprias;
 - política `abstract-first` para morte, guerra, julgamento, profecia e ressurreição quando não houver fotografia inequívoca.
 
