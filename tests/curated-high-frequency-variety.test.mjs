@@ -201,6 +201,14 @@ test('memória recente consegue rotacionar para outra foto em cada tema de alta 
       candidate.id,
       `${target.theme}: memória recente não conseguiu variar a foto`
     );
+    assert.ok(
+      second.scores.semantic >= VISUAL_THRESHOLDS.semantic,
+      `${target.theme}: rotação caiu abaixo do gate semântico`
+    );
+    assert.ok(
+      second.scores.final >= VISUAL_THRESHOLDS.final,
+      `${target.theme}: rotação caiu abaixo do gate final`
+    );
   }
 });
 
