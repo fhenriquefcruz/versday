@@ -132,7 +132,8 @@ test('chat envia question + history e não duplica pergunta como messages', asyn
       history: [{ role: 'user', content: 'Pergunta anterior' }]
     });
     assert.equal('messages' in capturedBody, false);
-    assert.match(answer, /<strong>segura<\/strong>/);
+    assert.equal(answer, 'Resposta **segura**.');
+    assert.doesNotMatch(answer, /<strong>/);
   } finally {
     restoreGlobal('document', oldDocument, hadDocument);
     restoreGlobal('location', oldLocation, hadLocation);

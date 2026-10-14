@@ -64,13 +64,9 @@ export async function askGemini(question, conversationHistory = []) {
   }
 
   const data = await response.json();
-  let answer = data.answer || data.choices?.[0]?.message?.content || '';
-
-  answer = answer.replace(/^#{1,6}\s+/gm, '');
-  answer = answer.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  answer = answer.replace(/\*(.*?)\*/g, '<em>$1</em>');
-  answer = answer.replace(/\n\n/g, '<br><br>');
-  answer = answer.replace(/\n/g, '<br>');
-
-  return answer;
+  return String(
+    data.answer ||
+    data.choices?.[0]?.message?.content ||
+    ''
+  ).trim();
 }
