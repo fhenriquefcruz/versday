@@ -1045,7 +1045,7 @@ export const CURATED_VISUALS = [
   pexels('39914924', 'pexels-photo-39914924.jpeg', {
     sceneFamily: 'forest-hammock-rest',
     providerUrl: 'https://www.pexels.com/photo/green-forest-with-colorful-hammock-in-pine-grove-39914924/',
-    description: 'A simple hammock rests quietly beneath a shaded pine grove, conveying pause and protected stillness rather than a resort or beach holiday.',
+    description: 'A simple hammock rests quietly beneath a shaded pine grove, conveying pause, shelter and protected stillness in a calm natural setting.',
     alt: 'Rede simples em um bosque sombreado e silencioso entre pinheiros.',
     width: 4272,
     height: 2856,
