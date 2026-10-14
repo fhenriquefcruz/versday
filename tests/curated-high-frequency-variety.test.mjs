@@ -173,16 +173,27 @@ test('memória recente consegue rotacionar para outra foto em cada tema de alta 
       compositionSignature: buildCompositionSignature(candidate)
     }];
 
-    const second = selectBestCandidate(
+    const reranked = rankCandidates(
       CURATED_VISUALS,
       intent,
       recentUsage
-    ).selected;
+    ).filter(item => item.accepted).slice(0, 4);
+
+    const selection = selectBestCandidate(
+      CURATED_VISUALS,
+      intent,
+      recentUsage
+    );
+    const second = selection.selected;
 
     assert.ok(second, `${target.theme}: sem alternativa após repetição`);
 
     t.diagnostic(
-      `${target.theme}: ${candidate.id} → ${second.candidate.id}`
+      `${target.theme}: ${candidate.id} → ${second.candidate.id} · ` +
+      reranked.map(item =>
+        `${item.candidate.id}[sem=${item.scores.semantic},final=${item.scores.final},nov=${item.scores.novelty},exact=${Boolean(item.noveltySignals?.exactImage)},sameScene=${Boolean(item.noveltySignals?.sameScene)}]`
+      ).join(' | ') +
+      ` · rotation=${JSON.stringify(selection.rotation || {})}`
     );
 
     assert.notEqual(
