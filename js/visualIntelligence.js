@@ -365,7 +365,7 @@ const THEME_PROFILES = {
     visualIntent: 'luz como revelação ou contraste com trevas quando simbólica; física somente quando o contexto exigir',
     symbolicElements: ['revelação', 'clareza', 'esperança'],
     preferredScenes: ['restrained beam of light through darkness', 'soft natural light entering shadowed space', 'subtle dawn light with strong negative space'],
-    avoid: ['lens flare', 'céu divino artificial', 'HDR', 'sol isolado'],
+    avoid: ['lens flare', 'céu divino artificial', 'raios divinos artificiais', 'HDR', 'sol isolado', 'efeito celestial'],
     palette: ['#090d13', '#2d333c', '#8b744f', '#e5c889'],
     mode: 'hybrid'
   }
