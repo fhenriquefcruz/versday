@@ -456,7 +456,7 @@ export function scoreCandidate(candidate, intent, recentUsage = []) {
 
   // Curadoria só ajuda quando o tema primário foi explicitamente marcado.
   // Ela jamais resgata uma fotografia de tema diferente.
-  const semanticScore = Math.min(1,
+  const rawSemanticScore = Math.min(1,
     primaryMatch * 0.28 +
     literalMatch * 0.18 +
     symbolicMatch * 0.10 +
@@ -467,6 +467,27 @@ export function scoreCandidate(candidate, intent, recentUsage = []) {
     searchAlignment * 0.05 +
     curationConfidence * 0.20
   );
+
+  // Uma fotografia manualmente curada para o tema exato pode atingir
+  // apenas o piso semântico, nunca ganhar "pontos grátis" acima dele.
+  // Exigimos ainda modo compatível e pelo menos um sinal independente
+  // (emoção, cena, literal ou símbolo) para evitar rotulagem arbitrária.
+  const independentSemanticSupport = Math.max(
+    literalMatch,
+    symbolicMatch,
+    emotionalMatch,
+    sceneMatch
+  );
+  const curationFloorApplied =
+    primaryMatch === 1 &&
+    modeMatch === 1 &&
+    curationConfidence >= 1 &&
+    independentSemanticSupport >= 0.25 &&
+    rawSemanticScore < VISUAL_THRESHOLDS.semantic;
+
+  const semanticScore = curationFloorApplied
+    ? VISUAL_THRESHOLDS.semantic
+    : rawSemanticScore;
 
   const qualityScore = Math.max(0, Math.min(1, Number(candidate.qualityScore ?? 0.8)));
   const compositionScore = Math.max(0, Math.min(1, Number(candidate.compositionScore ?? 0.76)));
@@ -504,6 +525,13 @@ export function scoreCandidate(candidate, intent, recentUsage = []) {
       final: Number(finalScore.toFixed(3))
     },
     noveltySignals: novelty,
+    curationSignals: {
+      floorApplied: curationFloorApplied,
+      rawSemantic: Number(rawSemanticScore.toFixed(3)),
+      independentSupport: Number(
+        independentSemanticSupport.toFixed(3)
+      )
+    },
     rejectedReasons: [...new Set(rejectedReasons)],
     accepted: rejectedReasons.length === 0
   };
