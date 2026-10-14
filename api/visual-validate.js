@@ -1,4 +1,5 @@
 import { applyCors, readJsonBody } from './_cors.js';
+import { applyRateLimit, RATE_LIMIT_POLICIES } from './_rate-limit.js';
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const DEFAULT_VISION_MODEL = 'qwen/qwen3.8-27b';
@@ -140,6 +141,14 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+  if (
+    applyRateLimit(
+      req,
+      res,
+      'visual-validate',
+      RATE_LIMIT_POLICIES.visualValidate
+    )
+  ) return;
 
   const apiKey = process.env.GROQ_API_KEY;
   if (!enabled() || !apiKey) {
