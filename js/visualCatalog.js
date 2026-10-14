@@ -509,6 +509,247 @@ export const CURATED_VISUALS = [
     negativeTags: [
       'resort', 'rede de praia', 'turismo', 'festa', 'publicidade'
     ]
+  }),
+  pexels('6774430', 'pexels-photo-6774430.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/a-woman-holding-paper-while-thinking-6774430/',
+    description: 'A person pauses with notes beside a window, weighing a decision in warm natural light.',
+    alt: 'Pessoa refletindo com anotações junto a uma janela antes de tomar uma decisão.',
+    themes: ['sabedoria'],
+    sceneFamily: 'wisdom-reflective-decision',
+    tags: [
+      'sabedoria', 'discernimento', 'atenção', 'escolha',
+      'decision making', 'reflection', 'notes', 'planning',
+      'natural light', 'observation', 'pause'
+    ],
+    moods: ['reflexivo', 'sóbrio', 'claro'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'right'],
+    tabletSafeTextAreas: ['upper-left', 'right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.58, y: 0.50 },
+    tabletFocalPoint: { x: 0.56, y: 0.50 },
+    mobileFocalPoint: { x: 0.54, y: 0.50 },
+    compositionScore: 0.87,
+    identityScore: 0.92,
+    negativeTags: [
+      'status acadêmico', 'biblioteca luxuosa',
+      'publicidade', 'pose olhando para câmera'
+    ]
+  }),
+  pexels('28752538', 'pexels-photo-28752538.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/minimalist-morning-lighthouse-by-the-sea-28752538/',
+    description: 'A solitary lighthouse remains visible through coastal fog, offering a restrained point of direction and stability.',
+    alt: 'Farol solitário permanece visível em meio à neblina sobre o mar.',
+    width: 3026,
+    height: 4539,
+    themes: ['confiança'],
+    sceneFamily: 'trust-guiding-lighthouse',
+    tags: [
+      'confiança', 'refúgio', 'direção', 'sustentação',
+      'lighthouse', 'fog', 'guidance', 'stability',
+      'coast', 'uncertainty', 'quiet'
+    ],
+    moods: ['seguro', 'sereno', 'encorajador'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['left', 'upper-left'],
+    tabletSafeTextAreas: ['left', 'upper-left'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.54, y: 0.48 },
+    tabletFocalPoint: { x: 0.53, y: 0.49 },
+    mobileFocalPoint: { x: 0.52, y: 0.50 },
+    compositionScore: 0.89,
+    identityScore: 0.93,
+    negativeTags: [
+      'praia tropical', 'turismo', 'festa', 'pose vitoriosa'
+    ]
+  }),
+  pexels('12313073', 'pexels-photo-12313073.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/a-person-standing-in-the-forest-12313073/',
+    description: 'A quiet human silhouette moves along a misty forest path where direction remains visible but the destination does not.',
+    alt: 'Silhueta humana segue por um caminho de floresta coberto por névoa.',
+    themes: ['fé'],
+    sceneFamily: 'faith-misty-presence',
+    tags: [
+      'fé', 'direção', 'presença', 'luz discreta',
+      'mist', 'path', 'silhouette', 'uncertainty',
+      'quiet', 'soft light', 'journey'
+    ],
+    moods: ['contemplativo', 'confiante', 'sóbrio'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-left', 'upper-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.52, y: 0.56 },
+    tabletFocalPoint: { x: 0.52, y: 0.54 },
+    mobileFocalPoint: { x: 0.52, y: 0.53 },
+    compositionScore: 0.87,
+    identityScore: 0.92,
+    negativeTags: [
+      'cruz genérica', 'bíblia aberta',
+      'mãos em oração', 'igreja'
+    ]
+  }),
+  pexels('11829155', 'pexels-photo-11829155.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/photo-of-a-glow-of-light-breaking-through-gray-rain-clouds-above-a-landscape-11829155/',
+    description: 'Natural light breaks through heavy storm clouds above a distant horizon, opening the landscape after tension.',
+    alt: 'Luz natural rompe nuvens pesadas e abre o horizonte de uma paisagem.',
+    themes: ['esperança'],
+    sceneFamily: 'hope-storm-light-opening',
+    tags: [
+      'esperança', 'renovação', 'horizonte', 'abertura',
+      'storm clouds', 'natural light', 'clearing',
+      'landscape', 'after storm', 'opening sky'
+    ],
+    moods: ['esperançoso', 'sereno', 'ascendente'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['left', 'lower-left'],
+    tabletSafeTextAreas: ['left', 'lower-left'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.58, y: 0.42 },
+    tabletFocalPoint: { x: 0.56, y: 0.44 },
+    mobileFocalPoint: { x: 0.54, y: 0.46 },
+    compositionScore: 0.89,
+    identityScore: 0.93,
+    negativeTags: [
+      'arco-íris artificial', 'euforia',
+      'motivational wallpaper', 'HDR'
+    ]
+  }),
+  pexels('31919075', 'pexels-photo-31919075.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/mother-and-child-in-thoughtful-embrace-outdoors-31919075/',
+    description: 'A mother and child share a candid embrace outdoors, expressing care, presence and an authentic family bond.',
+    alt: 'Mãe e criança compartilham um abraço espontâneo em um gesto de cuidado.',
+    width: 3074,
+    height: 4246,
+    themes: ['amor'],
+    sceneFamily: 'love-parent-child-care',
+    tags: [
+      'amor', 'presença', 'cuidado', 'aliança',
+      'mother', 'child', 'embrace', 'family bond',
+      'care', 'connection', 'candid'
+    ],
+    moods: ['íntimo', 'caloroso', 'humano'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-left', 'upper-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.52, y: 0.52 },
+    tabletFocalPoint: { x: 0.52, y: 0.52 },
+    mobileFocalPoint: { x: 0.52, y: 0.52 },
+    compositionScore: 0.88,
+    identityScore: 0.93,
+    negativeTags: [
+      'romance', 'sensualidade',
+      'casal de banco de imagens', 'publicidade'
+    ]
+  }),
+  pexels('36037650', 'pexels-photo-36037650.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/cozy-indoor-scene-with-rainy-window-view-36037650/',
+    description: 'A quiet protected interior sits beside a rain-covered window, creating warmth without denying the difficult weather outside.',
+    alt: 'Interior acolhedor e silencioso junto a uma janela coberta pela chuva.',
+    themes: ['conforto'],
+    sceneFamily: 'comfort-rainy-shelter',
+    tags: [
+      'conforto', 'acolhimento', 'abrigo', 'proximidade',
+      'rain', 'window', 'shelter', 'cozy interior',
+      'soft light', 'protected space', 'quiet'
+    ],
+    moods: ['acolhedor', 'sereno', 'compassivo'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'right'],
+    tabletSafeTextAreas: ['upper-left', 'right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.56, y: 0.54 },
+    tabletFocalPoint: { x: 0.55, y: 0.53 },
+    mobileFocalPoint: { x: 0.54, y: 0.52 },
+    compositionScore: 0.88,
+    identityScore: 0.92,
+    negativeTags: [
+      'alegria excessiva', 'festa',
+      'publicidade', 'euforia'
+    ]
+  }),
+  pexels('14126667', 'pexels-photo-14126667.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/light-shining-through-window-into-empty-room-14126667/',
+    description: 'A quiet minimalist room holds soft window light and open negative space, suggesting stillness and balance.',
+    alt: 'Ambiente minimalista e silencioso iluminado suavemente por uma janela.',
+    themes: ['paz'],
+    sceneFamily: 'peace-sunlit-interior',
+    tags: [
+      'paz', 'quietude', 'equilíbrio', 'abrigo',
+      'minimal interior', 'window light', 'stillness',
+      'negative space', 'soft shadows', 'calm'
+    ],
+    moods: ['sereno', 'quieto', 'acolhedor'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['left', 'upper-left'],
+    tabletSafeTextAreas: ['left', 'upper-left'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.58, y: 0.48 },
+    tabletFocalPoint: { x: 0.57, y: 0.49 },
+    mobileFocalPoint: { x: 0.55, y: 0.50 },
+    compositionScore: 0.90,
+    identityScore: 0.93,
+    negativeTags: [
+      'festa', 'multidão', 'euforia',
+      'real estate advertisement'
+    ]
+  }),
+  pexels('12684611', 'pexels-photo-12684611.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/boat-in-sea-in-storm-12684611/',
+    description: 'A small vessel endures rough waves at distance, holding its course within a tense and difficult sea.',
+    alt: 'Pequena embarcação resiste a ondas fortes em um mar tenso e difícil.',
+    width: 7360,
+    height: 4912,
+    themes: ['coragem'],
+    sceneFamily: 'courage-storm-vessel',
+    tags: [
+      'coragem', 'travessia', 'resistência', 'decisão',
+      'small vessel', 'rough sea', 'storm', 'waves',
+      'risk', 'adversity', 'holding course'
+    ],
+    moods: ['firme', 'tenso', 'encorajador'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-left', 'upper-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.54, y: 0.56 },
+    tabletFocalPoint: { x: 0.53, y: 0.55 },
+    mobileFocalPoint: { x: 0.52, y: 0.54 },
+    compositionScore: 0.88,
+    identityScore: 0.92,
+    negativeTags: [
+      'pose de super-herói', 'troféu',
+      'comemoração', 'triunfalismo'
+    ]
+  }),
+  pexels('40007388', 'pexels-photo-40007388.jpeg', {
+    providerUrl: 'https://www.pexels.com/photo/resilient-plant-growing-against-urban-concrete-40007388/',
+    description: 'A small plant grows from a crack in hard concrete, showing persistence and gradual progress under difficult conditions.',
+    alt: 'Pequena planta cresce por uma rachadura no concreto em condições difíceis.',
+    width: 3456,
+    height: 4608,
+    themes: ['perseverança'],
+    sceneFamily: 'perseverance-concrete-sprout',
+    tags: [
+      'perseverança', 'progresso', 'persistência', 'renovação',
+      'plant', 'concrete', 'crack', 'growth',
+      'resilience', 'difficult ground', 'continuity'
+    ],
+    moods: ['resiliente', 'progressivo', 'sóbrio'],
+    representationModes: ['conceptual'],
+    safeTextAreas: ['upper-left', 'upper-right'],
+    tabletSafeTextAreas: ['upper-left', 'upper-right'],
+    mobileSafeTextAreas: ['upper', 'lower'],
+    focalPoint: { x: 0.52, y: 0.62 },
+    tabletFocalPoint: { x: 0.52, y: 0.60 },
+    mobileFocalPoint: { x: 0.52, y: 0.58 },
+    compositionScore: 0.88,
+    identityScore: 0.92,
+    negativeTags: [
+      'pódio', 'medalha',
+      'vitória esportiva', 'euforia'
+    ]
   })
 ];
 

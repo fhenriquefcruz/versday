@@ -9,6 +9,11 @@ export const VISUAL_THRESHOLDS = Object.freeze({
   composition: 0.70
 });
 
+export const VISUAL_ROTATION_BAND = Object.freeze({
+  semanticDelta: 0.18,
+  finalDelta: 0.11
+});
+
 const RELIGIOUS_CLICHE_GROUPS = [
   { label: 'cross', terms: ['cross', 'crucifix', 'cruz', 'cruzes'] },
   { label: 'bible', terms: ['open bible', 'bible open', 'biblia aberta', 'bíblia aberta', 'escrituras abertas'] },
@@ -563,6 +568,61 @@ export function rankCandidates(candidates, intent, recentUsage = []) {
 
 export function selectBestCandidate(candidates, intent, recentUsage = []) {
   const ranked = rankCandidates(candidates, intent, recentUsage);
-  const selected = ranked.find(result => result.accepted) || null;
-  return { selected, ranked };
+  const accepted = ranked.filter(result => result.accepted);
+  const leader = accepted[0] || null;
+
+  if (!leader) {
+    return { selected: null, ranked, rotation: { applied: false } };
+  }
+
+  // Variedade só desempata candidatos que já passaram por todos os gates.
+  // O líder recente pode ceder espaço apenas a outra família de cena
+  // semanticamente próxima; coerência continua acima de novidade.
+  if (leader.noveltySignals?.exactImage) {
+    const alternative = accepted.find(result => {
+      if (result.candidate.id === leader.candidate.id) return false;
+      if (result.noveltySignals?.exactImage) return false;
+      if (result.noveltySignals?.sameScene) return false;
+
+      const semanticDelta = Number(
+        (leader.scores.semantic - result.scores.semantic)
+          .toFixed(3)
+      );
+      const finalDelta = Number(
+        (leader.scores.final - result.scores.final)
+          .toFixed(3)
+      );
+
+      return (
+        semanticDelta <= VISUAL_ROTATION_BAND.semanticDelta &&
+        finalDelta <= VISUAL_ROTATION_BAND.finalDelta
+      );
+    });
+
+    if (alternative) {
+      return {
+        selected: alternative,
+        ranked,
+        rotation: {
+          applied: true,
+          from: leader.candidate.id,
+          to: alternative.candidate.id,
+          semanticDelta: Number(
+            (leader.scores.semantic - alternative.scores.semantic)
+              .toFixed(3)
+          ),
+          finalDelta: Number(
+            (leader.scores.final - alternative.scores.final)
+              .toFixed(3)
+          )
+        }
+      };
+    }
+  }
+
+  return {
+    selected: leader,
+    ranked,
+    rotation: { applied: false }
+  };
 }
