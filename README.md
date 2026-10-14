@@ -255,7 +255,7 @@ Os gates cobrem:
 - ausência de chaves privadas no cliente;
 - contexto bíblico curado;
 - hard filters técnicos e semânticos;
-- acervo premium com pelo menos 36 imagens classificadas;
+- acervo premium com pelo menos 39 imagens classificadas;
 - cobertura curada para alegria, gratidão, relacionamento, reconciliação, sofrimento, lamento, justiça, sabedoria, amor, perseverança, perdão, fé, luz, confiança, coragem e descanso como cenas próprias;
 - política `abstract-first` para morte, guerra, julgamento, profecia e ressurreição quando não houver fotografia inequívoca.
 
