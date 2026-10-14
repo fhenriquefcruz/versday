@@ -10,8 +10,8 @@ export const VISUAL_THRESHOLDS = Object.freeze({
 });
 
 export const VISUAL_ROTATION_BAND = Object.freeze({
-  semanticDelta: 0.12,
-  finalDelta: 0.10
+  semanticDelta: 0.18,
+  finalDelta: 0.11
 });
 
 const RELIGIOUS_CLICHE_GROUPS = [
@@ -584,10 +584,14 @@ export function selectBestCandidate(candidates, intent, recentUsage = []) {
       if (result.noveltySignals?.exactImage) return false;
       if (result.noveltySignals?.sameScene) return false;
 
-      const semanticDelta =
-        leader.scores.semantic - result.scores.semantic;
-      const finalDelta =
-        leader.scores.final - result.scores.final;
+      const semanticDelta = Number(
+        (leader.scores.semantic - result.scores.semantic)
+          .toFixed(3)
+      );
+      const finalDelta = Number(
+        (leader.scores.final - result.scores.final)
+          .toFixed(3)
+      );
 
       return (
         semanticDelta <= VISUAL_ROTATION_BAND.semanticDelta &&
